@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>港台麻雀計番</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+
+/* Layout: a square mahjong table — four seats round a felt centre showing the round wind; actions and the hand log below. */
+:root{
+  --bg:#ECEFE8; --surface:#FBFBF6; --surface2:#F3F4EE; --fg:#1B2621; --muted:#5D6A63; --line:#D3DAD0;
+  --jade:#1F6B52; --jade-ink:#FFFFFF; --jade-soft:#DCEBE3;
+  --red:#B3261E; --red-soft:#F6E1DE;
+  --felt:#285A45; --felt-ink:#F2EFE2; --felt-muted:#B9CDBF;
+  --shadow:0 1px 0 rgba(20,40,30,.06),0 6px 18px -10px rgba(20,40,30,.25);
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1814; --surface:#17231E; --surface2:#1D2B25; --fg:#E5ECE6; --muted:#93A39A; --line:#2B3B34;
+  --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
+  --red:#F0766D; --red-soft:#3A1F1C;
+  --felt:#1B3B2E; --felt-ink:#EDEBDD; --felt-muted:#8FAE9C;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0E1814; --surface:#17231E; --surface2:#1D2B25; --fg:#E5ECE6; --muted:#93A39A; --line:#2B3B34;
+  --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
+  --red:#F0766D; --red-soft:#3A1F1C;
+  --felt:#1B3B2E; --felt-ink:#EDEBDD; --felt-muted:#8FAE9C;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:12px 40px;display:flex;flex-direction:column;gap:16px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{font-family:var(--f-display);font-weight:900;font-size:22px;margin:0;letter-spacing:.04em}
+header h1 small{font-family:var(--f-body);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.08em;margin-left:6px}
+.iconbtn{padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:500}
+
+/* table */
+.table{display:grid;grid-template-columns:1fr 1.05fr 1fr;grid-template-rows:auto auto auto;gap:8px;grid-template-areas:". s2 ." "s3 c s1" ". s0 ."}
+.seat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:var(--shadow);min-width:0;position:relative;text-align:center;transition:transform .12s}
+.seat:active{transform:scale(.97)}
+.seat .wind{font-family:var(--f-display);font-weight:900;font-size:26px;line-height:1.1;color:var(--fg)}
+.seat .name{font-weight:700;font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seat .money{font-size:14px;font-weight:700}
+.seat .tap{font-size:11px;color:var(--muted)}
+.seat.dealer{border-color:var(--red);box-shadow:0 0 0 2px var(--red-soft),var(--shadow)}
+.badge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pos{color:var(--jade)} .neg{color:var(--red)} .zero{color:var(--muted)}
+.center{grid-area:c;background:var(--felt);color:var(--felt-ink);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px;text-align:center;min-height:118px;
+  background-image:radial-gradient(circle at 50% 40%,rgba(255,255,255,.07),transparent 70%)}
+.center .rw{font-family:var(--f-display);font-weight:900;font-size:44px;line-height:1}
+.center .rwl{font-size:12px;letter-spacing:.2em;color:var(--felt-muted);margin-top:2px}
+.center .hn{font-size:12px;color:var(--felt-muted);margin-top:6px}
+.center .streak{margin-top:4px;font-size:12px;font-weight:700;background:rgba(255,255,255,.12);padding:2px 8px;border-radius:999px}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{padding:12px 14px;border-radius:12px;font-weight:700;background:var(--surface);border:1px solid var(--line);text-align:center}
+.btn.primary{background:var(--jade);color:var(--jade-ink);border-color:var(--jade)}
+.btn.danger{color:var(--red);border-color:var(--red)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.rules{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
+.rules b{color:var(--fg);font-weight:500}
+
+section h2{font-size:13px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin:0 0 8px}
+.log{display:flex;flex-direction:column;gap:6px}
+.hand{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:start}
+.hand .tag{font-family:var(--f-display);font-weight:900;font-size:15px;background:var(--surface2);border-radius:8px;padding:2px 6px;grid-row:span 2;text-align:center;min-width:44px}
+.hand .what{font-weight:700;min-width:0}
+.hand .sub{font-size:12px;color:var(--muted);min-width:0}
+.hand .deltas{grid-column:2;display:flex;flex-wrap:wrap;gap:2px 10px;font-size:12px}
+.empty{font-size:13px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:14px;text-align:center}
+.banner{background:var(--jade-soft);border-radius:12px;padding:10px 12px;font-size:13px}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(10,20,15,.45);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--bg);border-radius:20px 20px 0 0;max-height:92%;overflow:auto;
+  padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25);max-width:600px;margin:0 auto}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 10px}
+.sheet h3{font-family:var(--f-display);font-weight:900;font-size:20px;margin:0 0 12px;text-wrap:balance}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field>label,.lbl{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+input[type=text],input[type=number]{font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);width:100%;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.opt{padding:9px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt.on{background:var(--jade);color:var(--jade-ink);border-color:var(--jade);font-weight:700}
+.opt.redon{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
+.prefix{position:relative}
+.prefix span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
+.prefix input{padding-left:44px}
+.hint{font-size:12px;color:var(--muted)}
+
+.fanbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.fantotal{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fantotal .big{font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1}
+.faninput{width:96px!important;padding:6px 10px!important;font-size:28px!important;font-family:var(--f-display)!important;font-weight:900;text-align:left}
+.err{margin:10px 0 0;padding:8px 12px;border-radius:10px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700}
+.side{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.grid3 .btn{display:flex;flex-direction:column;align-items:center;gap:0;padding:10px 6px}
+.grid3 .btn small{font-size:11px;font-weight:500;color:var(--muted)}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--line);font-size:18px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip b{font-weight:700;color:var(--jade)}
+.chip.sel{background:var(--jade-soft);border-color:var(--jade)}
+.chip .x{color:var(--muted);font-size:14px}
+details.cat{border-top:1px solid var(--line)}
+details.cat summary{padding:10px 2px;font-weight:700;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+details.cat summary::after{content:"＋";color:var(--muted)}
+details.cat[open] summary::after{content:"－"}
+details.cat .chips{padding-bottom:12px}
+
+.photo{border:1px dashed var(--jade);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.photo .row{display:flex;gap:10px;align-items:center}
+.photo img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid var(--line);flex:none}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ai-out{font-size:13px;background:var(--surface2);border-radius:10px;padding:10px;white-space:pre-wrap;min-width:0;overflow-wrap:anywhere}
+
+.pay{display:flex;flex-direction:column;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.pay .r{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.pay .r small{color:var(--muted);font-size:12px}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding-block:10px 4px;display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.confirm-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ro .edit-only{display:none!important}
+body:not(.ro) .view-only{display:none!important}
+.ro .seat{cursor:default}
+.ro .seat:active{transform:none}
+.live{font-size:12px;font-weight:700;color:var(--jade);background:var(--jade-soft);padding:4px 10px;border-radius:999px;letter-spacing:.06em}
+.savebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;max-width:calc(100% - 32px);text-align:center}
+.busy .seat,.busy .actions .btn{pointer-events:none;opacity:.6}
+.endbtn{width:100%}
+.ended .table,.ended .rules,.ended .actions,.ended .side,.ended .endbtn,.ended .view-only.hint{display:none!important}
+.settle{display:flex;flex-direction:column;gap:10px}
+.settle-card{background:var(--felt);color:var(--felt-ink);border-radius:18px;padding:16px 14px 14px;display:flex;flex-direction:column;gap:10px;
+  background-image:radial-gradient(circle at 50% 0%,rgba(255,255,255,.10),transparent 60%)}
+.st-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.st-title{font-family:var(--f-display);font-weight:900;font-size:26px;letter-spacing:.12em}
+.st-meta{font-size:12px;color:var(--felt-muted)}
+.pl{background:var(--surface);color:var(--fg);border-radius:14px;padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center}
+.pl.first{box-shadow:0 0 0 2px #E2B53E}
+.rk{font-family:var(--f-display);font-weight:900;font-size:22px;width:30px;text-align:center;color:var(--muted)}
+.pl.first .rk{color:#B8860B}
+.pname{display:flex;flex-direction:column;min-width:0}
+.crown{font-size:22px;line-height:1;margin-bottom:2px}
+.pname b{font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pstats{font-size:12px;color:var(--muted)}
+.pscore{text-align:right;display:flex;flex-direction:column}
+.pscore b{font-size:17px}
+.pscore small{font-size:12px;color:var(--muted)}
+.tags{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--fg)}
+.tag.on{background:var(--jade);border-color:var(--jade);color:var(--jade-ink)}
+.notag{font-size:12px;color:var(--muted)}
+.tagdesc{grid-column:1/-1;font-size:13px;background:var(--jade-soft);border-radius:10px;padding:8px 10px}
+.tagdesc b{display:block;font-size:12px;color:var(--jade)}
+.share-lines{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;font-size:13px;margin-top:4px;padding-top:8px;border-top:1px solid var(--line)}
+.share-lines span b{color:var(--jade)}
+.st-foot{font-size:11px;color:var(--felt-muted);text-align:center}
+.settle-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.settle-actions .full{grid-column:1/-1}
+#shareImg{display:block;width:100%;border-radius:14px;border:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SHELL = `<div class="wrap">
+  <header>
+    <h1>港台麻雀<small>計番</small></h1>
+    <button class="iconbtn edit-only" id="openSetup">設定</button>
+  </header>
+
+  <div id="bannerBox"></div>
+
+  <section class="settle" id="settle" hidden>
+    <div id="settleCard"></div>
+    <div class="settle-actions">
+      <button class="btn primary full" id="shareBtn">分享戰績圖</button>
+      <button class="btn edit-only" id="backBtn">返回牌局</button>
+      <button class="btn danger edit-only" id="newGameBtn">重新開局</button>
+    </div>
+  </section>
+
+  <div class="table" id="table"></div>
+
+  <div class="rules num" id="rulesLine"></div>
+
+  <div class="actions edit-only">
+    <button class="btn" id="drawBtn">流局（莊家連莊）</button>
+    <button class="btn" id="undoBtn">撤銷上一項</button>
+  </div>
+
+  <div class="side edit-only">
+    <span class="lbl">暗槓／圍骰／順骰（每家 1 底）</span>
+    <div class="grid4" id="sidePlayerSeg"></div>
+    <div class="grid3">
+      <button class="btn" data-side="angang" disabled>暗槓<small>收三家</small></button>
+      <button class="btn" data-side="wai" disabled>圍骰<small>收三家</small></button>
+      <button class="btn" data-side="shun" disabled>順骰<small>比三家</small></button>
+    </div>
+    <span class="hint" id="sideHint">先揀玩家，再按項目。</span>
+  </div>
+
+  <button class="btn edit-only endbtn" id="endBtn">結束遊戲 · 睇結算</button>
+
+  <section>
+    <h2>牌局記錄</h2>
+    <div class="log" id="log"></div>
+  </section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="savebar" id="savingBar" hidden role="status"></div>
+
+<div class="sheet" id="shareSheet" hidden role="dialog" aria-label="分享戰績">
+  <div class="grab"></div>
+  <h3>分享戰績</h3>
+  <p class="hint" id="shareHint">製作圖片中…</p>
+  <img id="shareImg" alt="結算戰績圖" hidden>
+  <div class="settle-actions" style="margin-top:12px">
+        <button class="btn" id="closeShare">關閉</button>
+  </div>
+</div>
+
+<div class="sheet" id="setupSheet" hidden role="dialog" aria-label="設定">
+  <div class="grab"></div>
+  <h3>牌局設定</h3>
+  <div class="field">
+    <label>玩家名稱（按座位逆時針：自己 → 下家 → 對家 → 上家）</label>
+    <div class="grid2">
+      <input type="text" id="p0" maxlength="8">
+      <input type="text" id="p1" maxlength="8">
+      <input type="text" id="p2" maxlength="8">
+      <input type="text" id="p3" maxlength="8">
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="rate">每番</label><div class="prefix"><span>HK$</span><input type="number" id="rate" inputmode="decimal" min="0" step="0.5"></div></div>
+    <div class="field"><label for="base">底（番）</label><input type="number" id="base" inputmode="numeric" min="0" step="1"></div>
+    <div class="field"><label for="dealerFan">莊家（番）</label><input type="number" id="dealerFan" inputmode="numeric" min="0" step="1"></div>
+    <div class="field"><label for="streakFan">每連莊（連+拉，番）</label><input type="number" id="streakFan" inputmode="numeric" min="0" step="1"></div>
+  </div>
+  <p class="hint">莊家番：莊家食糊或莊家出銃／被自摸時才計。連莊 n 次時另加「每連莊番 × n」（即台灣「連 n 拉 n」）。</p>
+  <div class="field">
+    <label>開局莊家（東風位）</label>
+    <div class="grid4" id="startDealerSeg"></div>
+    <span class="hint" id="startDealerHint"></span>
+  </div>
+  <div class="confirm-row" style="margin-bottom:12px">
+    <button class="btn danger" id="resetBtn">清除所有記錄，重新開局</button>
+  </div>
+  <button class="btn primary" style="width:100%" id="closeSetup">完成</button>
+</div>
+
+<div class="sheet" id="winSheet" hidden role="dialog" aria-label="記錄食糊">
+  <div class="grab"></div>
+  <h3 id="winTitle">記錄食糊</h3>
+
+  <div class="field">
+    <span class="lbl">食糊玩家</span>
+    <div class="grid4" id="winnerSeg"></div>
+  </div>
+  <div class="field">
+    <span class="lbl">點樣食</span>
+    <div class="seg" id="modeSeg"></div>
+  </div>
+  <div class="field" id="discarderField">
+    <span class="lbl">邊個出銃</span>
+    <div class="seg" id="discarderSeg"></div>
+  </div>
+
+
+  <div class="fanbox" style="margin-top:14px">
+    <div class="fantotal">
+      <div><label class="lbl" for="fanInput">番數（不含底及莊）</label><div><input class="big num faninput" id="fanInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" enterkeyhint="done"></div></div>
+      <div class="stepper"><button id="fanMinus" aria-label="減一番">−</button><button id="fanPlus" aria-label="加一番">＋</button></div>
+    </div>
+    <div class="chips" id="selChips"></div>
+    <div id="catalog"></div>
+  </div>
+
+  <div class="pay num" id="payBox" style="margin-top:14px"></div>
+
+  <p class="err" id="winErr" hidden role="alert"></p>
+  <div class="sticky">
+    <button class="btn" id="cancelWin">取消</button>
+    <button class="btn primary" id="confirmWin">確認食糊</button>
+  </div>
+</div>`;
+document.getElementById("root").innerHTML = SHELL;
+const WINDS = "東南西北";
+const SEAT_AREA = ["s0","s1","s2","s3"];
+
+/* 番種表 — from the user's 港台番數 sheet */
+const CATALOG = [
+ {g:"基本類", items:[
+  ["門清",5,"無吃、碰、明槓"],["自摸",1,""],["門清自摸",3,"門清兼自摸"],["花上自摸",2,"補花後自摸（每隻花 2 番，可重複加）"],["槓上自摸",5,""],
+  ["無字花",5,"無字牌亦無花牌"],["無花",1,""],["爛花",1,"花牌不是自己位"],["靚花",1,"正花（自己位嘅花）+1"],["無字",1,""],
+  ["風牌",1,"風牌刻子（眼不計）"],["靚位",1,"門風刻子 +1"],["靚風",1,"圈風刻子 +1"],["三元牌",2,"中發白刻子（眼不計）"],["將眼",2,""],
+  ["對碰/假獨",2,""],["獨獨",2,""],["搶槓",5,""],["槓",1,""],["兩槓",5,""],["三槓",10,""],["四槓",20,""],
+  ["平胡",5,""],["無字花大平",15,"平胡兼無字無花"],["叮",5,"報叮"],["門叮",10,"門清報叮"],["叮即食",5,"叮後即食 +5"]]},
+ {g:"糊牌類", items:[
+  ["對對糊",30,"全刻子"],["嚦咕",50,""],["嚦咕8飛",10,"嚦咕再 +10"],["十六不搭",50,""],["十六不搭·龍",20,"+20"],["十六不搭·三相逢",20,"+20"],["十六不搭·16飛",10,"+10"],
+  ["混一色",30,""],["清一色",80,""],["十三么",120,""],["坎坎糊",200,"自摸"],["九蓮寶燈",100,""],["廿二羅漢",200,""]]},
+ {g:"花牌類", items:[
+  ["一台花",10,"一整套花"],["七搶一",30,"唔即食"],["七搶一(摸花後食)",40,""],["一搶七",30,"唔即食"],["一搶七(摸花後食)",40,""],
+  ["大花糊",80,"八花即食"],["八仙過海",40,"八花唔即食"]]},
+ {g:"叮糊類", items:[
+  ["天叮",60,"未摸頭牌已叮"],["地叮",40,"摸頭牌後叮；上或碰後不計"],["天糊",100,"莊家頭牌自摸（槓後不算）"],["地糊",80,"閒家頭牌自摸（槓後不算）"],["人糊",60,"莊家打出第一隻，閒家食"],
+  ["四子叮",20,""],["四子(食出)",40,""],["七子叮",15,""],["七子(食出)",20,""],["十子",10,""]]},
+ {g:"其他類", items:[
+  ["缺一門",5,"無字"],["缺五",10,"無字"],["斷么九",5,"無字"],["三缺",40,"不重複計缺一門、缺五、斷么九"]]},
+ {g:"混數字類", items:[
+  ["混帶么",30,"123／789 + 番子（只可碰 1／9）"],["全帶么",60,"123／789，無番子（只可碰 1／9）"],["混么九",80,"全 1／9 + 番子"],["么九",160,"全 1／9，無番子"],
+  ["混帶X(10)",10,"包含同一數字（最少 2 坎數字牌）"],["混帶X(20)",20,""],["混帶X(30)",30,""],["滿庭芳",60,"包含同一數字 + 無番子"],["純滿庭芳",80,"全部順子一樣數字"]]},
+ {g:"暗刻類", items:[["2暗刻",5,""],["3暗刻",15,""],["4暗刻",30,""],["5暗刻",120,""]]},
+ {g:"同刻／連刻類", items:[
+  ["2同刻",5,"如 111 / 一一一"],["3同刻(小)",15,""],["3同刻(大)",30,"111 / 一一一 / one one one"],
+  ["2連刻",5,"如 111 / 222"],["3連刻(小)",10,""],["3連刻(大)",15,""],["4連刻(小)",30,""],["4連刻(大)",50,""],["5連刻(小)",60,""],["5連刻(大)",80,""]]},
+ {g:"風牌／三元類", items:[
+  ["三風(小小)",10,"只限嚦咕"],["三風(小)",20,""],["三風(大)",40,""],["三元(小小)",15,"只限嚦咕"],["三元(小)",30,""],["三元(大)",60,""],
+  ["四喜(小小)",30,"只限嚦咕"],["四喜(小)",60,""],["四喜(大)",80,""],["字一色",100,""]]},
+ {g:"門類", items:[["五門齊(小)",10,""],["五門齊(大)",15,""],["七門齊(小)",15,""],["七門齊(大)",20,""]]},
+ {g:"步高／龍／老少", items:[
+  ["雜步高(明)",5,"123 / 二三四 / three four five"],["雜步高(暗)",10,""],["清步高(明)",10,"123 / 234 / 345"],["清步高(暗)",20,""],
+  ["雜龍(明)",8,"123 / 四五六 / seven eight nine"],["雜龍(暗)",15,""],["清龍(明)",10,"123 / 456 / 789"],["清龍(暗)",20,""],
+  ["老少上",3,"123 / 789"],["老少碰",5,"111 / 999"]]},
+ {g:"四歸／相逢／般高", items:[
+  ["四歸一(明)",5,"111 / 123"],["四歸一(暗)",10,""],["四歸二(明)",10,"123 / 123 / 11"],["四歸二(暗)",20,""],["四歸四(明)",20,"123 / 234 / 345 / 345"],["四歸四(暗)",40,""],
+  ["相逢",3,"123 / 一二三（可重複計）"],["三相逢(明)",10,"123 / 一二三 / one two three"],["三相逢(暗)",20,""],["全相逢(明)",20,"三相逢 + 456 / 四五六"],["全相逢(暗)",40,""],
+  ["一般高(明)",5,"123 / 123"],["一般高(暗)",10,""],["雙般高(明)",15,"123 / 123 + 一二三 / 一二三"],["雙般高(暗)",30,""],
+  ["三般高(明)",15,"123 / 123 / 123"],["三般高(暗)",30,""],["四般高(明)",40,"123 ×4"],["四般高(暗)",80,""]]},
+ {g:"特殊類", items:[
+  ["圍骰/順骰",5,"圍收 順比"],["斷追",2,""],["追",5,""],["雙響",5,""],["三響",10,""],["反雪(10)",10,"雙輸"],["反雪(20)",20,"三響後食出／自摸"],
+  ["海底撈月",10,"最後一隻自摸"],["河底出統",10,"最後一隻出銃"],["半求人",20,""],["全求人",40,""],["大雞",40,"番子一對，只計到花，不能叮"],["鴨糊",20,"自摸雞"]]},
+];
+const FAN_OF = {}; CATALOG.forEach(c=>c.items.forEach(i=>FAN_OF[i[0]]=i[1]));
+
+/* ---------- state ---------- */
+const DEFAULT_STATE = () => ({
+  v:1, players:["阿明","阿強","阿芬","阿珍"], rate:1, base:5, dealerFan:1, streakFan:2,
+  startDealer:0, dealer:0, streak:0, round:0, hands:[], updatedAt:0
+});
+let state = DEFAULT_STATE();
+const KEY = "hktw-mj-standalone";
+try{ const o = JSON.parse(localStorage.getItem(KEY) || "null"); if(o && o.v===1) state = Object.assign(DEFAULT_STATE(), o); }catch(e){}
+const canWrite = true, saving = false;
+function save(){
+  state.updatedAt = Date.now();
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* ---------- money logic ---------- */
+const seatWind = (p, dealer=state.dealer) => WINDS[(p - dealer + 4) % 4];
+const fmt = v => { const a = Math.abs(v); const s = Number.isInteger(a) ? a.toString() : a.toFixed(1); return (v>0?"+":v<0?"−":"") + "$" + s; };
+const cls = v => v>0?"pos":v<0?"neg":"zero";
+
+function computeWin(winner, discarder, fan){
+  // discarder === null → 自摸, all three pay
+  const payers = discarder===null ? [0,1,2,3].filter(p=>p!==winner) : [discarder];
+  const deltas = [0,0,0,0], rows = [];
+  for(const p of payers){
+    const involvesDealer = (winner===state.dealer || p===state.dealer);
+    const bonus = involvesDealer ? (state.dealerFan + state.streakFan*state.streak) : 0;
+    const total = state.base + fan + bonus;
+    const amt = Math.round(total * state.rate * 100)/100;
+    deltas[p] -= amt; deltas[winner] += amt;
+    rows.push({p, bonus, total, amt});
+  }
+  return {deltas, rows};
+}
+function totals(){
+  const t=[0,0,0,0];
+  state.hands.forEach(h=>h.deltas.forEach((d,i)=>t[i]+=d));
+  return t.map(v=>Math.round(v*100)/100);
+}
+function advanceDealer(){
+  state.dealer = (state.dealer+1)%4; state.streak = 0;
+  if(state.dealer === state.startDealer) state.round++;
+}
+function recordWin(winner, discarder, fan, items){
+  const {deltas} = computeWin(winner, discarder, fan);
+  const prev = {dealer:state.dealer, streak:state.streak, round:state.round};
+  state.hands.push({kind:"win", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak,
+    winner, discarder, fan, items, deltas, prev});
+  if(winner === state.dealer) state.streak++; else advanceDealer();
+  render(); save();
+}
+function recordDraw(){
+  const prev = {dealer:state.dealer, streak:state.streak, round:state.round};
+  state.hands.push({kind:"draw", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas:[0,0,0,0], prev});
+  state.streak++;
+  render(); save();
+}
+const SIDE = {
+  angang:{name:"暗槓", collect:true,  desc:"收三家各 1 底"},
+  wai:   {name:"圍骰", collect:true,  desc:"收三家各 1 底"},
+  shun:  {name:"順骰", collect:false, desc:"比三家各 1 底"},
+};
+function recordSide(type, p){
+  const amt = Math.round(state.base * state.rate * 100)/100;
+  const sign = SIDE[type].collect ? 1 : -1;
+  const deltas = [0,0,0,0].map((_,i)=> i===p ? sign*amt*3 : -sign*amt);
+  const prev = {dealer:state.dealer, streak:state.streak, round:state.round};
+  state.hands.push({kind:"side", type, player:p, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, prev});
+  render(); save();
+}
+function undo(){
+  const h = state.hands.pop(); if(!h) return;
+  Object.assign(state, h.prev); render(); save();
+}
+
+/* ---------- render main ---------- */
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+
+function render(){
+  renderSettle();
+  const t = totals();
+  const rw = WINDS[state.round % 4];
+  const handNo = state.hands.filter(h=>h.kind!=="side").length + 1;
+  let html = `<div class="center"><div class="rw">${rw}</div><div class="rwl">${rw}風圈${state.round>=4?` · 第${Math.floor(state.round/4)+1}將`:""}</div>
+    <div class="hn">第 ${handNo} 鋪 · ${esc(state.players[state.dealer])} 做莊</div>
+    ${state.streak>0?`<div class="streak">連${state.streak} 拉${state.streak}</div>`:""}</div>`;
+  for(let p=0;p<4;p++){
+    const isD = p===state.dealer;
+    html += `<button class="seat${isD?" dealer":""}" style="grid-area:${SEAT_AREA[p]}" data-seat="${p}" aria-label="${esc(state.players[p])} 食糊">
+      ${isD?`<span class="badge">莊${state.streak?" 連"+state.streak:""}</span>`:""}
+      <span class="wind">${seatWind(p)}</span>
+      <span class="name">${esc(state.players[p])}</span>
+      <span class="money num ${cls(t[p])}">${fmt(t[p])}</span>
+      <span class="tap edit-only">按此食糊</span></button>`;
+  }
+  $("table").innerHTML = html;
+  $("table").querySelectorAll(".seat").forEach(b=>b.onclick=()=>openWin(+b.dataset.seat));
+
+  $("rulesLine").innerHTML = `<span>每番 <b>HK$${state.rate}</b></span><span>底 <b>${state.base}</b> 番</span><span>莊 <b>${state.dealerFan}</b> 番</span><span>每連莊 <b>${state.streakFan}</b> 番</span>`;
+
+  const just = state.hands.length && state.round>0 && state.round%4===0 && state.hands[state.hands.length-1].prev.round !== state.round;
+  $("bannerBox").innerHTML = just ? `<div class="banner">北圈已完，打完一將（四圈）。可以繼續打落一將，或到「設定」重新開局。</div>` : "";
+
+  $("undoBtn").disabled = state.hands.length===0;
+  renderSide();
+
+  const log = $("log");
+  if(!state.hands.length){
+    log.innerHTML = `<div class="empty">未有記錄。按任何一位玩家記錄食糊，或者按「流局」、暗槓、圍骰、順骰。</div>`;
+    return;
+  }
+  let pu = 0;
+  log.innerHTML = state.hands.map((h)=>{
+    if(h.kind!=="side") pu++;
+    const tag = `${WINDS[h.round%4]}圈<br>${h.kind==="side" ? pu+1 : pu}`;
+    if(h.kind==="side"){
+      const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
+      const what = `${esc(state.players[h.player])} ${SIDE[h.type].name}`;
+      return `<div class="hand"><span class="tag">${tag}</span><span class="what">${what}</span><span class="sub">${SIDE[h.type].desc}</span><div class="deltas">${d}</div></div>`;
+    }
+    const dealerTxt = `${esc(state.players[h.dealer])}莊${h.streak?" 連"+h.streak:""}`;
+    if(h.kind==="draw") return `<div class="hand"><span class="tag">${tag}</span><span class="what">流局</span><span class="sub">${dealerTxt} · 莊家連莊</span></div>`;
+    const how = h.discarder===null ? "自摸" : `食 ${esc(state.players[h.discarder])} 出銃`;
+    const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
+    const items = h.items && h.items.length ? " · " + h.items.map(x=>esc(x.name)).join("、") : "";
+    return `<div class="hand"><span class="tag">${tag}</span><span class="what">${esc(state.players[h.winner])} ${how} · ${h.fan} 番</span>
+      <span class="sub">${dealerTxt}${items}</span><div class="deltas">${d}</div></div>`;
+  }).reverse().join("");
+}
+
+let sidePlayer = null;
+function renderSide(){
+  $("sidePlayerSeg").innerHTML = state.players.map((n,i)=>`<button class="opt${i===sidePlayer?" on":""}" data-i="${i}">${esc(n)}</button>`).join("");
+  $("sidePlayerSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sidePlayer = sidePlayer===+b.dataset.i ? null : +b.dataset.i; renderSide(); });
+  const amt = Math.round(state.base * state.rate * 100)/100;
+  document.querySelectorAll("[data-side]").forEach(b=>{
+    b.disabled = sidePlayer===null;
+    b.onclick = ()=>{
+      if(sidePlayer===null || !canWrite || saving) return;
+      const p = sidePlayer, t = b.dataset.side; sidePlayer = null;
+      recordSide(t, p);
+      $("sideHint").textContent = `已記錄：${state.players[p]} ${SIDE[t].name}，${SIDE[t].collect?"收":"比"}三家各 $${amt}。`;
+    };
+  });
+  if(sidePlayer!==null) $("sideHint").textContent = `${state.players[sidePlayer]}：暗槓／圍骰收三家各 $${amt}，順骰比三家各 $${amt}。`;
+}
+
+function resetGame(){
+  const keep = {players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
+  state = Object.assign(DEFAULT_STATE(), keep, {dealer:keep.startDealer});
+  render(); save();
+}
+
+/* ---------- settlement & tags ---------- */
+const TAGS = [
+  {id:1,  name:"根本不是一個Level", desc:"大佬比左$20我，今晚唱K我既", test:s=>s.rank===1 && s.lead>1000},
+  {id:2,  name:"人生勝利組",       desc:"No Bullshit! 我地一齊贏!",         test:s=>s.rank===1 && s.lead>600 && s.lead<=1000},
+  {id:3,  name:"熱血番長",         desc:"超越極限，Plus Ultra!!",            test:s=>s.rank===1 && s.lead>300 && s.lead<=600},
+  {id:4,  name:"唔挑食",           desc:"有食唔食，罪大惡極。",              test:s=>s.pts>0 && s.smallWins>=4},
+  {id:5,  name:"穩如老狗",         desc:"沉穩得像一個200kg的胖子。",         test:s=>s.rank===1 && s.allPositive},
+  {id:6,  name:"絕地大反擊",       desc:"未見過黑唔會明白光既價值。",        test:s=>s.minRun<=-300 && s.pts>=500},
+  {id:7,  name:"防守大師",         desc:"進攻贏得掌聲，防守贏得勝利。",      test:s=>s.rank!==1 && s.pts>0 && s.discards<2},
+  {id:8,  name:"陪跑員",           desc:"不求有功，但求無過，志在參與。",    test:s=>s.pts>0 && s.wins<3 && s.rank===3},
+  {id:9,  name:"重砲豪",           desc:"唔大既牌唔食。",                    test:s=>s.pts>0 && s.wins<3 && s.rank===2},
+  {id:12, name:"強迫症",           desc:"唔對稱既糊唔食。",                  test:s=>s.ddh>6},
+  {id:13, name:"羅莽連彈",         desc:"我跟羅莽學左一招半式。",            test:s=>s.maxConsec>5},
+  {id:14, name:"路人甲",           desc:"我只係路過，你地繼續。",            test:s=>s.pts>0 && s.wins<2 && s.discards<2 && s.discards!==0},
+  {id:15, name:"奪命劍客",         desc:"報酬唔高，我唔出手。",              test:s=>s.pts>0 && s.wins>3 && s.winFans.every(f=>f>40)},
+  {id:16, name:"臥龍",             desc:"觀星不需要望遠鏡。",                test:s=>s.pts>0 && s.discards===0},
+  {id:17, name:"小人物",           desc:"存在過，但不多。",                  test:s=>s.pts>0 && s.pts<20},
+  {id:18, name:"單槓運動員",       desc:"我既目標從來唔係靠食糊。",          test:s=>s.angang>=5},
+  {id:19, name:"大老闆",           desc:"大水喉，派人頭。",                  test:s=>s.discards>10 && s.rank>=3},
+  {id:20, name:"Sugar Daddy",      desc:"最受歡迎麻雀腳。",                  test:s=>s.rank===4 && s.pts<-500},
+];
+const r2 = v => Math.round(v*100)/100;
+function computeStats(){
+  const rate = state.rate > 0 ? state.rate : 1;
+  const S = [0,1,2,3].map(p=>({p, pts:0, money:0, wins:0, selfDraws:0, smallWins:0, discards:0, ddh:0, angang:0,
+    winFans:[], minRun:0, everNeg:false, started:false, maxConsec:0, cur:0}));
+  for(const h of state.hands){
+    h.deltas.forEach((d,i)=>{ const s=S[i]; s.money += d; s.pts += d/rate; s.minRun = Math.min(s.minRun, s.pts); if(Math.abs(s.pts) > 1e-9) s.started = true; if(s.started && s.pts <= 1e-9) s.everNeg = true; });
+    if(h.kind==="win"){
+      const w = S[h.winner]; w.wins++; w.winFans.push(h.fan); if(h.fan<10) w.smallWins++;
+      if(h.discarder===null) w.selfDraws++; else S[h.discarder].discards++;
+      if((h.items||[]).some(x=>x.name==="對對糊")) w.ddh++;
+      S.forEach(s=>{ if(s.p===h.winner){ s.cur++; s.maxConsec=Math.max(s.maxConsec,s.cur); } else s.cur=0; });
+    } else if(h.kind==="draw"){ S.forEach(s=>s.cur=0); }
+    else if(h.kind==="side" && h.type==="angang"){ S[h.player].angang++; }
+  }
+  S.forEach(s=>{ s.pts = r2(s.pts); s.money = r2(s.money); s.allPositive = !s.everNeg && s.pts>0; });
+  const order = S.slice().sort((a,b)=> b.pts - a.pts || a.p - b.p);
+  order.forEach((s,i)=> s.rank = i+1);
+  const winsMax = Math.max(...S.map(s=>s.wins));
+  S.forEach(s=>{ s.winsMax = winsMax; s.lead = s.rank===1 ? r2(order[0].pts - order[1].pts) : 0; });
+  // Each player gets at most 2 titles; a title goes to only one player per game.
+  // Titles are handed out in priority order; if several players qualify, the higher-ranked one gets it.
+  S.forEach(s=>s.tags=[]);
+  const given = new Set();
+  for(const t of TAGS){
+    if(given.has(t.name)) continue;
+    const who = order.find(s=>s.tags.length<2 && t.test(s));
+    if(who){ who.tags.push(t); given.add(t.name); }
+  }
+  return {S, order};
+}
+let openTag = null;   // "p:id" — only one description shown at a time
+function settleHTML(forShare){
+  const {order} = computeStats();
+  const pu = state.hands.filter(h=>h.kind!=="side").length;
+  const d = new Date(state.endedAt || Date.now());
+  const date = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+  const topPts = order[0].pts;
+  const rows = order.map(s=>{
+    const first = s.rank===1 && topPts>0;
+    const tagsHtml = s.tags.length
+      ? s.tags.map(t=>`<button class="tag${openTag===s.p+":"+t.id?" on":""}" data-tag="${s.p}:${t.id}">${esc(t.name)}</button>`).join("")
+      : `<span class="notag">未有稱號</span>`;
+    let extra = "";
+    if(forShare){
+      extra = `<div class="share-lines">${s.tags.length ? s.tags.map(t=>`<span><b>${esc(t.name)}</b>　${esc(t.desc)}</span>`).join("") : `<span class="notag">未有稱號</span>`}</div>`;
+    } else {
+      const ot = openTag && openTag.split(":");
+      const t = ot && +ot[0]===s.p ? TAGS.find(x=>x.id===+ot[1]) : null;
+      extra = t ? `<div class="tagdesc">${esc(t.desc)}</div>` : "";
+    }
+    return `<div class="pl${first?" first":""}">
+      <div class="rk">${s.rank}</div>
+      <div class="pname">${first?`<span class="crown" aria-label="冠軍">👑</span>`:""}<b>${esc(state.players[s.p])}</b>
+        <span class="pstats num">食糊 ${s.wins} · 自摸 ${s.selfDraws} · 出銃 ${s.discards}</span></div>
+      <div class="pscore num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} 番</small></div>
+      ${forShare ? "" : `<div class="tags">${tagsHtml}</div>`}
+      ${extra}
+    </div>`;
+  }).join("");
+  return `<div class="settle-card">
+    <div class="st-head"><span class="st-title">結算</span><span class="st-meta num">${date} · ${pu} 鋪 · 每番 HK$${state.rate}</span></div>
+    ${rows}
+    ${forShare?`<div class="st-foot">港台麻雀計番</div>`:""}
+  </div>`;
+}
+function renderSettle(){
+  const ended = !!state.ended;
+  document.body.classList.toggle("ended", ended);
+  $("settle").hidden = !ended;
+  if(!ended) return;
+  $("settleCard").innerHTML = settleHTML(false);
+  $("settleCard").querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{
+    openTag = openTag===b.dataset.tag ? null : b.dataset.tag; renderSettle();
+  });
+}
+$("endBtn").onclick = ()=>{ if(!canWrite || saving) return; state.ended = true; state.endedAt = Date.now(); openTag=null; render(); save(); window.scrollTo(0,0); };
+$("backBtn").onclick = ()=>{ if(!canWrite || saving) return; state.ended = false; render(); save(); };
+let newArmed = false;
+$("newGameBtn").onclick = ()=>{
+  if(!canWrite || saving) return;
+  if(!newArmed){ newArmed = true; $("newGameBtn").textContent = "再按一次確認"; return; }
+  newArmed = false; resetGame();
+};
+
+/* share image */
+let h2cPromise = null, downloadsNs = null, shareBlob = null;
+function loadH2C(){
+  if(window.html2canvas) return Promise.resolve();
+  if(!h2cPromise) h2cPromise = new Promise((ok,bad)=>{
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    sc.onload = ok; sc.onerror = ()=>{ h2cPromise=null; bad(); };
+    document.head.appendChild(sc);
+  });
+  return h2cPromise;
+}
+$("shareBtn").onclick = async ()=>{
+  showSheet($("shareSheet"));
+  $("shareImg").hidden = true;
+  $("shareHint").textContent = "製作圖片中…";
+  const holder = document.createElement("div");
+  holder.style.cssText = "position:fixed;left:-10000px;top:0;width:400px;padding:12px;background:var(--bg)";
+  holder.innerHTML = settleHTML(true);
+  document.body.appendChild(holder);
+  try{
+    await loadH2C();
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    const bg = getComputedStyle(document.body).backgroundColor;
+    const canvas = await window.html2canvas(holder, {scale:2, backgroundColor:bg, logging:false, useCORS:true});
+    $("shareImg").src = canvas.toDataURL("image/png"); $("shareImg").hidden = false;
+    
+    $("shareHint").textContent = "長按圖片可以儲存或者直接分享俾朋友。";
+  }catch(e){
+    $("shareHint").textContent = "暫時整唔到圖片，可以直接用手機截圖分享。";
+  }finally{ holder.remove(); }
+};
+$("closeShare").onclick = hideSheet;
+
+/* ---------- sheets ---------- */
+let openSheet = null;
+function showSheet(el){ openSheet = el; $("scrim").hidden = false; el.hidden = false; el.scrollTop = 0; }
+function hideSheet(){ const was = openSheet; if(openSheet) openSheet.hidden = true; openSheet = null; $("scrim").hidden = true; }
+$("scrim").onclick = hideSheet;
+
+/* setup */
+let resetArmed = false;
+function fillSetup(){
+  for(let i=0;i<4;i++) $("p"+i).value = state.players[i];
+  $("rate").value = state.rate; $("base").value = state.base; $("dealerFan").value = state.dealerFan; $("streakFan").value = state.streakFan;
+  const locked = state.hands.length>0;
+  $("startDealerSeg").innerHTML = state.players.map((n,i)=>`<button class="opt${i===state.startDealer?" redon":""}" data-i="${i}" ${locked?"disabled":""}>${esc(n)}</button>`).join("");
+  $("startDealerSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(state.hands.length) return; state.startDealer = state.dealer = +b.dataset.i; state.streak=0; state.round=0; save(); fillSetup(); render(); });
+  $("startDealerHint").textContent = locked ? "已開始記錄，要改開局莊家請先重新開局。" : "開局莊家坐東風位，之後按逆時針過莊。";
+  resetArmed=false; $("resetBtn").textContent = "清除所有記錄，重新開局";
+}
+$("openSetup").onclick = ()=>{ fillSetup(); showSheet($("setupSheet")); };
+$("closeSetup").onclick = hideSheet;
+for(let i=0;i<4;i++) $("p"+i).addEventListener("change", e=>{ state.players[i] = e.target.value.trim() || `玩家${i+1}`; render(); save(); fillSetup(); });
+[["rate",0.1],["base",0],["dealerFan",0],["streakFan",0]].forEach(([k])=>$(k).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state[k]=v; render(); save(); } else e.target.value = state[k]; }));
+$("resetBtn").onclick = ()=>{
+  if(!resetArmed){ resetArmed=true; $("resetBtn").textContent = "再按一次確認清除"; return; }
+  resetGame(); fillSetup();
+};
+
+/* draw / undo */
+$("drawBtn").onclick = ()=>{ if(canWrite && !saving) recordDraw(); };
+$("undoBtn").onclick = ()=>{ if(canWrite && !saving) undo(); };
+
+/* win sheet */
+let ws = null;
+function openWin(winner){
+  if(!canWrite || saving || state.ended) return;
+  ws = {winner, discarder:null, items:[], adj:0, photo:null};
+  $("winErr").hidden = true;
+  buildCatalog();
+  renderWin();
+  showSheet($("winSheet"));
+}
+function fanTotal(){ return Math.max(0, ws.items.reduce((a,b)=>a+b.fan,0) + ws.adj); }
+function renderWin(){
+  const w = ws.winner;
+  $("winTitle").textContent = `${state.players[w]} 食糊（${seatWind(w)}位${w===state.dealer?"・莊":""}）`;
+  $("winnerSeg").innerHTML = state.players.map((n,i)=>`<button class="opt${i===w?" on":""}" data-i="${i}">${esc(n)}</button>`).join("");
+  $("winnerSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.winner=+b.dataset.i; if(ws.discarder===ws.winner) ws.discarder = [0,1,2,3].find(p=>p!==ws.winner); renderWin(); });
+  const self = ws.discarder===null;
+  $("modeSeg").innerHTML = `<button class="opt${self?" on":""}" data-m="self">自摸（三家找）</button><button class="opt${!self?" on":""}" data-m="d">食出銃</button>`;
+  $("modeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder = b.dataset.m==="self" ? null : (ws.discarder ?? [0,1,2,3].find(p=>p!==ws.winner)); if(b.dataset.m!=="self" && ws.discarder===null) ws.discarder=[0,1,2,3].find(p=>p!==ws.winner); renderWin(); });
+  $("discarderField").hidden = self;
+  if(!self){
+    $("discarderSeg").innerHTML = [0,1,2,3].filter(p=>p!==w).map(p=>`<button class="opt${p===ws.discarder?" redon":""}" data-i="${p}">${esc(state.players[p])}</button>`).join("");
+    $("discarderSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder=+b.dataset.i; renderWin(); });
+  }
+  // fan
+  if(document.activeElement !== $("fanInput")) $("fanInput").value = fanTotal();
+  if(fanTotal() > 0) $("winErr").hidden = true;
+  const selHtml = ws.items.map((it,i)=>`<button class="chip sel" data-i="${i}">${esc(it.name)} <b>${it.fan}</b><span class="x">✕</span></button>`).join("")
+    + (ws.adj ? `<button class="chip sel" data-adj="1">手動調整 <b>${ws.adj>0?"+":""}${ws.adj}</b><span class="x">✕</span></button>` : "");
+  $("selChips").innerHTML = selHtml || `<span class="hint">揀下面番種，或用 ＋／− 直接加減番數。</span>`;
+  $("selChips").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.adj) ws.adj=0; else ws.items.splice(+b.dataset.i,1); renderWin(); });
+  // payments
+  const fan = fanTotal();
+  const {rows} = computeWin(w, ws.discarder, fan);
+  const sum = rows.reduce((a,r)=>a+r.amt,0);
+  $("payBox").innerHTML = `<div class="lbl" style="margin-bottom:4px">找數</div>` + rows.map(r=>`<div class="r"><span>${esc(state.players[r.p])} 俾 <small>底${state.base} + ${fan}番${r.bonus?` + 莊${r.bonus}`:""} = ${r.total}番</small></span><span class="neg">−$${r.amt}</span></div>`).join("")
+    + `<div class="r" style="border-top:1px solid var(--line);padding-top:6px;margin-top:2px"><b>${esc(state.players[w])} 收</b><b class="pos">+$${Math.round(sum*100)/100}</b></div>`;
+}
+function buildCatalog(){
+  $("catalog").innerHTML = CATALOG.map((c,ci)=>`<details class="cat"><summary>${c.g}</summary><div class="chips">${
+    c.items.map((it,ii)=>`<button class="chip" data-c="${ci}" data-i="${ii}" title="${esc(it[2])}">${esc(it[0])} <b>${it[1]}</b></button>`).join("")}</div></details>`).join("");
+  $("catalog").querySelectorAll("button.chip").forEach(b=>b.onclick=()=>{
+    const it = CATALOG[+b.dataset.c].items[+b.dataset.i];
+    ws.items.push({name:it[0], fan:it[1]}); renderWin();
+  });
+}
+$("fanPlus").onclick = ()=>{ ws.adj++; renderWin(); };
+$("fanInput").addEventListener("beforeinput", e=>{ if(e.data && /[^0-9]/.test(e.data)) e.preventDefault(); });
+$("fanInput").addEventListener("input", e=>{
+  const el = e.target, clean = el.value.replace(/[^0-9]/g,"").replace(/^0+(?=[0-9])/,"").slice(0,4);
+  if(el.value !== clean) el.value = clean;
+  const n = clean === "" ? 0 : parseInt(clean,10);
+  ws.adj = n - ws.items.reduce((a,b)=>a+b.fan,0);
+  renderWin();
+});
+$("fanInput").addEventListener("focus", e=>e.target.select());
+$("fanInput").addEventListener("blur", ()=>renderWin());
+$("fanInput").addEventListener("keydown", e=>{ if(e.key==="Enter") e.target.blur(); });
+$("fanMinus").onclick = ()=>{ ws.adj--; if(fanTotal()===0 && ws.adj<0 && ws.items.length===0) ws.adj=0; renderWin(); };
+$("cancelWin").onclick = hideSheet;
+$("confirmWin").onclick = ()=>{
+  if(fanTotal() <= 0){
+    $("winErr").textContent = "未輸入番數。請揀番種、按 ＋，或直接輸入番數。";
+    $("winErr").hidden = false; $("fanInput").focus(); return;
+  }
+  const items = ws.items.slice(); if(ws.adj) items.push({name:"手動調整", fan:ws.adj});
+  recordWin(ws.winner, ws.discarder, fanTotal(), items);
+  hideSheet();
+};
+
+render();
+</script>
+</body>
+</html>
