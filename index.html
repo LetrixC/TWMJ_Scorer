@@ -13,39 +13,90 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 
 /* Layout: a square mahjong table — four seats round a felt centre showing the round wind; actions and the hand log below. */
 :root{
-  --bg:#ECEFE8; --surface:#FBFBF6; --surface2:#F3F4EE; --fg:#1B2621; --muted:#5D6A63; --line:#D3DAD0;
-  --jade:#1F6B52; --jade-ink:#FFFFFF; --jade-soft:#DCEBE3;
-  --red:#B3261E; --red-soft:#F6E1DE;
-  --felt:#285A45; --felt-ink:#F2EFE2; --felt-muted:#B9CDBF;
+  --bg:#EEF1F5; --surface:#FFFFFF; --surface2:#F3F5F8; --fg:#17223B; --muted:#5B6578; --line:#D8DEE7;
+  --jade:#1F7A55; --jade-ink:#FFFFFF; --jade-soft:#DFEFE7;
+  --red:#C0282D; --red-soft:#F8E1E1;
+  --navy:#1E2F5C; --navy-ink:#FFFFFF;
+  --felt:#1F5C45; --felt-ink:#FFFFFF; --felt-muted:#B9D4C6;
   --shadow:0 1px 0 rgba(20,40,30,.06),0 6px 18px -10px rgba(20,40,30,.25);
   --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --r:14px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0E1814; --surface:#17231E; --surface2:#1D2B25; --fg:#E5ECE6; --muted:#93A39A; --line:#2B3B34;
+  --bg:#0F1520; --surface:#18202D; --surface2:#1F2836; --fg:#E6EBF2; --muted:#94A0B2; --line:#2B3546;
   --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
   --red:#F0766D; --red-soft:#3A1F1C;
-  --felt:#1B3B2E; --felt-ink:#EDEBDD; --felt-muted:#8FAE9C;
+  --navy:#8DA6F2; --navy-ink:#0B1220;
+  --felt:#1B4A38; --felt-ink:#F2F5F0; --felt-muted:#9CC3AE;
   --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#0E1814; --surface:#17231E; --surface2:#1D2B25; --fg:#E5ECE6; --muted:#93A39A; --line:#2B3B34;
+  --bg:#0F1520; --surface:#18202D; --surface2:#1F2836; --fg:#E6EBF2; --muted:#94A0B2; --line:#2B3546;
   --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
   --red:#F0766D; --red-soft:#3A1F1C;
-  --felt:#1B3B2E; --felt-ink:#EDEBDD; --felt-muted:#8FAE9C;
+  --navy:#8DA6F2; --navy-ink:#0B1220;
+  --felt:#1B4A38; --felt-ink:#F2F5F0; --felt-muted:#9CC3AE;
   --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
   color-scheme:dark;
 }
+/* Skins chosen in settings (預設／米色／萬聖節); placed after the dark blocks so they win in both modes */
+:root[data-skin="beige"]{
+  --bg:#F3EBDD; --surface:#FFFBF3; --surface2:#F7EFE2; --fg:#3A2E22; --muted:#7A6A58; --line:#E3D6C2;
+  --jade:#4F7A3A; --jade-ink:#FFFFFF; --jade-soft:#F1E2CC;
+  --navy:#8A5A2B; --navy-ink:#FFFFFF;
+  --red:#B4412F; --red-soft:#F6DED7;
+  --felt:#6B4A2E; --felt-ink:#FBF3E6; --felt-muted:#D9C3A5;
+  --shadow:0 1px 0 rgba(60,40,20,.06),0 6px 18px -10px rgba(60,40,20,.28);
+  color-scheme:light;
+}
+:root[data-skin="halloween"]{
+  --bg:#140F1C; --surface:#221A2E; --surface2:#2B2139; --fg:#F3E9DC; --muted:#A897B5; --line:#3A2E4A;
+  --jade:#FF8A1F; --jade-ink:#1A0F00; --jade-soft:#3D2614;
+  --navy:#FF8A1F; --navy-ink:#1A0F00;
+  --red:#FF4D6D; --red-soft:#3A1622;
+  --felt:#2E1A47; --felt-ink:#FFE8CC; --felt-muted:#C6A8E0;
+  --shadow:0 1px 0 rgba(0,0,0,.4),0 8px 22px -10px rgba(255,138,31,.25);
+  color-scheme:dark;
+}
+/* 薄霧: soft pink-lilac */
+:root[data-skin="mist"]{
+  --bg:#F4EEF6; --surface:#FFFFFF; --surface2:#F8F2FA; --fg:#3B2F45; --muted:#7F7193; --line:#E7DDEE;
+  --jade:#5E54B0; --jade-ink:#FFFFFF; --jade-soft:#EEE8F8;
+  --red:#C9467A; --red-soft:#FBE4EE;
+  --navy:#7B5DB0; --navy-ink:#FFFFFF;
+  --felt:#8E78BE; --felt-ink:#FFFFFF; --felt-muted:#EDE2FA;
+  --shadow:0 1px 0 rgba(90,60,120,.05),0 8px 22px -12px rgba(140,100,190,.35);
+  color-scheme:light;
+}
+:root[data-skin="mist"] .center{background-image:radial-gradient(circle at 30% 20%,rgba(255,214,236,.45),transparent 60%),radial-gradient(circle at 80% 90%,rgba(255,255,255,.25),transparent 55%)}
+:root[data-skin="mist"] .settle-card{background-image:radial-gradient(circle at 20% 0%,rgba(255,214,236,.4),transparent 60%)}
+/* 便利店: white shop floor, green counter, orange + red signage */
+:root[data-skin="store"]{
+  --bg:#F2F4F1; --surface:#FFFFFF; --surface2:#F6F7F5; --fg:#1D2A22; --muted:#5D6A62; --line:#DCE2DC;
+  --jade:#00843D; --jade-ink:#FFFFFF; --jade-soft:#E1F2E7;
+  --red:#DE2027; --red-soft:#FDE2E1;
+  --navy:#D9590B; --navy-ink:#FFFFFF;
+  --felt:#00843D; --felt-ink:#FFFFFF; --felt-muted:#C5E8D2;
+  --shadow:0 1px 0 rgba(0,0,0,.05),0 6px 16px -10px rgba(0,0,0,.25);
+  color-scheme:light;
+}
+:root[data-skin="store"] .center,:root[data-skin="store"] .settle-card{box-shadow:inset 0 -6px 0 #F58220,inset 0 -12px 0 #FFFFFF,inset 0 -18px 0 #DE2027}
+:root[data-skin="store"] .settle-card{padding-bottom:28px}
+:root[data-skin="store"] .center{padding-bottom:22px}
+:root[data-skin="halloween"] header h1::after{content:" 🎃";font-size:20px}
+:root[data-skin="halloween"] .center{background-image:radial-gradient(circle at 50% 40%,rgba(255,138,31,.18),transparent 70%)}
+:root[data-skin="halloween"] .settle-card{background-image:radial-gradient(circle at 50% 0%,rgba(255,138,31,.16),transparent 60%)}
+:root[data-skin="halloween"] .st-title::after{content:" 🦇";font-size:20px}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
 .wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:12px 40px;display:flex;flex-direction:column;gap:16px}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
-button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-header h1{font-family:var(--f-display);font-weight:900;font-size:22px;margin:0;letter-spacing:.04em}
+header h1{font-family:var(--f-display);font-weight:900;font-size:22px;margin:0;letter-spacing:.04em;color:var(--navy)}
 header h1 small{font-family:var(--f-body);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.08em;margin-left:6px}
 .iconbtn{padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:500}
 
@@ -69,7 +120,7 @@ header h1 small{font-family:var(--f-body);font-weight:500;font-size:12px;color:v
 
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .btn{padding:12px 14px;border-radius:12px;font-weight:700;background:var(--surface);border:1px solid var(--line);text-align:center}
-.btn.primary{background:var(--jade);color:var(--jade-ink);border-color:var(--jade)}
+.btn.primary{background:var(--navy);color:var(--navy-ink);border-color:var(--navy)}
 .btn.danger{color:var(--red);border-color:var(--red)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .rules{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
@@ -98,7 +149,7 @@ input[type=text],input[type=number]{font:inherit;font-size:16px;padding:10px 12p
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .opt{padding:9px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.opt.on{background:var(--jade);color:var(--jade-ink);border-color:var(--jade);font-weight:700}
+.opt.on{background:var(--navy);color:var(--navy-ink);border-color:var(--navy);font-weight:700}
 .opt.redon{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
 .prefix{position:relative}
 .prefix span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
@@ -174,7 +225,7 @@ body:not(.ro) .view-only{display:none!important}
 .pscore small{font-size:12px;color:var(--muted)}
 .tags{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--fg)}
-.tag.on{background:var(--jade);border-color:var(--jade);color:var(--jade-ink)}
+.tag.on{background:var(--navy);border-color:var(--navy);color:var(--navy-ink)}
 .notag{font-size:12px;color:var(--muted)}
 .tagdesc{grid-column:1/-1;font-size:13px;background:var(--jade-soft);border-radius:10px;padding:8px 10px}
 .tagdesc b{display:block;font-size:12px;color:var(--jade)}
@@ -278,6 +329,11 @@ const SHELL = `<div class="wrap">
     <label>開局莊家（東風位）</label>
     <div class="grid4" id="startDealerSeg"></div>
     <span class="hint" id="startDealerHint"></span>
+  </div>
+  <div class="field">
+    <label>主題</label>
+    <div class="grid4" id="skinSeg" style="grid-template-columns:repeat(3,1fr)"></div>
+    <span class="hint">整個網站會即時轉成呢個主題。</span>
   </div>
   <div class="confirm-row" style="margin-bottom:12px">
     <button class="btn danger" id="resetBtn">清除所有記錄，重新開局</button>
@@ -485,8 +541,14 @@ function undo(){
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 
+const SKINS = [["default","預設"],["beige","米色"],["mist","薄霧"],["store","便利店"],["halloween","萬聖節"]];
+function applySkin(){
+  const k = state.skin || "default";
+  if(k==="default") delete document.documentElement.dataset.skin; else document.documentElement.dataset.skin = k;
+}
 const isHandStart = h => h.kind!=="side" && !(h.group && !h.groupFirst);
 function render(){
+  applySkin();
   renderSettle();
   const t = totals();
   const rw = WINDS[state.round % 4];
@@ -564,7 +626,7 @@ function renderSide(){
 }
 
 function resetGame(){
-  const keep = {players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
+  const keep = {skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
   state = Object.assign(DEFAULT_STATE(), keep, {dealer:keep.startDealer});
   render(); save();
 }
@@ -729,6 +791,9 @@ function fillSetup(){
   $("startDealerSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(state.hands.length) return; state.startDealer = state.dealer = +b.dataset.i; state.streak=0; state.round=0; save(); fillSetup(); render(); });
   $("startDealerHint").textContent = locked ? "已開始記錄，要改開局莊家請先重新開局。" : "開局莊家坐東風位，之後按逆時針過莊。";
   resetArmed=false; $("resetBtn").textContent = "清除所有記錄，重新開局";
+  const cur = state.skin || "default";
+  $("skinSeg").innerHTML = SKINS.map(([k,n])=>`<button class="opt${k===cur?" on":""}" data-k="${k}">${n}</button>`).join("");
+  $("skinSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.skin = b.dataset.k; applySkin(); save(); fillSetup(); });
 }
 $("openSetup").onclick = ()=>{ fillSetup(); showSheet($("setupSheet")); };
 $("closeSetup").onclick = hideSheet;
