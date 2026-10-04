@@ -266,6 +266,27 @@ body:not(.ro) .view-only{display:none!important}
 .sty-foot img{width:100%;height:100%;object-fit:contain}
 .st-foot{display:flex;align-items:center;justify-content:center;gap:6px}
 .flogo{width:22px;height:22px;display:inline-flex}
+.hbtns{display:flex;gap:6px}
+.help-tabs{margin-bottom:12px}
+.help-tabs .opt{padding:7px 11px;font-size:13px}
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.help-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:6px;min-width:0}
+.help-item span{font-weight:700;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.help-item b{font-size:12px;color:var(--jade);flex:none}
+.help-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+.help-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.help-head h3{margin:0}
+.help-fan{font-weight:900;color:var(--navy-ink);background:var(--navy);border-radius:999px;padding:2px 10px;font-size:13px;flex:none}
+.help-label{margin:14px 0 4px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.08em;padding-left:8px;border-left:3px solid var(--jade)}
+.help-text{margin:0;font-size:15px;line-height:1.6}
+.tiles{display:flex;flex-wrap:wrap;gap:10px 12px;padding:12px;background:var(--surface2);border-radius:12px}
+.tgroup{display:flex;gap:2px}
+.tile{width:28px;height:38px;border-radius:5px;background:#FFFDF6;border:1px solid #D9D2BF;box-shadow:0 3px 0 #8FBF97;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--f-display);font-weight:900;font-size:13px;line-height:1.05;color:#1B1B1B}
+.tile .su{font-size:12px}
+.tile.m .su{color:#C0282D}.tile.p .su{color:#1F5FA8}.tile.s .su{color:#1F7A55}
+.tile.h{font-size:18px}.tile.hC{color:#C0282D}.tile.hF{color:#1F7A55}.tile.hP::after{content:"";width:16px;height:22px;border:2px solid #1F5FA8;border-radius:3px}
+.tile.fl{font-size:15px;color:#C9467A}
 .lg-d{display:none!important}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]):not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]) .lg-l{display:none!important}
@@ -286,7 +307,11 @@ body:not(.ro) .view-only{display:none!important}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
 .splash-name{font-family:var(--f-display);font-weight:900;font-size:44px;margin:8px 0 0;color:var(--navy);letter-spacing:.06em;line-height:1.1}
 .splash-name span{display:block;font-family:var(--f-body);font-size:16px;font-weight:700;letter-spacing:.3em;color:var(--muted);margin-top:4px}
-.splash-go{width:100%;max-width:280px;margin-top:28px;padding:15px;font-size:17px;border-radius:14px}
+.splash-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:300px;margin-top:28px}
+.splash-go{width:100%;padding:15px 8px;font-size:17px;border-radius:14px}
+.splash-note{margin:4px 0 0;font-size:13px;color:var(--red);font-weight:700}
+.modechip{font-family:var(--f-body);font-size:12px;font-weight:700;color:var(--navy);border:1.5px solid var(--navy);border-radius:999px;padding:1px 8px;letter-spacing:.04em}
+body.hk .side,body.hk #multiField,body.hk #revengeBox{display:none!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.splash-logo{animation:none}}
 </style>
 </head>
@@ -299,13 +324,17 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <div class="splash-in">
     <div class="splash-logo">${LOGO}</div>
     <h1 class="splash-name">番鼠<span>FanSyu</span></h1>
-    <button class="btn primary splash-go" id="enterBtn">開始計番</button>
+    <div class="splash-pick">
+      <button class="btn primary splash-go" data-mode="tw">台牌</button>
+      <button class="btn primary splash-go" data-mode="hk">廣東牌</button>
+    </div>
+    <p class="splash-note" id="splashNote" hidden></p>
   </div>
 </div>
 <div class="wrap">
   <header>
-    <h1><span class="hlogo" aria-hidden="true">${LOGO}</span>番鼠</h1>
-    <button class="iconbtn edit-only" id="openSetup">設定</button>
+    <h1><span class="hlogo" aria-hidden="true">${LOGO}</span>番鼠<span class="modechip" id="modeChip"></span></h1>
+    <span class="hbtns"><button class="iconbtn" id="openHelp">說明</button><button class="iconbtn edit-only" id="openSetup">設定</button></span>
   </header>
 
   <div id="bannerBox"></div>
@@ -369,6 +398,25 @@ const SHELL = `<div class="splash" id="splash" hidden>
   </div>
 </div>
 
+<div class="sheet" id="helpSheet" hidden role="dialog" aria-label="牌型說明">
+  <div class="grab"></div>
+  <div id="helpListView">
+    <h3 id="helpTitle">牌型說明</h3>
+    <div class="seg help-tabs" id="helpTabs"></div>
+    <div class="help-grid" id="helpList"></div>
+  </div>
+  <div id="helpDetailView" hidden>
+    <button class="iconbtn" id="helpBack">‹ 返回</button>
+    <div class="help-card">
+      <div class="help-head"><h3 id="hdName"></h3><span class="help-fan" id="hdFan"></span></div>
+      <p class="help-label">解釋</p>
+      <p class="help-text" id="hdText"></p>
+      <div id="hdExWrap"><p class="help-label">例子</p><div class="tiles" id="hdTiles"></div><p class="hint" id="hdNote"></p></div>
+    </div>
+  </div>
+  <button class="btn" style="width:100%;margin-top:14px" id="closeHelp">關閉</button>
+</div>
+
 <div class="sheet" id="setupSheet" hidden role="dialog" aria-label="設定">
   <div class="grab"></div>
   <h3>牌局設定</h3>
@@ -381,6 +429,12 @@ const SHELL = `<div class="splash" id="splash" hidden>
       <input type="text" id="p3" maxlength="8">
     </div>
   </div>
+  <div class="field">
+    <label>牌種</label>
+    <div class="grid2" id="modeSeg2"></div>
+    <span class="hint" id="modeHint">已有記錄時轉牌種，會清除記錄重新開局。</span>
+  </div>
+  <div id="twFields">
   <div class="grid2">
     <div class="field"><label for="rate">每番</label><div class="prefix"><span>HK$</span><input type="number" id="rate" inputmode="decimal" min="0" step="0.5"></div></div>
     <div class="field"><label for="base">底（番）</label><input type="number" id="base" inputmode="numeric" min="0" step="1"></div>
@@ -388,6 +442,17 @@ const SHELL = `<div class="splash" id="splash" hidden>
     <div class="field"><label for="streakFan">每連莊（連+拉，番）</label><input type="number" id="streakFan" inputmode="numeric" min="0" step="1"></div>
   </div>
   <p class="hint">莊家番：莊家食糊或莊家出銃／被自摸時才計。連莊 n 次時另加「每連莊番 × n」（即台灣「連 n 拉 n」）。</p>
+  </div>
+  <div id="hkFields">
+    <div class="grid2">
+      <div class="field"><label for="hkUnit">每點</label><div class="prefix"><span>HK$</span><input type="number" id="hkUnit" inputmode="decimal" min="0" step="0.25"></div></div>
+      <div class="field"><label for="hkMin">起糊（番）</label><input type="number" id="hkMin" inputmode="numeric" min="0" max="13" step="1"></div>
+    </div>
+    <div class="field"><label>爆棚（最高番數）</label><div class="grid4" id="hkCapSeg" style="grid-template-columns:repeat(3,1fr)"></div></div>
+    <div class="field"><label>計法</label><div class="grid2" id="hkScaleSeg"></div></div>
+    <div class="field"><label>出銃</label><div class="grid2" id="hkShootSeg"></div></div>
+    <p class="hint" id="hkTable"></p>
+  </div>
   <div class="field">
     <label>開局莊家（東風位）</label>
     <div class="grid4" id="startDealerSeg"></div>
@@ -429,7 +494,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
 
   <div class="fanbox" style="margin-top:14px">
     <div class="fantotal">
-      <div><label class="lbl" for="fanInput">番數（不含底及莊）</label><div><input class="big num faninput" id="fanInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" enterkeyhint="done"></div></div>
+      <div><label class="lbl" for="fanInput" id="fanLbl">番數（不含底及莊）</label><div><input class="big num faninput" id="fanInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" enterkeyhint="done"></div></div>
       <div class="stepper"><button id="fanMinus" aria-label="減一番">−</button><button id="fanPlus" aria-label="加一番">＋</button></div>
     </div>
     <div class="chips" id="selChips"></div>
@@ -450,10 +515,7 @@ document.getElementById("root").innerHTML = SHELL;
   let seen = false; try{ seen = sessionStorage.getItem("fansyu-entered")==="1"; }catch(e){}
   if(seen) return;
   sp.hidden = false;
-  document.getElementById("enterBtn").onclick = ()=>{
-    try{ sessionStorage.setItem("fansyu-entered","1"); }catch(e){}
-    sp.classList.add("leaving"); setTimeout(()=>{ sp.hidden = true; }, 340);
-  };
+  sp.querySelectorAll("[data-mode]").forEach(b=>b.onclick = ()=>{ if(chooseMode(b.dataset.mode, b)) closeSplash(); });
 })();
 const WINDS = "東南西北";
 const SEAT_AREA = ["s0","s1","s2","s3"];
@@ -501,12 +563,47 @@ const CATALOG = [
   ["圍骰/順骰",5,"圍收 順比"],["斷追",2,""],["追",5,""],["雙響",5,""],["三響",10,""],["反雪(10)",10,"雙輸"],["反雪(20)",20,"三響後食出／自摸"],
   ["海底撈月",10,"最後一隻自摸"],["河底出統",10,"最後一隻出銃"],["半求人",20,""],["全求人",40,""],["大雞",40,"番子一對，只計到花，不能叮"],["鴨糊",20,"自摸雞"]]},
 ];
-const FAN_OF = {}; CATALOG.forEach(c=>c.items.forEach(i=>FAN_OF[i[0]]=i[1]));
+/* 廣東牌常用番種（各檯規矩可能唔同，可用 ＋／− 或直接輸入調整） */
+const HK_CATALOG = [
+ {g:"基本", items:[
+  ["自摸",1,""],["門前清",1,"冇上冇碰冇明槓"],["平糊",1,"全順子，冇番子、冇花"],["無花",1,""],["正花",1,"自己位嘅花，每隻 1 番"],["一台花",2,"梅蘭菊竹或春夏秋冬一套"],
+  ["番子（中／發／白）",1,"每組刻子 1 番"],["正風（門風）",1,""],["圈風",1,""],["搶槓",1,""],["海底撈月",1,"摸最後一隻牌自摸"],["槓上自摸",2,""],["槓上槓自摸",8,""]]},
+ {g:"牌型", items:[
+  ["對對糊",3,"全刻子"],["混一色",3,"一門數字 + 番子"],["清一色",7,"全一門數字"],["混么九",1,"全 1／9 + 番子（加埋對對糊）"],["花么九",1,""],
+  ["小三元",5,"中發白兩組刻子 + 一對"],["大三元",8,"中發白三組刻子"],["坎坎糊",8,"全暗刻自摸"],["小四喜",10,"四風三組刻子 + 一對"]]},
+ {g:"例牌／爆棚", items:[
+  ["大四喜",13,""],["字一色",13,""],["清么九",13,""],["十三么",13,""],["九子連環",13,""],["十八羅漢",13,"四個槓"],
+  ["天糊",13,"莊家起手即糊"],["地糊",13,"閒家第一隻摸牌即糊"],["人糊",13,"第一巡食人"],["八仙過海",13,"八隻花"],["七搶一",13,""]]},
+];
+const FAN_OF = {}; CATALOG.concat(HK_CATALOG).forEach(c=>c.items.forEach(i=>{ if(!(i[0] in FAN_OF)) FAN_OF[i[0]]=i[1]; }));
+const isHK = () => state.mode === "hk";
+const curCatalog = () => isHK() ? HK_CATALOG : CATALOG;
+const unitRate = () => { const r = isHK() ? state.hk.unit : state.rate; return r > 0 ? r : 1; };
+// 廣東牌點數：半辣上 = 4 番後每番 ×1.5／×1.33 交替（16,24,32,48,64…）；全辣上 = 每番 ×2
+function hkPoints(fan){
+  const f = Math.max(0, Math.min(fan, state.hk.cap));
+  if(state.hk.scale==="full" || f<=4) return Math.pow(2,f);
+  const k = f-4; return 16 * Math.pow(2, Math.floor(k/2)) * (k%2 ? 1.5 : 1);
+}
+function chooseMode(m, btn){
+  if(!canWrite || state.mode===m) return true;
+  if(state.hands.length){
+    if(btn.dataset.armed!=="1"){ btn.dataset.armed="1"; const n=$("splashNote"); n.textContent=`轉做${m==="hk"?"廣東牌":"台牌"}會清除現有記錄，再按一次確認。`; n.hidden=false; return false; }
+    state.mode = m; resetGame(); return true;
+  }
+  state.mode = m; render(); save(); return true;
+}
+function closeSplash(){
+  const sp = $("splash");
+  try{ sessionStorage.setItem("fansyu-entered","1"); }catch(e){}
+  sp.classList.add("leaving"); setTimeout(()=>{ sp.hidden = true; }, 340);
+}
 
 /* ---------- state ---------- */
 const DEFAULT_STATE = () => ({
   v:1, players:["阿明","阿強","阿芬","阿珍"], rate:1, base:5, dealerFan:1, streakFan:2,
-  startDealer:0, dealer:0, streak:0, round:0, hands:[], updatedAt:0
+  startDealer:0, dealer:0, streak:0, round:0, hands:[], updatedAt:0,
+  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}
 });
 let state = DEFAULT_STATE();
 const KEY = "hktw-mj-standalone";
@@ -523,9 +620,21 @@ const fmt = v => { const a = Math.abs(v); const s = Number.isInteger(a) ? a.toSt
 const cls = v => v>0?"pos":v<0?"neg":"zero";
 
 function computeWin(winner, discarder, fan){
+  const deltas = [0,0,0,0], rows = [];
+  if(isHK()){
+    const pts = hkPoints(fan), X = pts * state.hk.unit;
+    const shares = discarder===null
+      ? [0,1,2,3].filter(p=>p!==winner).map(p=>[p,0.5])
+      : (state.hk.shoot==="half" ? [0,1,2,3].filter(p=>p!==winner).map(p=>[p, p===discarder?0.5:0.25]) : [[discarder,1]]);
+    for(const [p,share] of shares){
+      const amt = Math.round(X*share*100)/100;
+      deltas[p] -= amt; deltas[winner] += amt;
+      rows.push({p, bonus:0, total:fan, amt, label:`${Math.min(fan,state.hk.cap)}番 = ${pts}點${share<1?` × ${share===0.5?"½":"¼"}`:""}`});
+    }
+    return {deltas, rows};
+  }
   // discarder === null → 自摸, all three pay
   const payers = discarder===null ? [0,1,2,3].filter(p=>p!==winner) : [discarder];
-  const deltas = [0,0,0,0], rows = [];
   for(const p of payers){
     const involvesDealer = (winner===state.dealer || p===state.dealer);
     const bonus = involvesDealer ? (state.dealerFan + state.streakFan*state.streak) : 0;
@@ -550,7 +659,7 @@ function advanceDealer(){
 const MULTI = {2:{name:"雙響", fan:5, revenge:10}, 3:{name:"三響", fan:10, revenge:20}};
 function recordWins(list, discarder){
   const prev = snap();
-  const n = list.length, M = MULTI[n] || null;
+  const n = list.length, M = isHK() ? null : (MULTI[n] || null);
   const group = n>1 ? Date.now() : null;
   const R = state.revenge;
   let usedRevenge = false;
@@ -628,7 +737,7 @@ function render(){
   const handNo = state.hands.filter(isHandStart).length + 1;
   let html = `<div class="center"><div class="rw">${rw}</div><div class="rwl">${rw}風圈${state.round>=4?` · 第${Math.floor(state.round/4)+1}將`:""}</div>
     <div class="hn">第 ${handNo} 鋪 · ${esc(state.players[state.dealer])} 做莊</div>
-    ${state.streak>0?`<div class="streak">連${state.streak} 拉${state.streak}</div>`:""}</div>`;
+    ${state.streak>0?`<div class="streak">${isHK()?`連莊 ${state.streak}`:`連${state.streak} 拉${state.streak}`}</div>`:""}</div>`;
   for(let p=0;p<4;p++){
     const isD = p===state.dealer;
     html += `<button class="seat${isD?" dealer":""}" style="grid-area:${SEAT_AREA[p]}" data-seat="${p}" aria-label="${esc(state.players[p])} 食糊">
@@ -641,7 +750,11 @@ function render(){
   $("table").innerHTML = html;
   $("table").querySelectorAll(".seat").forEach(b=>b.onclick=()=>openWin(+b.dataset.seat));
 
-  $("rulesLine").innerHTML = `<span>每番 <b>HK$${state.rate}</b></span><span>底 <b>${state.base}</b> 番</span><span>莊 <b>${state.dealerFan}</b> 番</span><span>每連莊 <b>${state.streakFan}</b> 番</span>`;
+  document.body.classList.toggle("hk", isHK());
+  $("modeChip").textContent = isHK() ? "廣東牌" : "台牌";
+  $("rulesLine").innerHTML = isHK()
+    ? `<span>每點 <b>HK$${state.hk.unit}</b></span><span><b>${state.hk.min}</b> 番起糊</span><span><b>${state.hk.cap}</b> 番爆棚</span><span><b>${state.hk.scale==="full"?"全辣上":"半辣上"}</b></span><span><b>${state.hk.shoot==="half"?"半銃":"全銃"}</b></span>`
+    : `<span>每番 <b>HK$${state.rate}</b></span><span>底 <b>${state.base}</b> 番</span><span>莊 <b>${state.dealerFan}</b> 番</span><span>每連莊 <b>${state.streakFan}</b> 番</span>`;
 
   const just = state.hands.length && state.round>0 && state.round%4===0 && state.hands[state.hands.length-1].prev.round !== state.round;
   $("bannerBox").innerHTML = just ? `<div class="banner">北圈已完，打完一將（四圈）。可以繼續打落一將，或到「設定」重新開局。</div>` : "";
@@ -699,7 +812,7 @@ function renderSide(){
 }
 
 function resetGame(){
-  const keep = {skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
+  const keep = {mode:state.mode, hk:state.hk, skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
   state = Object.assign(DEFAULT_STATE(), keep, {dealer:keep.startDealer});
   render(); save();
 }
@@ -727,7 +840,7 @@ const TAGS = [
 ];
 const r2 = v => Math.round(v*100)/100;
 function computeStats(){
-  const rate = state.rate > 0 ? state.rate : 1;
+  const rate = unitRate();
   const S = [0,1,2,3].map(p=>({p, pts:0, money:0, wins:0, selfDraws:0, smallWins:0, discards:0, ddh:0, angang:0,
     winFans:[], minRun:0, everNeg:false, started:false, maxConsec:0, cur:0}));
   for(const h of state.hands){
@@ -790,7 +903,7 @@ function settleHTML(forShare){
     </div>`;
   }).join("");
   return `<div class="settle-card">
-    <div class="st-head"><span class="st-brand">${forShare?`<span class="slogo">${LOGO_D}</span>`:""}<span class="st-title">結算</span></span><span class="st-meta num">${date} · ${pu} 鋪 · 每番 HK$${state.rate}</span></div>
+    <div class="st-head"><span class="st-brand">${forShare?`<span class="slogo">${LOGO_D}</span>`:""}<span class="st-title">結算</span></span><span class="st-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</span></div>
     ${rows}
     ${forShare?`<div class="st-foot"><span class="flogo">${LOGO_D}</span>番鼠 · 港台麻雀計番</div>`:""}
   </div>`;
@@ -808,7 +921,7 @@ function storyHTML(){
       <div><div class="sty-name">${first?"👑 ":""}${esc(state.players[s.p])}</div><div class="sty-stats">食糊 ${s.wins} · 自摸 ${s.selfDraws} · 出銃 ${s.discards}</div></div>
       <div class="sty-score num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} 番</small></div>${tags}</div>`;
   }).join("");
-  return `<div class="story"><div class="sty-head"><span class="sty-logo">${LOGO_D}</span><div><div class="sty-title">結算</div><div class="sty-meta num">${date} · ${pu} 鋪 · 每番 HK$${state.rate}</div></div></div>
+  return `<div class="story"><div class="sty-head"><span class="sty-logo">${LOGO_D}</span><div><div class="sty-title">結算</div><div class="sty-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</div></div></div>
     <div class="sty-list">${rows}</div><div class="sty-foot"><span>${LOGO_D}</span>番鼠 · 港台麻雀計番</div></div>`;
 }
 function renderSettle(){
@@ -894,6 +1007,150 @@ $("saveImgBtn").onclick = async ()=>{
 };
 $("closeShare").onclick = hideSheet;
 
+/* 牌型說明：d = 解釋，ex = 例子（m 萬、p 筒、s 索；E S W N 東南西北；C 中、F 發、P 白；f1–f8 花：梅蘭菊竹春夏秋冬） */
+const HELP = {
+ "門清":{d:"由開局到食糊，冇上、冇碰、冇明槓，所有牌都係自己摸返嚟。"},
+ "自摸":{d:"食糊嗰隻牌係自己摸返嚟，唔係食人哋打出嘅牌。"},
+ "門清自摸":{d:"門清之餘，最後嗰隻牌仲係自己摸返嚟。"},
+ "花上自摸":{d:"摸到花牌補牌，補返嚟嗰隻啱啱自摸食糊。每隻花 2 番，可以重複加。"},
+ "槓上自摸":{d:"開槓之後補牌，補返嚟嗰隻啱啱自摸食糊。"},
+ "無字花":{d:"成副牌冇字牌，亦冇摸過花牌。",ex:"123m 456m 789p 234s 567s 99m"},
+ "無花":{d:"成局冇摸過任何花牌。"},
+ "爛花":{d:"有花，但冇一隻係自己位嘅花。"},
+ "靚花":{d:"摸到自己位嘅花。東位係梅、春；南位係蘭、夏；西位係菊、秋；北位係竹、冬。",ex:"f1 f5"},
+ "無字":{d:"成副牌冇任何字牌（東南西北中發白）。",ex:"123m 456m 789p 234s 567s 99m"},
+ "風牌":{d:"有一組風牌刻子。做眼唔計。",ex:"EEE"},
+ "靚位":{d:"風牌刻子啱啱係自己門風，例如坐南位碰南。",ex:"SSS"},
+ "靚風":{d:"風牌刻子啱啱係圈風，例如東圈碰東。",ex:"EEE"},
+ "三元牌":{d:"中、發、白任何一組刻子。做眼唔計。",ex:"CCC"},
+ "將眼":{d:"按你哋檯規計。"},
+ "對碰/假獨":{d:"聽兩對，任何一對摸到第三隻就成刻食糊。",ex:"55m 88p"},
+ "獨獨":{d:"真係淨係聽一隻牌，例如邊張、嵌張或者單吊。下面例子淨係聽五萬。",ex:"46m"},
+ "搶槓":{d:"人哋碰咗嘅牌摸到第四隻想加槓，嗰隻啱啱係你要嘅牌，即刻搶嚟食。"},
+ "槓":{d:"有一組槓（四隻一樣）。",ex:"5555m"},"兩槓":{d:"有兩組槓。",ex:"5555m 7777p"},"三槓":{d:"有三組槓。"},"四槓":{d:"有四組槓。"},
+ "平胡":{d:"全部係順子加一對眼，冇字冇花，聽兩面，而且係食出。",ex:"123m 456m 789m 234p 678s 99s"},
+ "無字花大平":{d:"平胡之餘，成副牌冇字亦冇花。",ex:"123m 456m 789m 234p 678s 99s"},
+ "叮":{d:"聽牌時報叮。"},"門叮":{d:"門清（冇上冇碰）嘅情況下報叮。"},"叮即食":{d:"報叮之後即刻食糊。"},
+ "對對糊":{d:"全部都係刻子，再加一對眼。",ex:"111m 999p 555s EEE CCC 88m"},
+ "嚦咕":{d:"七對加一組刻子，全部唔使順子。",ex:"11m 33m 55p 77p 22s 99s EE CCC"},
+ "嚦咕8飛":{d:"嚦咕再加 8 飛（按你哋檯規）。"},
+ "十六不搭":{d:"十六隻牌互不相連，再摸一隻成對就糊（按你哋檯規）。"},
+ "混一色":{d:"成副牌只得一門數字（萬、筒或索其中一門），加埋字牌。",ex:"123m 456m 789m 999m EEE CC"},
+ "清一色":{d:"成副牌全部都係同一門數字，冇字牌。",ex:"123m 234m 456m 678m 999m 55m"},
+ "十三么":{d:"一九萬、一九筒、一九索、東南西北中發白各一隻，其中一隻成對。",ex:"19m 19p 19s ESWN CFP 1m"},
+ "坎坎糊":{d:"全部係自己摸返嚟嘅暗刻，自摸食糊。",ex:"222m 555p 888s EEE CCC 99m"},
+ "九蓮寶燈":{d:"同一門數字 1112345678999，再加同門任何一隻。",ex:"1112345678999m 5m"},
+ "廿二羅漢":{d:"按你哋檯規計。"},
+ "一台花":{d:"集齊一套花：梅蘭菊竹，或者春夏秋冬。",ex:"f1234"},
+ "七搶一":{d:"自己有七隻花，搶人哋手上嘅第八隻（唔即食）。"},"七搶一(摸花後食)":{d:"有七隻花，再摸到第八隻花之後食。"},
+ "一搶七":{d:"人哋有七隻花，你摸到最後一隻花即搶。"},"一搶七(摸花後食)":{d:"有一隻花，搶人哋七隻花之後食。"},
+ "大花糊":{d:"集齊八隻花，即刻食糊。",ex:"f12345678"},"八仙過海":{d:"集齊八隻花但唔即食，三家照賠。",ex:"f12345678"},
+ "天叮":{d:"莊家未摸頭牌已經聽牌。"},"地叮":{d:"摸咗頭牌之後即刻聽牌。上或者碰咗就唔計。"},
+ "天糊":{d:"莊家頭牌即自摸食糊（開槓之後唔計）。"},"地糊":{d:"閒家第一次摸牌即自摸食糊（開槓之後唔計）。"},
+ "人糊":{d:"莊家打出第一隻牌，閒家即刻食。"},
+ "四子叮":{d:"按你哋檯規計。"},"四子(食出)":{d:"按你哋檯規計。"},"七子叮":{d:"按你哋檯規計。"},"七子(食出)":{d:"按你哋檯規計。"},"十子":{d:"按你哋檯規計。"},
+ "缺一門":{d:"萬、筒、索三門入面缺咗一門，而且冇字牌。",ex:"123m 456m 789m 234p 678p 99p"},
+ "缺五":{d:"成副牌冇任何五，亦冇字牌。",ex:"123m 789m 234p 678p 111s 99s"},
+ "斷么九":{d:"成副牌冇一、九，亦冇字牌。",ex:"234m 456m 678p 345s 567s 88s"},
+ "三缺":{d:"同時做到缺一門、缺五同斷么九，只計呢一項，唔重複計。"},
+ "混帶么":{d:"每組牌都有一或九，可以有番子（字牌）。只可以碰一或九。",ex:"123m 789m 123p 999s EEE CC"},
+ "全帶么":{d:"每組牌都有一或九，冇番子。只可以碰一或九。",ex:"123m 789m 123p 789p 111s 99s"},
+ "混么九":{d:"全部都係一、九同字牌。",ex:"111m 999p 111s EEE CCC 99m"},
+ "么九":{d:"全部都係一同九，冇字牌。",ex:"111m 999m 111p 999p 111s 99s"},
+ "混帶X(10)":{d:"每組牌都包含同一個數字，最少有兩坎數字牌。",ex:"345m 456m 567m 555p 456s 55s"},
+ "混帶X(20)":{d:"同上，按你哋檯規分 10／20／30 番。"},"混帶X(30)":{d:"同上，按你哋檯規分 10／20／30 番。"},
+ "滿庭芳":{d:"每組牌都包含同一個數字，而且冇番子。",ex:"345m 456m 567m 555p 456s 55s"},
+ "純滿庭芳":{d:"全部順子都係同一組數字。",ex:"123m 123p 123s 123m 123p 11s"},
+ "2暗刻":{d:"有兩組自己摸返嚟嘅刻子。",ex:"222m 777p"},"3暗刻":{d:"有三組暗刻。",ex:"222m 777p 444s"},
+ "4暗刻":{d:"有四組暗刻。",ex:"222m 777p 444s EEE"},"5暗刻":{d:"有五組暗刻。",ex:"222m 777p 444s EEE CCC"},
+ "2同刻":{d:"兩門有同一個數字嘅刻子。",ex:"111m 111p"},"3同刻(小)":{d:"三門同一數字嘅刻子（按你哋檯規分大小）。",ex:"111m 111p 111s"},"3同刻(大)":{d:"三門同一數字嘅刻子，全部暗刻。",ex:"111m 111p 111s"},
+ "2連刻":{d:"同一門有兩組數字相連嘅刻子。",ex:"111m 222m"},"3連刻(小)":{d:"同一門三組相連嘅刻子。",ex:"111m 222m 333m"},"3連刻(大)":{d:"三組相連刻子，全部暗刻。",ex:"111m 222m 333m"},
+ "4連刻(小)":{d:"同一門四組相連嘅刻子。",ex:"111m 222m 333m 444m"},"4連刻(大)":{d:"四組相連刻子，全部暗刻。",ex:"111m 222m 333m 444m"},
+ "5連刻(小)":{d:"同一門五組相連嘅刻子。",ex:"111m 222m 333m 444m 555m"},"5連刻(大)":{d:"五組相連刻子，全部暗刻。",ex:"111m 222m 333m 444m 555m"},
+ "三風(小小)":{d:"只限嚦咕：三種風牌各一對。",ex:"EE SS WW"},"三風(小)":{d:"兩組風牌刻子，加一對風牌。",ex:"EEE SSS WW"},"三風(大)":{d:"三組風牌刻子。",ex:"EEE SSS WWW"},
+ "三元(小小)":{d:"只限嚦咕：中發白各一對。",ex:"CC FF PP"},"三元(小)":{d:"中發白其中兩組刻子，加一對。",ex:"CCC FFF PP"},"三元(大)":{d:"中、發、白三組刻子。",ex:"CCC FFF PPP"},
+ "四喜(小小)":{d:"只限嚦咕：東南西北各一對。",ex:"EE SS WW NN"},"四喜(小)":{d:"四種風牌其中三組刻子，加一對。",ex:"EEE SSS WWW NN"},"四喜(大)":{d:"東南西北四組刻子。",ex:"EEE SSS WWW NNN"},
+ "字一色":{d:"成副牌全部都係字牌。",ex:"EEE SSS WWW CCC FFF PP"},
+ "五門齊(小)":{d:"萬、筒、索、風牌、三元牌五門都有。",ex:"123m 456p 789s EEE CCC 99m"},"五門齊(大)":{d:"五門齊，按你哋檯規分大小。",ex:"123m 456p 789s EEE CCC 99m"},
+ "七門齊(小)":{d:"按你哋檯規計。"},"七門齊(大)":{d:"按你哋檯規計。"},
+ "雜步高(明)":{d:"三門各一組順子，數字逐級高一級。",ex:"123m 234p 345s"},"雜步高(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 234p 345s"},
+ "清步高(明)":{d:"同一門三組順子，數字逐級高一級。",ex:"123m 234m 345m"},"清步高(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 234m 345m"},
+ "雜龍(明)":{d:"一至九分三門砌成一條龍。",ex:"123m 456p 789s"},"雜龍(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 456p 789s"},
+ "清龍(明)":{d:"同一門一至九砌成一條龍。",ex:"123m 456m 789m"},"清龍(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 456m 789m"},
+ "老少上":{d:"同一門有一二三同七八九兩組順子。",ex:"123m 789m"},"老少碰":{d:"同一門有一同九兩組刻子。",ex:"111m 999m"},
+ "四歸一(明)":{d:"四隻一樣嘅牌，冇開槓，分散喺唔同組度。",ex:"111m 123m"},"四歸一(暗)":{d:"同上，全部自己摸返嚟。",ex:"111m 123m"},
+ "四歸二(明)":{d:"兩組一樣嘅順子再加一對，令某幾隻牌用齊四隻。",ex:"123m 123m 11m"},"四歸二(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 123m 11m"},
+ "四歸四(明)":{d:"按你哋張表：123／234／345／345。",ex:"123m 234m 345m 345m"},"四歸四(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 234m 345m 345m"},
+ "相逢":{d:"兩門有一樣數字嘅順子，可以重複計。",ex:"123m 123p"},
+ "三相逢(明)":{d:"三門都有一樣數字嘅順子。",ex:"123m 123p 123s"},"三相逢(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 123p 123s"},
+ "全相逢(明)":{d:"三相逢之外，再有另一組相逢。",ex:"123m 123p 123s 456m 456p"},"全相逢(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 123p 123s 456m 456p"},
+ "一般高(明)":{d:"同一門有兩組一模一樣嘅順子。",ex:"123m 123m"},"一般高(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 123m"},
+ "雙般高(明)":{d:"兩門各有兩組一模一樣嘅順子。",ex:"123m 123m 123p 123p"},"雙般高(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 123m 123p 123p"},
+ "三般高(明)":{d:"同一門三組一模一樣嘅順子。",ex:"123m 123m 123m"},"三般高(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 123m 123m"},
+ "四般高(明)":{d:"同一門四組一模一樣嘅順子。",ex:"123m 123m 123m 123m"},"四般高(暗)":{d:"同上，全部自己摸返嚟。",ex:"123m 123m 123m 123m"},
+ "圍骰/順骰":{d:"擲骰時三粒一樣係圍骰（收），三粒順數係順骰（比）。"},
+ "斷追":{d:"按你哋檯規計。"},"追":{d:"按你哋檯規計。"},
+ "雙響":{d:"一隻牌有兩個人同時食，出銃嗰個分別俾兩個人。"},"三響":{d:"一隻牌有三個人同時食。"},
+ "反雪(10)":{d:"出咗雙響嘅人，下次自己食糊時，另外收返嗰兩個人。"},"反雪(20)":{d:"出咗三響嘅人，下次自己食糊時，另外收返嗰三個人。"},
+ "海底撈月":{d:"摸牌牆最後一隻牌自摸。"},"河底出統":{d:"食人哋打出嘅最後一隻牌。"},
+ "半求人":{d:"上晒或者碰晒，手上淨係剩一隻牌單吊，自摸食糊。"},"全求人":{d:"上晒或者碰晒，手上淨係剩一隻牌單吊，食人哋出銃。"},
+ "大雞":{d:"番子一對，只計到花，唔可以叮。"},"鴨糊":{d:"自摸雞糊。"},
+ /* 廣東牌 */
+ "門前清":{d:"冇上、冇碰、冇明槓，全部牌都係自己摸返嚟。"},
+ "平糊":{d:"全部係順子加一對眼，冇番子、冇花。",ex:"123m 456m 789p 234s 66s"},
+ "正花":{d:"摸到自己位嘅花，每隻 1 番。東位係梅、春；南位係蘭、夏；西位係菊、秋；北位係竹、冬。",ex:"f1 f5"},
+ "番子（中／發／白）":{d:"中、發或白其中一組刻子，每組 1 番。",ex:"CCC"},
+ "正風（門風）":{d:"自己門風嘅刻子，例如坐東位碰東。",ex:"EEE"},
+ "圈風":{d:"圈風嘅刻子，例如南圈碰南。",ex:"SSS"},
+ "槓上槓自摸":{d:"連續開兩次槓，第二次補牌即自摸。"},
+ "花么九":{d:"按你哋檯規計。"},
+ "小三元":{d:"中發白其中兩組刻子，第三種做眼。",ex:"CCC FFF PP 123m 456m"},
+ "大三元":{d:"中、發、白三組刻子。",ex:"CCC FFF PPP 123m 55m"},
+ "小四喜":{d:"東南西北其中三組刻子，第四種做眼。",ex:"EEE SSS WWW NN 123m"},
+ "大四喜":{d:"東南西北四組刻子。",ex:"EEE SSS WWW NNN 55m"},
+ "清么九":{d:"全部都係一同九，冇字牌。",ex:"111m 999m 111p 999p 11s"},
+ "九子連環":{d:"同一門 1112345678999，再加同門任何一隻。",ex:"1112345678999m 5m"},
+ "十八羅漢":{d:"四組槓再加一對眼，一共十八隻牌。",ex:"1111m 2222p 3333s EEEE 55m"},
+ "hk:八仙過海":{d:"集齊八隻花，即爆棚。",ex:"f12345678"},
+};
+
+const NUMS = "一二三四五六七八九", SUITS = {m:"萬",p:"筒",s:"索"}, HON = {E:"東",S:"南",W:"西",N:"北",C:"中",F:"發",P:""}, FLW = "梅蘭菊竹春夏秋冬";
+function tilesHTML(ex){
+  return ex.split(/\s+/).filter(Boolean).map(g=>{
+    let t = [];
+    let mm;
+    if(/^[ESWNCFP]+$/.test(g)) t = [...g].map(c=>`<span class="tile h h${c}">${HON[c]}</span>`);
+    else if((mm = g.match(/^f(\d+)$/))) t = [...mm[1]].map(d=>`<span class="tile fl">${FLW[+d-1]}</span>`);
+    else if((mm = g.match(/^(\d+)([mps])$/))) t = [...mm[1]].map(d=>`<span class="tile ${mm[2]}"><span>${NUMS[+d-1]}</span><span class="su">${SUITS[mm[2]]}</span></span>`);
+    return `<span class="tgroup">${t.join("")}</span>`;
+  }).join("");
+}
+let helpTab = 0;
+function helpFor(name){ return (isHK() && HELP["hk:"+name]) || HELP[name] || null; }
+function renderHelpList(){
+  const cat = curCatalog();
+  if(helpTab >= cat.length) helpTab = 0;
+  $("helpTitle").textContent = `牌型說明（${isHK()?"廣東牌":"台牌"}）`;
+  $("helpTabs").innerHTML = cat.map((c,i)=>`<button class="opt${i===helpTab?" on":""}" data-t="${i}">${esc(c.g)}</button>`).join("");
+  $("helpTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{ helpTab=+b.dataset.t; renderHelpList(); });
+  $("helpList").innerHTML = cat[helpTab].items.map((it,i)=>`<button class="help-item" data-i="${i}"><span>${esc(it[0])}</span><b>${it[1]} 番</b></button>`).join("");
+  $("helpList").querySelectorAll("button").forEach(b=>b.onclick=()=>showHelpDetail(cat[helpTab].items[+b.dataset.i]));
+}
+function showHelpDetail(it){
+  const h = helpFor(it[0]);
+  $("hdName").textContent = it[0];
+  $("hdFan").textContent = `${it[1]} 番`;
+  $("hdText").textContent = (h && h.d) || it[2] || "按你哋檯規計。";
+  const ex = h && h.ex;
+  $("hdExWrap").hidden = !ex;
+  if(ex){ $("hdTiles").innerHTML = tilesHTML(ex); $("hdNote").textContent = /\b\w+\b/.test(ex) && ex.split(/\s+/).length < 5 ? "只顯示相關嘅幾組牌，其餘可以係任何牌。" : ""; }
+  $("helpListView").hidden = true; $("helpDetailView").hidden = false;
+  $("helpSheet").scrollTop = 0;
+}
+$("openHelp").onclick = ()=>{ $("helpListView").hidden = false; $("helpDetailView").hidden = true; renderHelpList(); showSheet($("helpSheet")); };
+$("helpBack").onclick = ()=>{ $("helpDetailView").hidden = true; $("helpListView").hidden = false; };
+$("closeHelp").onclick = hideSheet;
+
 /* ---------- sheets ---------- */
 let openSheet = null;
 function showSheet(el){ openSheet = el; $("scrim").hidden = false; el.hidden = false; el.scrollTop = 0; }
@@ -910,6 +1167,22 @@ function fillSetup(){
   $("startDealerSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(state.hands.length) return; state.startDealer = state.dealer = +b.dataset.i; state.streak=0; state.round=0; save(); fillSetup(); render(); });
   $("startDealerHint").textContent = locked ? "已開始記錄，要改開局莊家請先重新開局。" : "開局莊家坐東風位，之後按逆時針過莊。";
   resetArmed=false; $("resetBtn").textContent = "清除所有記錄，重新開局";
+  const MODES = [["tw","台牌"],["hk","廣東牌"]];
+  $("modeSeg2").innerHTML = MODES.map(([k,n])=>`<button class="opt${k===state.mode?" on":""}" data-m="${k}">${n}</button>`).join("");
+  $("modeSeg2").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    if(b.dataset.m===state.mode) return;
+    if(state.hands.length && b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="再按一次確認"; $("modeHint").textContent="轉牌種會清除現有記錄，重新開局。"; return; }
+    state.mode = b.dataset.m; if(state.hands.length) resetGame(); else { render(); save(); } fillSetup();
+  });
+  $("twFields").hidden = isHK(); $("hkFields").hidden = !isHK();
+  $("hkUnit").value = state.hk.unit; $("hkMin").value = state.hk.min;
+  const seg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.hk[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
+    $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.hk[key] = isNaN(+v) ? v : +v; render(); save(); fillSetup(); }); };
+  seg("hkCapSeg", [[8,"8 番"],[10,"10 番"],[13,"13 番"]], "cap");
+  seg("hkScaleSeg", [["half","半辣上"],["full","全辣上"]], "scale");
+  seg("hkShootSeg", [["full","全銃（出銃包晒）"],["half","半銃（三家分）"]], "shoot");
+  const ex = [state.hk.min, Math.min(state.hk.min+2,state.hk.cap), state.hk.cap].map(f=>`${f}番 ${hkPoints(f)}點（$${Math.round(hkPoints(f)*state.hk.unit*100)/100}）`).join("、");
+  $("hkTable").textContent = `${state.hk.shoot==="half"?"出銃者俾一半，其餘兩家各俾四分之一":"出銃者俾全數"}；自摸三家各俾一半。例：${ex}。`;
   const cur = state.skin || "default";
   $("skinSeg").innerHTML = SKINS.map(([k,n])=>`<button class="opt${k===cur?" on":""}" data-k="${k}">${n}</button>`).join("");
   $("skinSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.skin = b.dataset.k; applySkin(); save(); fillSetup(); });
@@ -917,6 +1190,7 @@ function fillSetup(){
 $("openSetup").onclick = ()=>{ fillSetup(); showSheet($("setupSheet")); };
 $("closeSetup").onclick = hideSheet;
 for(let i=0;i<4;i++) $("p"+i).addEventListener("change", e=>{ state.players[i] = e.target.value.trim() || `玩家${i+1}`; render(); save(); fillSetup(); });
+[["hkUnit","unit"],["hkMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v); if(!isNaN(v) && v>=0 && (k!=="min" || v<=state.hk.cap)){ state.hk[k]=v; render(); save(); fillSetup(); } else e.target.value = state.hk[k]; }));
 [["rate",0.1],["base",0],["dealerFan",0],["streakFan",0]].forEach(([k])=>$(k).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state[k]=v; render(); save(); } else e.target.value = state[k]; }));
 $("resetBtn").onclick = ()=>{
   if(!resetArmed){ resetArmed=true; $("resetBtn").textContent = "再按一次確認清除"; return; }
@@ -965,6 +1239,7 @@ function renderWin(){
     $("discarderSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder=+b.dataset.i; renderWin(); });
   }
   // fan
+  $("fanLbl").textContent = isHK() ? `番數（${state.hk.min} 番起糊，${state.hk.cap} 番爆棚）` : "番數（不含底及莊）";
   if(document.activeElement !== $("fanInput")) $("fanInput").value = fanTotal();
   if(fanTotal() > 0) $("winErr").hidden = true;
   const selHtml = ws.items.map((it,i)=>`<button class="chip sel" data-i="${i}">${esc(it.name)} <b>${it.fan}</b><span class="x">✕</span></button>`).join("")
@@ -977,14 +1252,14 @@ function winList(){
   return [{winner:ws.winner, fan:fanTotal()}].concat(Object.keys(ws.extra).map(k=>({winner:+k, fan:ws.extra[k]||0})));
 }
 function renderPay(){
-  const list = winList(), M = MULTI[list.length];
+  const list = winList(), M = isHK() ? null : MULTI[list.length];
   let html = `<div class="lbl" style="margin-bottom:4px">找數${M?`（一炮${M.name}，每位食糊 +${M.fan} 番）`:""}</div>`;
   const R = state.revenge;
   list.forEach(x=>{
     const fan = x.fan + (M ? M.fan : 0);
     const {rows} = computeWin(x.winner, ws.discarder, fan);
     let sum = rows.reduce((a,r)=>a+r.amt,0);
-    html += rows.map(r=>`<div class="r"><span>${esc(state.players[r.p])} 俾 ${list.length>1?esc(state.players[x.winner])+" ":""}<small>底${state.base} + ${fan}番${r.bonus?` + 莊${r.bonus}`:""} = ${r.total}番</small></span><span class="neg">−$${r.amt}</span></div>`).join("");
+    html += rows.map(r=>`<div class="r"><span>${esc(state.players[r.p])} 俾 ${list.length>1?esc(state.players[x.winner])+" ":""}<small>${r.label || `底${state.base} + ${fan}番${r.bonus?` + 莊${r.bonus}`:""} = ${r.total}番`}</small></span><span class="neg">−$${r.amt}</span></div>`).join("");
     if(R && R.from===x.winner){
       const amt = Math.round(R.fan*state.rate*100)/100;
       html += R.targets.map(t=>`<div class="r"><span>${esc(state.players[t])} 俾 <small>反雪 ${R.fan}番</small></span><span class="neg">−$${amt}</span></div>`).join("");
@@ -996,10 +1271,10 @@ function renderPay(){
   $("payBox").innerHTML = html;
 }
 function buildCatalog(){
-  $("catalog").innerHTML = CATALOG.map((c,ci)=>`<details class="cat"><summary>${c.g}</summary><div class="chips">${
+  $("catalog").innerHTML = curCatalog().map((c,ci)=>`<details class="cat"><summary>${c.g}</summary><div class="chips">${
     c.items.map((it,ii)=>`<button class="chip" data-c="${ci}" data-i="${ii}" title="${esc(it[2])}">${esc(it[0])} <b>${it[1]}</b></button>`).join("")}</div></details>`).join("");
   $("catalog").querySelectorAll("button.chip").forEach(b=>b.onclick=()=>{
-    const it = CATALOG[+b.dataset.c].items[+b.dataset.i];
+    const it = curCatalog()[+b.dataset.c].items[+b.dataset.i];
     ws.items.push({name:it[0], fan:it[1]}); renderWin();
   });
 }
@@ -1018,10 +1293,15 @@ $("fanInput").addEventListener("keydown", e=>{ if(e.key==="Enter") e.target.blur
 $("fanMinus").onclick = ()=>{ ws.adj--; if(fanTotal()===0 && ws.adj<0 && ws.items.length===0) ws.adj=0; renderWin(); };
 $("cancelWin").onclick = hideSheet;
 $("confirmWin").onclick = ()=>{
-  if(fanTotal() <= 0){
+  if(fanTotal() <= 0 && !(isHK() && state.hk.min===0)){
     $("winErr").textContent = "未輸入番數。請揀番種、按 ＋，或直接輸入番數。";
     $("winErr").hidden = false; $("fanInput").focus(); return;
   }
+  if(isHK() && fanTotal() < state.hk.min){
+    $("winErr").textContent = `未夠起糊番數（${state.hk.min} 番起糊）。`;
+    $("winErr").hidden = false; return;
+  }
+  if(isHK()) ws.extra = {};
   const missing = Object.keys(ws.extra).filter(k=>!(ws.extra[k]>0));
   if(missing.length){
     $("winErr").textContent = `請輸入 ${missing.map(k=>state.players[k]).join("、")} 嘅番數。`;
