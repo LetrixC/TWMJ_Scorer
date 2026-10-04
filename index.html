@@ -240,7 +240,30 @@ body:not(.ro) .view-only{display:none!important}
 .st-foot{font-size:11px;color:var(--felt-muted);text-align:center}
 .settle-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .settle-actions .full{grid-column:1/-1}
-#shareImg{display:block;width:100%;border-radius:14px;border:1px solid var(--line)}
+#shareImg{display:block;width:auto;max-width:100%;max-height:56vh;margin:0 auto;border-radius:14px;border:1px solid var(--line)}
+/* 9:16 story card for sharing (IG 限時動態 1080×1920) */
+.story{width:360px;height:640px;box-sizing:border-box;padding:76px 20px 60px;background:var(--felt);color:var(--felt-ink);font-family:var(--f-body);
+  display:flex;flex-direction:column;gap:16px;background-image:radial-gradient(circle at 50% 0%,rgba(255,255,255,.14),transparent 55%)}
+.sty-head{display:flex;align-items:center;gap:12px}
+.sty-logo{width:64px;height:64px;display:inline-flex;flex:none}
+.sty-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.sty-title{font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1;letter-spacing:.12em}
+.sty-meta{font-size:12px;color:var(--felt-muted);margin-top:6px}
+.sty-list{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:0}
+.sty-row{background:var(--surface);color:var(--fg);border-radius:14px;padding:10px 12px;display:grid;grid-template-columns:24px 1fr auto;gap:2px 10px;align-items:center}
+.sty-row.first{box-shadow:0 0 0 2px #E2B53E}
+.sty-rk{font-family:var(--f-display);font-weight:900;font-size:20px;color:var(--muted);text-align:center}
+.sty-row.first .sty-rk{color:#B8860B}
+.sty-name{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sty-stats{font-size:11px;color:var(--muted)}
+.sty-score{text-align:right;display:flex;flex-direction:column}
+.sty-score b{font-size:17px}
+.sty-score small{font-size:11px;color:var(--muted)}
+.sty-tags{grid-column:2/-1;display:flex;flex-direction:column;gap:2px;font-size:11px;line-height:1.35;border-top:1px solid var(--line);padding-top:5px;margin-top:3px}
+.sty-tags b{color:var(--jade);margin-right:6px}
+.sty-foot{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--felt-muted)}
+.sty-foot span{width:20px;height:20px;display:inline-flex}
+.sty-foot img{width:100%;height:100%;object-fit:contain}
 .st-foot{display:flex;align-items:center;justify-content:center;gap:6px}
 .flogo{width:22px;height:22px;display:inline-flex}
 .lg-d{display:none!important}
@@ -338,9 +361,11 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <div class="grab"></div>
   <h3>分享戰績</h3>
   <p class="hint" id="shareHint">製作圖片中…</p>
-  <img id="shareImg" alt="結算戰績圖" hidden>
+  <img id="shareImg" alt="結算戰績圖（IG 限時動態 9:16）" hidden>
   <div class="settle-actions" style="margin-top:12px">
-        <button class="btn" id="closeShare">關閉</button>
+    <button class="btn primary full" id="nativeShareBtn" hidden>分享到 IG／WhatsApp／Telegram…</button>
+    <button class="btn" id="saveImgBtn" hidden>儲存圖片</button>
+    <button class="btn" id="closeShare">關閉</button>
   </div>
 </div>
 
@@ -770,6 +795,22 @@ function settleHTML(forShare){
     ${forShare?`<div class="st-foot"><span class="flogo">${LOGO_D}</span>番鼠 · 港台麻雀計番</div>`:""}
   </div>`;
 }
+function storyHTML(){
+  const {order} = computeStats();
+  const pu = state.hands.filter(isHandStart).length;
+  const d = new Date(state.endedAt || Date.now());
+  const date = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+  const topPts = order[0].pts;
+  const rows = order.map(s=>{
+    const first = s.rank===1 && topPts>0;
+    const tags = s.tags.length ? `<div class="sty-tags">${s.tags.map(t=>`<span><b>${esc(t.name)}</b>${esc(t.desc)}</span>`).join("")}</div>` : "";
+    return `<div class="sty-row${first?" first":""}"><div class="sty-rk">${s.rank}</div>
+      <div><div class="sty-name">${first?"👑 ":""}${esc(state.players[s.p])}</div><div class="sty-stats">食糊 ${s.wins} · 自摸 ${s.selfDraws} · 出銃 ${s.discards}</div></div>
+      <div class="sty-score num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} 番</small></div>${tags}</div>`;
+  }).join("");
+  return `<div class="story"><div class="sty-head"><span class="sty-logo">${LOGO_D}</span><div><div class="sty-title">結算</div><div class="sty-meta num">${date} · ${pu} 鋪 · 每番 HK$${state.rate}</div></div></div>
+    <div class="sty-list">${rows}</div><div class="sty-foot"><span>${LOGO_D}</span>番鼠 · 港台麻雀計番</div></div>`;
+}
 function renderSettle(){
   const ended = !!state.ended;
   document.body.classList.toggle("ended", ended);
@@ -790,7 +831,7 @@ $("newGameBtn").onclick = ()=>{
 };
 
 /* share image */
-let h2cPromise = null, downloadsNs = null, shareBlob = null;
+let h2cPromise = null, downloadsNs = null, shareFile = null, shareURL = null;
 function loadH2C(){
   if(window.html2canvas) return Promise.resolve();
   if(!h2cPromise) h2cPromise = new Promise((ok,bad)=>{
@@ -803,23 +844,53 @@ function loadH2C(){
 }
 $("shareBtn").onclick = async ()=>{
   showSheet($("shareSheet"));
-  $("shareImg").hidden = true;
+  $("shareImg").hidden = true; $("saveImgBtn").hidden = true; $("nativeShareBtn").hidden = true; shareFile = null;
   $("shareHint").textContent = "製作圖片中…";
   const holder = document.createElement("div");
-  holder.style.cssText = "position:fixed;left:-10000px;top:0;width:400px;padding:12px;background:var(--bg)";
-  holder.innerHTML = settleHTML(true);
+  holder.style.cssText = "position:fixed;left:-10000px;top:0;width:360px;height:640px";
+  holder.innerHTML = storyHTML();
   document.body.appendChild(holder);
   try{
     await loadH2C();
     if(document.fonts && document.fonts.ready) await document.fonts.ready;
-    const bg = getComputedStyle(document.body).backgroundColor;
-    const canvas = await window.html2canvas(holder, {scale:2, backgroundColor:bg, logging:false, useCORS:true});
-    $("shareImg").src = canvas.toDataURL("image/png"); $("shareImg").hidden = false;
-    
-    $("shareHint").textContent = "長按圖片可以儲存或者直接分享俾朋友。";
+    await Promise.all([...holder.querySelectorAll("img")].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
+    const canvas = await window.html2canvas(holder.firstElementChild, {scale:3, width:360, height:640, backgroundColor:null, logging:false, useCORS:true});
+    const blob = await new Promise(r=>canvas.toBlob(r, "image/png"));
+    const d = new Date();
+    shareFile = new File([blob], `番鼠戰績-${d.getMonth()+1}-${d.getDate()}.png`, {type:"image/png"});
+    if(shareURL) URL.revokeObjectURL(shareURL);
+    shareURL = URL.createObjectURL(blob);
+    $("shareImg").src = shareURL; $("shareImg").hidden = false;
+    let canShare = false;
+    try{ canShare = !!(navigator.canShare && navigator.canShare({files:[shareFile]})); }catch(e){}
+    $("nativeShareBtn").hidden = !canShare;
+    $("saveImgBtn").hidden = false;
+    $("shareHint").textContent = canShare
+      ? "圖片係 IG 限時動態比例（9:16）。撳下面掣揀 IG、WhatsApp 或 Telegram，或者長按圖片儲存。"
+      : "圖片係 IG 限時動態比例（9:16）。長按圖片或者撳「儲存圖片」，再喺 IG、WhatsApp 或 Telegram 分享。";
   }catch(e){
     $("shareHint").textContent = "暫時整唔到圖片，可以直接用手機截圖分享。";
   }finally{ holder.remove(); }
+};
+$("nativeShareBtn").onclick = async ()=>{
+  if(!shareFile) return;
+  try{ await navigator.share({files:[shareFile], title:"番鼠戰績"}); }
+  catch(e){
+    if(e && e.name==="AbortError") return;
+    $("nativeShareBtn").hidden = true;
+    $("shareHint").textContent = "呢度唔可以直接分享。請長按圖片或者撳「儲存圖片」，再喺 IG、WhatsApp 或 Telegram 分享。";
+  }
+};
+$("saveImgBtn").onclick = async ()=>{
+  if(!shareFile) return;
+  if(downloadsNs){
+    try{ await downloadsNs.save({filename:shareFile.name, data:shareFile}); $("shareHint").textContent = "已儲存。"; }
+    catch(e){ if(e && e.code!=="declined") $("shareHint").textContent = "儲存唔到，請長按圖片儲存。"; }
+    return;
+  }
+  const a = document.createElement("a"); a.href = shareURL; a.download = shareFile.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  $("shareHint").textContent = "已下載。iPhone 如果冇反應，請長按圖片再揀「加入照片」。";
 };
 $("closeShare").onclick = hideSheet;
 
