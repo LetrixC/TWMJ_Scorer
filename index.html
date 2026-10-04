@@ -113,7 +113,14 @@ input[type=text],input[type=number]{font:inherit;font-size:16px;padding:10px 12p
 .side{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .grid3 .btn{display:flex;flex-direction:column;align-items:center;gap:0;padding:10px 6px}
-.grid3 .btn small{font-size:11px;font-weight:500;color:var(--muted)}
+.grid3 .btn small,.side .grid2 .btn small{font-size:11px;font-weight:500;color:var(--muted)}
+.side .grid2 .btn{display:flex;flex-direction:column;align-items:center;gap:0;padding:10px 6px}
+.side .dingrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.side .dingrow .opt{padding:6px 10px;font-size:13px}
+.multi-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.multi-row .opt{flex:1}
+.multi-row input{width:84px!important;flex:none;text-align:center}
+.revenge{background:var(--red-soft);color:var(--red);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700}
 .stepper{display:flex;align-items:center;gap:6px}
 .stepper button{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--line);font-size:18px;font-weight:700}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -147,7 +154,7 @@ body:not(.ro) .view-only{display:none!important}
 .savebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;max-width:calc(100% - 32px);text-align:center}
 .busy .seat,.busy .actions .btn{pointer-events:none;opacity:.6}
 .endbtn{width:100%}
-.ended .table,.ended .rules,.ended .actions,.ended .side,.ended .endbtn,.ended .view-only.hint{display:none!important}
+.ended #revengeBox,.ended .table,.ended .rules,.ended .actions,.ended .side,.ended .endbtn,.ended .view-only.hint{display:none!important}
 .settle{display:flex;flex-direction:column;gap:10px}
 .settle-card{background:var(--felt);color:var(--felt-ink);border-radius:18px;padding:16px 14px 14px;display:flex;flex-direction:column;gap:10px;
   background-image:radial-gradient(circle at 50% 0%,rgba(255,255,255,.10),transparent 60%)}
@@ -200,6 +207,8 @@ const SHELL = `<div class="wrap">
     </div>
   </section>
 
+  <div id="revengeBox"></div>
+
   <div class="table" id="table"></div>
 
   <div class="rules num" id="rulesLine"></div>
@@ -210,13 +219,18 @@ const SHELL = `<div class="wrap">
   </div>
 
   <div class="side edit-only">
-    <span class="lbl">暗槓／圍骰／順骰（每家 1 底）</span>
+    <span class="lbl">暗槓／圍骰／順骰／詐糊／詐叮</span>
     <div class="grid4" id="sidePlayerSeg"></div>
     <div class="grid3">
       <button class="btn" data-side="angang" disabled>暗槓<small>收三家</small></button>
       <button class="btn" data-side="wai" disabled>圍骰<small>收三家</small></button>
       <button class="btn" data-side="shun" disabled>順骰<small>比三家</small></button>
     </div>
+    <div class="grid2">
+      <button class="btn" data-side="zhahu" disabled>詐糊<small>比三家各 30 番</small></button>
+      <button class="btn" data-side="zhading" disabled>詐叮<small>比三家各 20 番</small></button>
+    </div>
+    <div class="dingrow"><span class="lbl">詐糊／詐叮另計叮</span><span id="dingSeg" class="dingrow"></span></div>
     <span class="hint" id="sideHint">先揀玩家，再按項目。</span>
   </div>
 
@@ -286,6 +300,11 @@ const SHELL = `<div class="wrap">
   <div class="field" id="discarderField">
     <span class="lbl">邊個出銃</span>
     <div class="seg" id="discarderSeg"></div>
+  </div>
+  <div class="field" id="multiField" hidden>
+    <span class="lbl">一炮雙響／三響：同一隻牌仲有邊個食？</span>
+    <div id="multiList"></div>
+    <span class="hint" id="multiHint">冇就唔使揀。揀咗要入佢嘅番數（不含底及莊）。</span>
   </div>
 
 
@@ -393,20 +412,40 @@ function totals(){
   state.hands.forEach(h=>h.deltas.forEach((d,i)=>t[i]+=d));
   return t.map(v=>Math.round(v*100)/100);
 }
+function snap(){ return {dealer:state.dealer, streak:state.streak, round:state.round, revenge: state.revenge ? JSON.parse(JSON.stringify(state.revenge)) : null}; }
 function advanceDealer(){
   state.dealer = (state.dealer+1)%4; state.streak = 0;
   if(state.dealer === state.startDealer) state.round++;
 }
-function recordWin(winner, discarder, fan, items){
-  const {deltas} = computeWin(winner, discarder, fan);
-  const prev = {dealer:state.dealer, streak:state.streak, round:state.round};
-  state.hands.push({kind:"win", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak,
-    winner, discarder, fan, items, deltas, prev});
-  if(winner === state.dealer) state.streak++; else advanceDealer();
+// list = [{winner, fan, items}] ; more than one entry = 一炮雙響／三響 (discarder pays each winner)
+const MULTI = {2:{name:"雙響", fan:5, revenge:10}, 3:{name:"三響", fan:10, revenge:20}};
+function recordWins(list, discarder){
+  const prev = snap();
+  const n = list.length, M = MULTI[n] || null;
+  const group = n>1 ? Date.now() : null;
+  const R = state.revenge;
+  let usedRevenge = false;
+  list.forEach((w,i)=>{
+    const items = (w.items||[]).slice(); let fan = w.fan;
+    if(M){ items.push({name:M.name, fan:M.fan}); fan += M.fan; }
+    const {deltas} = computeWin(w.winner, discarder, fan);
+    let rev = null;
+    if(R && R.from===w.winner){
+      const amt = Math.round(R.fan*state.rate*100)/100;
+      R.targets.forEach(t=>{ deltas[t] -= amt; deltas[w.winner] += amt; });
+      rev = {targets:R.targets.slice(), fan:R.fan}; usedRevenge = true;
+    }
+    state.hands.push({kind:"win", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak,
+      winner:w.winner, discarder, fan, items, deltas, revenge:rev, group, groupFirst: i===0, multi: n>1 ? n : 0, prev: i===0 ? prev : null});
+  });
+  if(usedRevenge) state.revenge = null;
+  if(M) state.revenge = {from:discarder, targets:list.map(w=>w.winner), fan:M.revenge};
+  if(list.some(w=>w.winner===state.dealer)) state.streak++; else advanceDealer();
   render(); save();
 }
+function recordWin(winner, discarder, fan, items){ recordWins([{winner, fan, items}], discarder); }
 function recordDraw(){
-  const prev = {dealer:state.dealer, streak:state.streak, round:state.round};
+  const prev = snap();
   state.hands.push({kind:"draw", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas:[0,0,0,0], prev});
   state.streak++;
   render(); save();
@@ -415,29 +454,43 @@ const SIDE = {
   angang:{name:"暗槓", collect:true,  desc:"收三家各 1 底"},
   wai:   {name:"圍骰", collect:true,  desc:"收三家各 1 底"},
   shun:  {name:"順骰", collect:false, desc:"比三家各 1 底"},
+  zhahu: {name:"詐糊", collect:false, fan:30, ding:true},
+  zhading:{name:"詐叮", collect:false, fan:20, ding:true},
 };
+const DING = [["無",0],["天叮",60],["地叮",40],["四子叮",20],["七子叮",15],["十子",10]];
+let dingIdx = 0;
+function sideFan(type){ const S = SIDE[type]; return S.fan ? S.fan + (S.ding ? DING[dingIdx][1] : 0) : state.base; }
 function recordSide(type, p){
-  const amt = Math.round(state.base * state.rate * 100)/100;
+  const fanEach = sideFan(type);
+  const amt = Math.round(fanEach * state.rate * 100)/100;
+  const S = SIDE[type];
+  const desc = S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}` : S.desc;
   const sign = SIDE[type].collect ? 1 : -1;
   const deltas = [0,0,0,0].map((_,i)=> i===p ? sign*amt*3 : -sign*amt);
-  const prev = {dealer:state.dealer, streak:state.streak, round:state.round};
-  state.hands.push({kind:"side", type, player:p, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, prev});
+  const prev = snap();
+  state.hands.push({kind:"side", type, player:p, desc, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, prev});
+  if(S.ding) dingIdx = 0;
   render(); save();
 }
 function undo(){
-  const h = state.hands.pop(); if(!h) return;
-  Object.assign(state, h.prev); render(); save();
+  let h = state.hands.pop(); if(!h) return;
+  while(h && h.group && !h.groupFirst) h = state.hands.pop();   // 雙響／三響 undo together
+  if(!h) return;
+  Object.assign(state, h.prev);
+  if(!("revenge" in h.prev)) state.revenge = state.revenge || null;
+  render(); save();
 }
 
 /* ---------- render main ---------- */
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 
+const isHandStart = h => h.kind!=="side" && !(h.group && !h.groupFirst);
 function render(){
   renderSettle();
   const t = totals();
   const rw = WINDS[state.round % 4];
-  const handNo = state.hands.filter(h=>h.kind!=="side").length + 1;
+  const handNo = state.hands.filter(isHandStart).length + 1;
   let html = `<div class="center"><div class="rw">${rw}</div><div class="rwl">${rw}風圈${state.round>=4?` · 第${Math.floor(state.round/4)+1}將`:""}</div>
     <div class="hn">第 ${handNo} 鋪 · ${esc(state.players[state.dealer])} 做莊</div>
     ${state.streak>0?`<div class="streak">連${state.streak} 拉${state.streak}</div>`:""}</div>`;
@@ -459,6 +512,8 @@ function render(){
   $("bannerBox").innerHTML = just ? `<div class="banner">北圈已完，打完一將（四圈）。可以繼續打落一將，或到「設定」重新開局。</div>` : "";
 
   $("undoBtn").disabled = state.hands.length===0;
+  const R = state.revenge;
+  $("revengeBox").innerHTML = R ? `<div class="revenge">反雪待收：${esc(state.players[R.from])} 下次食糊，會另外收 ${R.targets.map(t=>esc(state.players[t])).join("、")} 各 ${R.fan} 番</div>` : "";
   renderSide();
 
   const log = $("log");
@@ -468,20 +523,21 @@ function render(){
   }
   let pu = 0;
   log.innerHTML = state.hands.map((h)=>{
-    if(h.kind!=="side") pu++;
+    if(isHandStart(h)) pu++;
     const tag = `${WINDS[h.round%4]}圈<br>${h.kind==="side" ? pu+1 : pu}`;
     if(h.kind==="side"){
       const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
       const what = `${esc(state.players[h.player])} ${SIDE[h.type].name}`;
-      return `<div class="hand"><span class="tag">${tag}</span><span class="what">${what}</span><span class="sub">${SIDE[h.type].desc}</span><div class="deltas">${d}</div></div>`;
+      return `<div class="hand"><span class="tag">${tag}</span><span class="what">${what}</span><span class="sub">${esc(h.desc || SIDE[h.type].desc)}</span><div class="deltas">${d}</div></div>`;
     }
     const dealerTxt = `${esc(state.players[h.dealer])}莊${h.streak?" 連"+h.streak:""}`;
     if(h.kind==="draw") return `<div class="hand"><span class="tag">${tag}</span><span class="what">流局</span><span class="sub">${dealerTxt} · 莊家連莊</span></div>`;
-    const how = h.discarder===null ? "自摸" : `食 ${esc(state.players[h.discarder])} 出銃`;
+    const how = (h.discarder===null ? "自摸" : `食 ${esc(state.players[h.discarder])} 出銃`) + (h.multi ? `（一炮${MULTI[h.multi].name}）` : "");
+    const revTxt = h.revenge ? ` · 反雪收 ${h.revenge.targets.map(t=>esc(state.players[t])).join("、")} 各 ${h.revenge.fan} 番` : "";
     const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
     const items = h.items && h.items.length ? " · " + h.items.map(x=>esc(x.name)).join("、") : "";
     return `<div class="hand"><span class="tag">${tag}</span><span class="what">${esc(state.players[h.winner])} ${how} · ${h.fan} 番</span>
-      <span class="sub">${dealerTxt}${items}</span><div class="deltas">${d}</div></div>`;
+      <span class="sub">${dealerTxt}${items}${revTxt}</span><div class="deltas">${d}</div></div>`;
   }).reverse().join("");
 }
 
@@ -490,16 +546,21 @@ function renderSide(){
   $("sidePlayerSeg").innerHTML = state.players.map((n,i)=>`<button class="opt${i===sidePlayer?" on":""}" data-i="${i}">${esc(n)}</button>`).join("");
   $("sidePlayerSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ sidePlayer = sidePlayer===+b.dataset.i ? null : +b.dataset.i; renderSide(); });
   const amt = Math.round(state.base * state.rate * 100)/100;
+  $("dingSeg").innerHTML = DING.map((d,i)=>`<button class="opt${i===dingIdx?" on":""}" data-d="${i}">${d[0]}${d[1]?" "+d[1]:""}</button>`).join("");
+  $("dingSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ dingIdx=+b.dataset.d; renderSide(); });
+  document.querySelector('[data-side="zhahu"] small').textContent = `比三家各 ${sideFan("zhahu")} 番`;
+  document.querySelector('[data-side="zhading"] small').textContent = `比三家各 ${sideFan("zhading")} 番`;
   document.querySelectorAll("[data-side]").forEach(b=>{
     b.disabled = sidePlayer===null;
     b.onclick = ()=>{
       if(sidePlayer===null || !canWrite || saving) return;
       const p = sidePlayer, t = b.dataset.side; sidePlayer = null;
+      const each = Math.round(sideFan(t) * state.rate * 100)/100;
       recordSide(t, p);
-      $("sideHint").textContent = `已記錄：${state.players[p]} ${SIDE[t].name}，${SIDE[t].collect?"收":"比"}三家各 $${amt}。`;
+      $("sideHint").textContent = `已記錄：${state.players[p]} ${SIDE[t].name}，${SIDE[t].collect?"收":"比"}三家各 $${each}。`;
     };
   });
-  if(sidePlayer!==null) $("sideHint").textContent = `${state.players[sidePlayer]}：暗槓／圍骰收三家各 $${amt}，順骰比三家各 $${amt}。`;
+  if(sidePlayer!==null) $("sideHint").textContent = `${state.players[sidePlayer]}：暗槓／圍骰收三家各 $${amt}，順骰比三家各 $${amt}；詐糊／詐叮按掣上番數比三家。`;
 }
 
 function resetGame(){
@@ -538,9 +599,13 @@ function computeStats(){
     h.deltas.forEach((d,i)=>{ const s=S[i]; s.money += d; s.pts += d/rate; s.minRun = Math.min(s.minRun, s.pts); if(Math.abs(s.pts) > 1e-9) s.started = true; if(s.started && s.pts <= 1e-9) s.everNeg = true; });
     if(h.kind==="win"){
       const w = S[h.winner]; w.wins++; w.winFans.push(h.fan); if(h.fan<10) w.smallWins++;
-      if(h.discarder===null) w.selfDraws++; else S[h.discarder].discards++;
+      const lead = !h.group || h.groupFirst;
+      if(h.discarder===null) w.selfDraws++; else if(lead) S[h.discarder].discards++;
       if((h.items||[]).some(x=>x.name==="對對糊")) w.ddh++;
-      S.forEach(s=>{ if(s.p===h.winner){ s.cur++; s.maxConsec=Math.max(s.maxConsec,s.cur); } else s.cur=0; });
+      if(lead){
+        const winners = new Set(h.group ? state.hands.filter(x=>x.group===h.group).map(x=>x.winner) : [h.winner]);
+        S.forEach(s=>{ if(winners.has(s.p)){ s.cur++; s.maxConsec=Math.max(s.maxConsec,s.cur); } else s.cur=0; });
+      }
     } else if(h.kind==="draw"){ S.forEach(s=>s.cur=0); }
     else if(h.kind==="side" && h.type==="angang"){ S[h.player].angang++; }
   }
@@ -563,7 +628,7 @@ function computeStats(){
 let openTag = null;   // "p:id" — only one description shown at a time
 function settleHTML(forShare){
   const {order} = computeStats();
-  const pu = state.hands.filter(h=>h.kind!=="side").length;
+  const pu = state.hands.filter(isHandStart).length;
   const d = new Date(state.endedAt || Date.now());
   const date = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
   const topPts = order[0].pts;
@@ -682,7 +747,7 @@ $("undoBtn").onclick = ()=>{ if(canWrite && !saving) undo(); };
 let ws = null;
 function openWin(winner){
   if(!canWrite || saving || state.ended) return;
-  ws = {winner, discarder:null, items:[], adj:0, photo:null};
+  ws = {winner, discarder:null, items:[], adj:0, photo:null, extra:{}};
   $("winErr").hidden = true;
   buildCatalog();
   renderWin();
@@ -698,6 +763,19 @@ function renderWin(){
   $("modeSeg").innerHTML = `<button class="opt${self?" on":""}" data-m="self">自摸（三家找）</button><button class="opt${!self?" on":""}" data-m="d">食出銃</button>`;
   $("modeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder = b.dataset.m==="self" ? null : (ws.discarder ?? [0,1,2,3].find(p=>p!==ws.winner)); if(b.dataset.m!=="self" && ws.discarder===null) ws.discarder=[0,1,2,3].find(p=>p!==ws.winner); renderWin(); });
   $("discarderField").hidden = self;
+  $("multiField").hidden = self;
+  if(self) ws.extra = {};
+  else {
+    Object.keys(ws.extra).forEach(k=>{ if(+k===w || +k===ws.discarder) delete ws.extra[k]; });
+    const others = [0,1,2,3].filter(p=>p!==w && p!==ws.discarder);
+    $("multiList").innerHTML = others.map(p=>{ const on = p in ws.extra;
+      return `<div class="multi-row"><button class="opt${on?" on":""}" data-mp="${p}">${esc(state.players[p])}${on?" 都食":""}</button>${on?`<input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" data-mf="${p}" value="${ws.extra[p]||""}" placeholder="番數" aria-label="${esc(state.players[p])} 番數">`:""}</div>`; }).join("");
+    $("multiList").querySelectorAll("[data-mp]").forEach(b=>b.onclick=()=>{ const p=+b.dataset.mp; if(p in ws.extra) delete ws.extra[p]; else ws.extra[p]=0; renderWin(); });
+    $("multiList").querySelectorAll("[data-mf]").forEach(inp=>{
+      inp.addEventListener("beforeinput", e=>{ if(e.data && /[^0-9]/.test(e.data)) e.preventDefault(); });
+      inp.addEventListener("input", e=>{ const c=e.target.value.replace(/[^0-9]/g,"").replace(/^0+(?=[0-9])/,"").slice(0,4); if(e.target.value!==c) e.target.value=c; ws.extra[+e.target.dataset.mf] = c===""?0:parseInt(c,10); renderPay(); });
+    });
+  }
   if(!self){
     $("discarderSeg").innerHTML = [0,1,2,3].filter(p=>p!==w).map(p=>`<button class="opt${p===ws.discarder?" redon":""}" data-i="${p}">${esc(state.players[p])}</button>`).join("");
     $("discarderSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder=+b.dataset.i; renderWin(); });
@@ -709,12 +787,29 @@ function renderWin(){
     + (ws.adj ? `<button class="chip sel" data-adj="1">手動調整 <b>${ws.adj>0?"+":""}${ws.adj}</b><span class="x">✕</span></button>` : "");
   $("selChips").innerHTML = selHtml || `<span class="hint">揀下面番種，或用 ＋／− 直接加減番數。</span>`;
   $("selChips").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.adj) ws.adj=0; else ws.items.splice(+b.dataset.i,1); renderWin(); });
-  // payments
-  const fan = fanTotal();
-  const {rows} = computeWin(w, ws.discarder, fan);
-  const sum = rows.reduce((a,r)=>a+r.amt,0);
-  $("payBox").innerHTML = `<div class="lbl" style="margin-bottom:4px">找數</div>` + rows.map(r=>`<div class="r"><span>${esc(state.players[r.p])} 俾 <small>底${state.base} + ${fan}番${r.bonus?` + 莊${r.bonus}`:""} = ${r.total}番</small></span><span class="neg">−$${r.amt}</span></div>`).join("")
-    + `<div class="r" style="border-top:1px solid var(--line);padding-top:6px;margin-top:2px"><b>${esc(state.players[w])} 收</b><b class="pos">+$${Math.round(sum*100)/100}</b></div>`;
+  renderPay();
+}
+function winList(){
+  return [{winner:ws.winner, fan:fanTotal()}].concat(Object.keys(ws.extra).map(k=>({winner:+k, fan:ws.extra[k]||0})));
+}
+function renderPay(){
+  const list = winList(), M = MULTI[list.length];
+  let html = `<div class="lbl" style="margin-bottom:4px">找數${M?`（一炮${M.name}，每位食糊 +${M.fan} 番）`:""}</div>`;
+  const R = state.revenge;
+  list.forEach(x=>{
+    const fan = x.fan + (M ? M.fan : 0);
+    const {rows} = computeWin(x.winner, ws.discarder, fan);
+    let sum = rows.reduce((a,r)=>a+r.amt,0);
+    html += rows.map(r=>`<div class="r"><span>${esc(state.players[r.p])} 俾 ${list.length>1?esc(state.players[x.winner])+" ":""}<small>底${state.base} + ${fan}番${r.bonus?` + 莊${r.bonus}`:""} = ${r.total}番</small></span><span class="neg">−$${r.amt}</span></div>`).join("");
+    if(R && R.from===x.winner){
+      const amt = Math.round(R.fan*state.rate*100)/100;
+      html += R.targets.map(t=>`<div class="r"><span>${esc(state.players[t])} 俾 <small>反雪 ${R.fan}番</small></span><span class="neg">−$${amt}</span></div>`).join("");
+      sum += amt*R.targets.length;
+    }
+    html += `<div class="r" style="border-top:1px solid var(--line);padding-top:6px;margin:2px 0 6px"><b>${esc(state.players[x.winner])} 收</b><b class="pos">+$${Math.round(sum*100)/100}</b></div>`;
+  });
+  if(M) html += `<div class="hint">記錄後：${esc(state.players[ws.discarder])} 下次食糊會反雪，收 ${list.map(x=>esc(state.players[x.winner])).join("、")} 各 ${M.revenge} 番。</div>`;
+  $("payBox").innerHTML = html;
 }
 function buildCatalog(){
   $("catalog").innerHTML = CATALOG.map((c,ci)=>`<details class="cat"><summary>${c.g}</summary><div class="chips">${
@@ -743,8 +838,14 @@ $("confirmWin").onclick = ()=>{
     $("winErr").textContent = "未輸入番數。請揀番種、按 ＋，或直接輸入番數。";
     $("winErr").hidden = false; $("fanInput").focus(); return;
   }
+  const missing = Object.keys(ws.extra).filter(k=>!(ws.extra[k]>0));
+  if(missing.length){
+    $("winErr").textContent = `請輸入 ${missing.map(k=>state.players[k]).join("、")} 嘅番數。`;
+    $("winErr").hidden = false; return;
+  }
   const items = ws.items.slice(); if(ws.adj) items.push({name:"手動調整", fan:ws.adj});
-  recordWin(ws.winner, ws.discarder, fanTotal(), items);
+  const list = [{winner:ws.winner, fan:fanTotal(), items}].concat(Object.keys(ws.extra).map(k=>({winner:+k, fan:ws.extra[k], items:[]})));
+  recordWins(list, ws.discarder);
   hideSheet();
 };
 
