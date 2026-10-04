@@ -267,6 +267,14 @@ body:not(.ro) .view-only{display:none!important}
 .st-foot{display:flex;align-items:center;justify-content:center;gap:6px}
 .flogo{width:22px;height:22px;display:inline-flex}
 .hbtns{display:flex;gap:6px}
+button.modechip{cursor:pointer;background:none}
+button.modechip::after{content:" ⇄";font-size:11px}
+.ro button.modechip{cursor:default;pointer-events:none}
+.ro button.modechip::after{content:""}
+.confirm{position:fixed;inset:0;z-index:70;background:rgba(10,15,20,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.confirm-card{background:var(--bg);color:var(--fg);border-radius:18px;padding:18px 16px 14px;max-width:340px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.confirm-card h3{font-family:var(--f-display);font-weight:900;font-size:20px;margin:0 0 6px}
+.confirm-card p{margin:0 0 14px;font-size:14px;color:var(--muted);line-height:1.55}
 .help-tabs{margin-bottom:12px}
 .help-tabs .opt{padding:7px 11px;font-size:13px}
 .help-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -294,6 +302,8 @@ body:not(.ro) .view-only{display:none!important}
 }
 :root[data-theme="dark"]:not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]) .lg-l,:root[data-skin="halloween"] .lg-l{display:none!important}
 :root[data-theme="dark"]:not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]) .lg-d,:root[data-skin="halloween"] .lg-d{display:block!important}
+.st-mode{font-family:var(--f-body);font-size:13px;font-weight:700;letter-spacing:.06em;border:1.5px solid currentColor;border-radius:999px;padding:2px 10px;margin-left:10px;vertical-align:middle;opacity:.9}
+.sty-title .st-mode{font-size:13px}
 .st-brand{display:flex;align-items:center;gap:10px}
 .slogo{width:54px;height:54px;display:inline-flex;flex:none}
 .slogo img{width:100%;height:100%;display:block;object-fit:contain}
@@ -333,7 +343,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
 </div>
 <div class="wrap">
   <header>
-    <h1><span class="hlogo" aria-hidden="true">${LOGO}</span>番鼠<span class="modechip" id="modeChip"></span></h1>
+    <h1><span class="hlogo" aria-hidden="true">${LOGO}</span>番鼠<button class="modechip" id="modeChip" type="button" aria-label="轉換牌種"></button></h1>
     <span class="hbtns"><button class="iconbtn" id="openHelp">說明</button><button class="iconbtn edit-only" id="openSetup">設定</button></span>
   </header>
 
@@ -384,6 +394,13 @@ const SHELL = `<div class="splash" id="splash" hidden>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
+<div class="confirm" id="confirmBox" hidden role="alertdialog" aria-labelledby="cfTitle">
+  <div class="confirm-card">
+    <h3 id="cfTitle"></h3>
+    <p id="cfText"></p>
+    <div class="grid2"><button class="btn" id="cfNo">取消</button><button class="btn danger" id="cfYes">確認</button></div>
+  </div>
+</div>
 <div class="savebar" id="savingBar" hidden role="status"></div>
 
 <div class="sheet" id="shareSheet" hidden role="dialog" aria-label="分享戰績">
@@ -392,7 +409,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <p class="hint" id="shareHint">製作圖片中…</p>
   <img id="shareImg" alt="結算戰績圖（IG 限時動態 9:16）" hidden>
   <div class="settle-actions" style="margin-top:12px">
-    <button class="btn primary full" id="nativeShareBtn" hidden>分享到 IG／WhatsApp／Telegram…</button>
+    <button class="btn primary full" id="nativeShareBtn" hidden>分享</button>
     <button class="btn" id="saveImgBtn" hidden>儲存圖片</button>
     <button class="btn" id="closeShare">關閉</button>
   </div>
@@ -432,7 +449,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <div class="field">
     <label>牌種</label>
     <div class="grid2" id="modeSeg2"></div>
-    <span class="hint" id="modeHint">已有記錄時轉牌種，會清除記錄重新開局。</span>
+    <span class="hint" id="modeHint">轉換牌種會清除記錄、重新開局，會先問你確認。</span>
   </div>
   <div id="twFields">
   <div class="grid2">
@@ -585,12 +602,24 @@ function hkPoints(fan){
   if(state.hk.scale==="full" || f<=4) return Math.pow(2,f);
   const k = f-4; return 16 * Math.pow(2, Math.floor(k/2)) * (k%2 ? 1.5 : 1);
 }
+function askConfirm(title, text, okText, onOk){
+  $("cfTitle").textContent = title; $("cfText").textContent = text; $("cfYes").textContent = okText;
+  const box = $("confirmBox"); box.hidden = false;
+  $("cfNo").onclick = ()=>{ box.hidden = true; };
+  $("cfYes").onclick = ()=>{ box.hidden = true; onOk(); };
+}
+const MODE_NAME = m => m==="hk" ? "廣東牌" : "台牌";
+function switchMode(m, after){
+  if(!canWrite || saving || m===state.mode){ if(after) after(); return; }
+  const n = state.hands.length;
+  askConfirm(`轉做${MODE_NAME(m)}？`,
+    n ? `轉換牌種會清除而家 ${n} 項記錄，重新開局。清除咗就冇得還原。` : `轉換牌種會用${MODE_NAME(m)}規則重新開局。`,
+    n ? "清除並轉換" : "確認轉換",
+    ()=>{ state.mode = m; if(n) resetGame(); else { render(); save(); } if(after) after(); });
+}
 function chooseMode(m, btn){
   if(!canWrite || state.mode===m) return true;
-  if(state.hands.length){
-    if(btn.dataset.armed!=="1"){ btn.dataset.armed="1"; const n=$("splashNote"); n.textContent=`轉做${m==="hk"?"廣東牌":"台牌"}會清除現有記錄，再按一次確認。`; n.hidden=false; return false; }
-    state.mode = m; resetGame(); return true;
-  }
+  if(state.hands.length){ switchMode(m, closeSplash); return false; }
   state.mode = m; render(); save(); return true;
 }
 function closeSplash(){
@@ -903,7 +932,7 @@ function settleHTML(forShare){
     </div>`;
   }).join("");
   return `<div class="settle-card">
-    <div class="st-head"><span class="st-brand">${forShare?`<span class="slogo">${LOGO_D}</span>`:""}<span class="st-title">結算</span></span><span class="st-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</span></div>
+    <div class="st-head"><span class="st-brand">${forShare?`<span class="slogo">${LOGO_D}</span>`:""}<span class="st-title">結算</span><span class="st-mode">${MODE_NAME(state.mode)}</span></span><span class="st-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</span></div>
     ${rows}
     ${forShare?`<div class="st-foot"><span class="flogo">${LOGO_D}</span>番鼠 · 港台麻雀計番</div>`:""}
   </div>`;
@@ -921,7 +950,7 @@ function storyHTML(){
       <div><div class="sty-name">${first?"👑 ":""}${esc(state.players[s.p])}</div><div class="sty-stats">食糊 ${s.wins} · 自摸 ${s.selfDraws} · 出銃 ${s.discards}</div></div>
       <div class="sty-score num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} 番</small></div>${tags}</div>`;
   }).join("");
-  return `<div class="story"><div class="sty-head"><span class="sty-logo">${LOGO_D}</span><div><div class="sty-title">結算</div><div class="sty-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</div></div></div>
+  return `<div class="story"><div class="sty-head"><span class="sty-logo">${LOGO_D}</span><div><div class="sty-title">結算<span class="st-mode">${MODE_NAME(state.mode)}</span></div><div class="sty-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</div></div></div>
     <div class="sty-list">${rows}</div><div class="sty-foot"><span>${LOGO_D}</span>番鼠 · 港台麻雀計番</div></div>`;
 }
 function renderSettle(){
@@ -1150,6 +1179,7 @@ function showHelpDetail(it){
 $("openHelp").onclick = ()=>{ $("helpListView").hidden = false; $("helpDetailView").hidden = true; renderHelpList(); showSheet($("helpSheet")); };
 $("helpBack").onclick = ()=>{ $("helpDetailView").hidden = true; $("helpListView").hidden = false; };
 $("closeHelp").onclick = hideSheet;
+$("modeChip").onclick = ()=>{ if(state.ended) return; switchMode(isHK() ? "tw" : "hk"); };
 
 /* ---------- sheets ---------- */
 let openSheet = null;
@@ -1169,11 +1199,7 @@ function fillSetup(){
   resetArmed=false; $("resetBtn").textContent = "清除所有記錄，重新開局";
   const MODES = [["tw","台牌"],["hk","廣東牌"]];
   $("modeSeg2").innerHTML = MODES.map(([k,n])=>`<button class="opt${k===state.mode?" on":""}" data-m="${k}">${n}</button>`).join("");
-  $("modeSeg2").querySelectorAll("button").forEach(b=>b.onclick=()=>{
-    if(b.dataset.m===state.mode) return;
-    if(state.hands.length && b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="再按一次確認"; $("modeHint").textContent="轉牌種會清除現有記錄，重新開局。"; return; }
-    state.mode = b.dataset.m; if(state.hands.length) resetGame(); else { render(); save(); } fillSetup();
-  });
+  $("modeSeg2").querySelectorAll("button").forEach(b=>b.onclick=()=>switchMode(b.dataset.m, fillSetup));
   $("twFields").hidden = isHK(); $("hkFields").hidden = !isHK();
   $("hkUnit").value = state.hk.unit; $("hkMin").value = state.hk.min;
   const seg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.hk[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
