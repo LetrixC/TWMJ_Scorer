@@ -1599,7 +1599,11 @@ const ONLINE_CSS = `
 `;
 function buildOnlineUI(){
   document.head.insertAdjacentHTML("beforeend", `<style>${ONLINE_CSS}</style>`);
-  $("splash").remove();
+  // 保留迎賓頁：佢喺大廳上面；揀牌種後淡出，露出登入／大廳。入咗房間就只係關閉，唔會改房間牌種。
+  $("splash").querySelectorAll("[data-mode]").forEach(btn=>btn.onclick = () => {
+    if(ONLINE.room){ closeSplash(); return; }
+    if(chooseMode(btn.dataset.mode, btn)) closeSplash();
+  });
   document.body.insertAdjacentHTML("beforeend", `
 <div class="lobby" id="lobby" hidden><div class="lobby-in">
   <div class="lobby-brand"><span class="lb-logo">${LOGO}</span><h1>番鼠</h1></div>
