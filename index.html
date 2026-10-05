@@ -1465,7 +1465,7 @@ const ONLINE = {
   cfg: (typeof firebaseConfig !== "undefined" && firebaseConfig) || window.FANSYU_FIREBASE || null,
   mock: /[?&]mock=1/.test(location.search),
   backend: null, user: null, room: null, roomDoc: null, isHost: false, unsub: null,
-  games: null, gamesErr: false, firstSnap: false, pushTimer: null, ledgerScope: "month", lastSent: "",
+  games: null, gamesErr: false, profiles: {}, profFetching: new Set(), firstSnap: false, pushTimer: null, ledgerScope: "month", lastSent: "",
 };
 ONLINE.enabled = !!(ONLINE.cfg || ONLINE.mock);
 let canWriteLocal = true;
@@ -1517,7 +1517,9 @@ async function firebaseBackend(cfg){
     watchRoom(code, cb){ return rooms.doc(code).onSnapshot(s=>cb(s.exists ? s.data() : null), ()=>cb(undefined)); },
     pushState(code, json){ return rooms.doc(code).update({state:json, updatedAt:Date.now()}); },
     async saveRecords(list){ const b = db.batch(); list.forEach(r=>b.set(db.collection("users").doc(r.uid).collection("games").doc(r.gameId), r.data)); await b.commit(); },
-    async myGames(uid){ const q = await db.collection("users").doc(uid).collection("games").orderBy("endedAt","desc").limit(500).get(); return q.docs.map(d=>d.data()); },
+    async myGames(uid){ const q = await db.collection("users").doc(uid).collection("games").orderBy("endedAt","desc").get(); return q.docs.map(d=>d.data()); },
+    saveProfile(uid, data){ return db.collection("users").doc(uid).set(data, {merge:true}); },
+    async getProfiles(uids){ const out = {}; await Promise.all(uids.map(async u=>{ try{ const s = await db.collection("users").doc(u).get(); if(s.exists) out[u] = s.data(); }catch(e){} })); return out; },
     deleteGame(uid, gameId){ return db.collection("users").doc(uid).collection("games").doc(gameId).delete(); },
   };
 }
@@ -1549,6 +1551,8 @@ function mockBackend(){
       list.forEach(x=>{ const g = L("games:"+x.uid) || {}; g[x.gameId] = x.data; W("games:"+x.uid, g); });
     },
     async myGames(uid){ return Object.values(L("games:"+uid) || {}).sort((a,b)=>b.endedAt-a.endedAt); },
+    async saveProfile(uid, data){ const P = L("profiles") || {}; P[uid] = Object.assign(P[uid] || {}, data); W("profiles", P); },
+    async getProfiles(uids){ const P = L("profiles") || {}; const o = {}; uids.forEach(u=>{ if(P[u]) o[u] = P[u]; }); return o; },
     async deleteGame(uid, gameId){ const g = L("games:"+uid) || {}; delete g[gameId]; W("games:"+uid, g); },
   };
 }
@@ -1595,6 +1599,23 @@ const ONLINE_CSS = `
 .gamerow{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:14px}
 .gamerow:last-child{border-bottom:0}
 .gamerow small{color:var(--muted);font-size:12px;grid-column:1/-1}
+.lvcard .lvbig{font-family:var(--f-display);font-weight:900;font-size:30px;line-height:1;color:var(--navy)}
+.lvcard .lvtitle{font-weight:700;font-size:14px;color:var(--muted);margin-top:4px}
+.xpbar{height:10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);overflow:hidden}
+.xpbar i{display:block;height:100%;background:var(--jade);border-radius:999px}
+.lvcard.lvmax{position:relative;overflow:hidden;border-color:#B8860B;background:linear-gradient(135deg,#FFF6D6,#F7E08A 45%,#FFF9E6 60%,#E9C766)}
+.lvcard.lvmax .lvbig,.lvcard.lvmax .lvtitle{color:#5A3A00}.lvcard.lvmax .xpbar i{background:#C9962A}
+.lvcard.lvmax::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.75) 48%,transparent 66%);transform:translateX(-120%);animation:shine 3s ease-in-out infinite}
+.lvb{font-size:11px;font-weight:700;color:var(--navy);border:1px solid var(--navy);border-radius:999px;padding:0 6px;white-space:nowrap}
+.lvb.lvmax{color:#5A3A00;border-color:#B8860B;background:linear-gradient(135deg,#F7E08A,#E2B53E)}
+.xpline{grid-column:1/-1;font-size:12px;color:var(--jade);font-weight:700}
+.xpnote{margin:0;font-size:12px;color:var(--felt-muted);text-align:center}
+.lvup{position:fixed;inset:0;z-index:80;background:rgba(10,15,20,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.lvup-card{background:var(--bg);border-radius:20px;padding:22px 18px 16px;text-align:center;max-width:300px;width:100%;animation:pop .45s ease-out 1;display:flex;flex-direction:column;gap:6px}
+.lvup-k{font-weight:700;color:var(--jade);letter-spacing:.2em}
+.lvup-n{font-family:var(--f-display);font-weight:900;font-size:34px;color:var(--navy)}
+.lvup-t{font-weight:700;color:var(--muted);margin-bottom:8px}
+.lvup-card.lvmax{background:linear-gradient(135deg,#FFF6D6,#F7E08A 50%,#E9C766)}.lvup-card.lvmax .lvup-n,.lvup-card.lvmax .lvup-t{color:#5A3A00}
 .lg-empty{font-size:13px;color:var(--muted);padding:6px 2px}
 `;
 function buildOnlineUI(){
@@ -1685,6 +1706,11 @@ function renderLobby(){
     <div class="card">
       <div class="hello"><div><b>你好，${esc(ONLINE.user.name)}</b><div class="uid">用戶 ID：${esc(ONLINE.user.name)} · #${esc(ONLINE.user.uid.slice(0,6))}</div></div><button class="iconbtn" id="lgOut">登出</button></div>
     </div>
+    ${ONLINE.games===null ? "" : (()=>{ const L = levelOf(totalXp()); return `<div class="card lvcard${L.max?" lvmax":""}">
+      <div class="hello"><div><div class="lvbig">Lv ${L.lv}</div><div class="lvtitle">${esc(L.title)}</div></div><span class="uid">總經驗 ${totalXp().toLocaleString("en-US")}</span></div>
+      <div class="xpbar"><i style="width:${L.max?100:Math.round(L.into/L.need*100)}%"></i></div>
+      <span class="hint" style="margin:0">${L.max ? "已滿級" : `${L.into.toLocaleString("en-US")} / ${L.need.toLocaleString("en-US")} 經驗升 Lv ${L.lv+1}`}</span>
+    </div>`; })()}
     <div class="card">
       <h3>今個月戰績</h3>
       ${ONLINE.games===null ? `<p class="hint" style="margin:0">${ONLINE.gamesErr?"暫時讀唔到記錄。":"讀緊記錄…"}</p>` : `
@@ -1748,6 +1774,7 @@ async function joinRoom(code){
 function enterRoom(code){
   leaveRoom(true);
   ONLINE.room = code; ONLINE.firstSnap = true; ONLINE.lastSent = "";
+  ONLINE.profiles = {};
   try{ sessionStorage.setItem("fansyu-room", code); localStorage.setItem("fansyu-lastroom", code); }catch(e){}
   canWrite = false; applyMode();
   return new Promise(resolve=>{
@@ -1810,6 +1837,11 @@ function renderRoomBar(){
 function renderRoomSheet(){
   const box = $("roomBody"); if(!box || !ONLINE.roomDoc) return;
   const d = ONLINE.roomDoc, members = Object.entries(d.members || {});
+  const missing = members.map(([u])=>u).filter(u=>!(u in ONLINE.profiles) && !ONLINE.profFetching.has(u));
+  if(missing.length){
+    missing.forEach(u=>ONLINE.profFetching.add(u));
+    ONLINE.backend.getProfiles(missing).then(P=>{ missing.forEach(u=>{ ONLINE.profiles[u] = P[u] || null; ONLINE.profFetching.delete(u); }); if(openSheet && openSheet.id==="roomSheet") renderRoomSheet(); }).catch(()=>{});
+  }
   const link = location.origin + location.pathname + "?room=" + ONLINE.room;
   const uids = state.uids || [null,null,null,null];
   let seats = "";
@@ -1828,7 +1860,7 @@ function renderRoomSheet(){
       <div class="grid2"><button class="btn" id="rmCopy">複製連結</button><button class="btn" id="rmShare">分享</button></div>
       <span class="hint">朋友打開連結登入就會入房；或者喺大廳輸入房間號碼 <b>${esc(ONLINE.room)}</b>。</span></div>
     <div class="field"><label>房間成員（${members.length}）</label><div class="mlist">
-      ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${u===d.host?`<span class="pill-host">房主</span>`:""}</span><span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span></div>`).join("")}
+      ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span><span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span></div>`).join("")}
     </div></div>
     ${seats}
     <button class="btn danger" style="width:100%" id="rmLeave">離開房間</button>`;
@@ -1847,9 +1879,62 @@ function renderRoomSheet(){
   });
 }
 
+/* ---------- 經驗值同等級 ---------- */
+const XP = {minHands:8, join:10, perHand:40, perGame:300, hkMult:4, maxLv:100};
+const xpNeed = L => Math.round(16 + 1.52 * Math.pow(L-1, 1.4));          // 由 L 級升 L+1 級要幾多經驗
+const LV_TITLES = ["初出茅廬","街坊雀友","茶樓常客","雀館熟客","雀壇好手","一方雀霸","雀林高手","雀聖門生","雀聖","雀神"];
+function levelOf(total){
+  let lv = 1, rest = Math.max(0, total||0);
+  while(lv < XP.maxLv && rest >= xpNeed(lv)){ rest -= xpNeed(lv); lv++; }
+  const max = lv >= XP.maxLv;
+  return {lv, into: max ? 0 : rest, need: max ? 0 : xpNeed(lv), max, title: max ? "登峰造極" : LV_TITLES[Math.floor(lv/10)]};
+}
+function lvBadge(total, small){ const L = levelOf(total); return `<span class="lvb${L.max?" lvmax":""}${small?" sm":""}">Lv ${L.lv}${small?"":" · "+L.title}</span>`; }
+// 一場嘅經驗：合資格先有；參與獎 + 每鋪食糊番數（廣東牌 ×4，每鋪最多 40），每場最多 300
+function xpCheck(){
+  const u = state.uids || [];
+  if(!ONLINE.room) return {ok:false, why:"單機模式唔計經驗"};
+  if(u.length<4 || u.some(x=>!x)) return {ok:false, why:"要四個座位都係有帳戶嘅玩家先計經驗"};
+  if(new Set(u).size < 4) return {ok:false, why:"同一個帳戶坐咗兩個位，今場唔計經驗"};
+  const n = state.hands.filter(isHandStart).length;
+  if(n < XP.minHands) return {ok:false, why:`最少要打 ${XP.minHands} 鋪先計經驗（今場 ${n} 鋪）`};
+  return {ok:true};
+}
+function xpForGame(){
+  const chk = xpCheck(), xp = [0,0,0,0];
+  if(!chk.ok) return {chk, xp};
+  for(let p=0;p<4;p++){
+    let sum = 0;
+    for(const h of state.hands){
+      if(h.kind!=="win" || h.winner!==p) continue;
+      const f = isHK() ? Math.min(h.fan, state.hk.cap) * XP.hkMult : h.fan;
+      sum += Math.min(XP.perHand, Math.max(0, f));
+    }
+    xp[p] = Math.min(XP.perGame, XP.join + sum);
+  }
+  return {chk, xp};
+}
+const totalXp = () => (ONLINE.games || []).reduce((a,g)=>a+(g.xp||0), 0);
+function checkLevelUp(){
+  if(!ONLINE.user || ONLINE.games===null) return;
+  const total = totalXp(), L = levelOf(total), key = "fansyu-lv-" + ONLINE.user.uid;
+  let prev = null; try{ prev = +localStorage.getItem(key) || null; }catch(e){}
+  try{ localStorage.setItem(key, L.lv); }catch(e){}
+  if(prev && L.lv > prev) showLevelUp(prev, L);
+  ONLINE.backend.saveProfile(ONLINE.user.uid, {name:ONLINE.user.name, xp:total, lv:L.lv}).catch(()=>{});
+}
+function showLevelUp(from, L){
+  const el = document.createElement("div");
+  el.className = "lvup";
+  el.innerHTML = `<div class="lvup-card${L.max?" lvmax":""}"><div class="lvup-k">升級！</div><div class="lvup-n">Lv ${from} → ${L.lv}</div><div class="lvup-t">${esc(L.title)}</div><button class="btn primary">好嘢</button></div>`;
+  document.body.appendChild(el);
+  el.querySelector("button").onclick = () => el.remove();
+}
+
 /* ---------- settlement → 小氣簿 ---------- */
 function buildRecords(){
   const {S} = computeStats();
+  const G = xpForGame();
   const uids = state.uids || [];
   if(!state.gameId) state.gameId = newGameId();
   const gameId = ONLINE.room + "_" + state.gameId;
@@ -1861,6 +1946,7 @@ function buildRecords(){
       rank:s.rank, money:s.money, pts:s.pts, tags:s.tags.map(t=>t.name), gold:s.tags.some(t=>t.id===1),
       special: s.special ? {id:s.special.t.id, name:s.special.t.name, tier:s.special.t.tier} : null,
       vs:[0,1,2,3].filter(q=>q!==p).map(q=>({uid:uids[q] || null, name:state.players[q], money:s.vs[q]})),
+      xp: G.xp[p],
     }};
   });
 }
@@ -1870,12 +1956,28 @@ async function sendRecords(){
   try{
     await ONLINE.backend.saveRecords(list);
     toast(`已記入 ${list.length} 位玩家嘅小氣簿。`);
+    ONLINE.profiles = {};
     if(list.some(x=>x.uid===ONLINE.user.uid)) loadGames();
   }catch(e){ toast("記錄唔到小氣簿：" + errText(e)); }
 }
 {
   const origEnd = $("endBtn").onclick;
   $("endBtn").onclick = () => { origEnd(); if(ONLINE.room && ONLINE.isHost && state.ended){ onlinePush(); sendRecords(); } };
+  const origSettle = renderSettle;
+  renderSettle = function(){
+    origSettle();
+    if(!ONLINE.room || !state.ended) return;
+    const G = xpForGame();
+    const rows = $("settleCard").querySelectorAll(".pl");
+    const {order} = computeStats();
+    rows.forEach((row,i)=>{
+      const p = order[i].p;
+      const d = document.createElement("div"); d.className = "xpline";
+      d.innerHTML = G.chk.ok ? `<b>+${G.xp[p]}</b> 經驗` : "";
+      if(G.chk.ok) row.appendChild(d);
+    });
+    if(!G.chk.ok){ const n = document.createElement("p"); n.className = "xpnote"; n.textContent = G.chk.why; $("settleCard").querySelector(".settle-card").appendChild(n); }
+  };
   const origReset = resetGame;
   resetGame = function(){
     const keepU = state.uids;
@@ -1887,7 +1989,7 @@ async function sendRecords(){
 /* ---------- 小氣簿 ---------- */
 async function loadGames(){
   if(!ONLINE.user) return;
-  try{ ONLINE.games = await ONLINE.backend.myGames(ONLINE.user.uid); ONLINE.gamesErr = false; }
+  try{ ONLINE.games = await ONLINE.backend.myGames(ONLINE.user.uid); ONLINE.gamesErr = false; checkLevelUp(); }
   catch(e){ ONLINE.gamesErr = true; }
   if(!$("lobby").hidden) renderLobby();
   if(openSheet && openSheet.id==="ledgerSheet") renderLedger();
@@ -1909,7 +2011,7 @@ function renderLedger(){
     ${ONLINE.games===null ? `<p class="lg-empty">${ONLINE.gamesErr?"暫時讀唔到記錄，請檢查網絡。":"讀緊記錄…"}</p>` : `
     <div class="card"><span class="lbl">${scope==="month"?"今個月":"全部"}輸贏</span>
       <div class="bigmoney num ${cls(st.net)}">${money(st.net)}</div>
-      <div class="statrow"><span>打咗 <b>${st.n}</b> 場</span><span>第一名 <b>${st.firsts}</b> 次</span></div></div>
+      <div class="statrow"><span>打咗 <b>${st.n}</b> 場</span><span>第一名 <b>${st.firsts}</b> 次</span><span>經驗 <b>+${st.games.reduce((a,g)=>a+(g.xp||0),0).toLocaleString("en-US")}</b></span></div></div>
     <div class="card"><h3>邊個贏咗我錢</h3>
       ${opps.length ? opps.map(o=>`<div class="opp"><span>${esc(o.name)}${o.guest?` <span class="uid">（訪客）</span>`:""}<small>同枱 ${o.n} 場</small></span>
         <span class="amt num ${cls(o.money)}">${o.money<0?`輸咗俾佢 ${money(o.money).slice(1)}`:o.money>0?`贏咗佢 ${money(o.money).slice(1)}`:"打和"}</span></div>`).join("") : `<p class="lg-empty">未有記錄。</p>`}
@@ -1921,7 +2023,7 @@ function renderLedger(){
     <div class="card"><h3>牌局記錄</h3>
       ${st.games.length ? st.games.slice(0,60).map(g=>`<div class="gamerow"><span>${fmtD(g.endedAt)} · ${MODE_NAME(g.mode)} · 第 ${g.rank} 名</span>
         <span class="num ${cls(g.money)}" style="font-weight:700">${money(g.money)}</span>
-        <small>房間 ${esc(g.room)} · ${g.hands||0} 鋪${g.special?` · ${esc(g.special.name)}`:""}${g.gold?" · 根本不是一個Level":""}</small></div>`).join("") : `<p class="lg-empty">未有記錄。</p>`}
+        <small>房間 ${esc(g.room)} · ${g.hands||0} 鋪${g.xp?` · +${g.xp} 經驗`:""}${g.special?` · ${esc(g.special.name)}`:""}${g.gold?" · 根本不是一個Level":""}</small></div>`).join("") : `<p class="lg-empty">未有記錄。</p>`}
     </div>`}`;
   box.querySelectorAll("[data-sc]").forEach(b=>b.onclick = () => { ONLINE.ledgerScope = b.dataset.sc; renderLedger(); });
 }
