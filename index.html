@@ -343,11 +343,11 @@ button.modechip::after{content:" ⇄";font-size:11px}
 .tile.fl{font-size:15px;color:#C9467A}
 .lg-d{display:none!important}
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]):not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]) .lg-l{display:none!important}
-  :root:not([data-theme="light"]):not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]) .lg-d{display:block!important}
+  :root:not([data-theme="light"]):not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]):not([data-skin="royal"]) .lg-l{display:none!important}
+  :root:not([data-theme="light"]):not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]):not([data-skin="royal"]) .lg-d{display:block!important}
 }
-:root[data-theme="dark"]:not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]) .lg-l,:root[data-skin="halloween"] .lg-l{display:none!important}
-:root[data-theme="dark"]:not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]) .lg-d,:root[data-skin="halloween"] .lg-d{display:block!important}
+:root[data-theme="dark"]:not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]):not([data-skin="royal"]) .lg-l,:root[data-skin="halloween"] .lg-l{display:none!important}
+:root[data-theme="dark"]:not([data-skin="beige"]):not([data-skin="mist"]):not([data-skin="store"]):not([data-skin="royal"]) .lg-d,:root[data-skin="halloween"] .lg-d{display:block!important}
 .st-mode{font-family:var(--f-body);font-size:13px;font-weight:700;letter-spacing:.06em;border:1.5px solid currentColor;border-radius:999px;padding:2px 10px;margin-left:10px;vertical-align:middle;opacity:.9}
 .sty-title .st-mode{font-size:13px}
 .st-brand{display:flex;align-items:center;gap:10px}
@@ -1569,6 +1569,7 @@ async function firebaseBackend(cfg){
     async saveRecords(list){ const b = db.batch(); list.forEach(r=>b.set(db.collection("users").doc(r.uid).collection("games").doc(r.gameId), r.data)); await b.commit(); },
     async myGames(uid){ const q = await db.collection("users").doc(uid).collection("games").orderBy("endedAt","desc").get(); return q.docs.map(d=>d.data()); },
     saveProfile(uid, data){ return db.collection("users").doc(uid).set(data, {merge:true}); },
+    async isRemoved(uid){ try{ return (await db.collection("removed").doc(uid).get()).exists; }catch(e){ return false; } },
     async getProfiles(uids){ const out = {}; await Promise.all(uids.map(async u=>{ try{ const s = await db.collection("users").doc(u).get(); if(s.exists) out[u] = s.data(); }catch(e){} })); return out; },
     deleteGame(uid, gameId){ return db.collection("users").doc(uid).collection("games").doc(gameId).delete(); },
   };
@@ -1604,6 +1605,7 @@ function mockBackend(){
     },
     async myGames(uid){ return Object.values(L("games:"+uid) || {}).sort((a,b)=>b.endedAt-a.endedAt); },
     async saveProfile(uid, data){ const P = L("profiles") || {}; P[uid] = Object.assign(P[uid] || {}, data); W("profiles", P); },
+    async isRemoved(uid){ return !!(L("removed") || {})[uid]; },
     async getProfiles(uids){ const P = L("profiles") || {}; const o = {}; uids.forEach(u=>{ if(P[u]) o[u] = P[u]; }); return o; },
     async deleteGame(uid, gameId){ const g = L("games:"+uid) || {}; delete g[gameId]; W("games:"+uid, g); },
   };
@@ -1615,6 +1617,24 @@ const ONLINE_CSS = `
 .lobby[hidden]{display:none!important}
 .lobby-in{max-width:440px;margin:0 auto;padding:28px 16px 40px;display:flex;flex-direction:column;gap:14px}
 #lobbyBody{display:flex;flex-direction:column;gap:14px}
+.vipname{background:linear-gradient(90deg,#B8860B,#E9C766,#2F8F63,#E9C766,#B8860B);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;animation:vipflow 3s linear infinite}
+@keyframes vipflow{0%{background-position:0% 0}100%{background-position:200% 0}}
+@media (prefers-reduced-motion:reduce){.vipname{animation:none}}
+.vipb{font-size:10px;font-weight:900;letter-spacing:.06em;color:#5A3A00;background:linear-gradient(135deg,#F7E08A,#E2B53E);border:1px solid #B8860B;border-radius:999px;padding:0 6px;vertical-align:middle}
+:root[data-skin="royal"]{
+  --bg:#FAF6EC; --surface:#FFFDF7; --surface2:#F5EFE0; --fg:#2E2A22; --muted:#7D7462; --line:#E7DCC4;
+  --jade:#2F6B4F; --jade-ink:#FFFDF7; --jade-soft:#E7EEE3;
+  --red:#A33A2C; --red-soft:#F6E3DC;
+  --navy:#A8842C; --navy-ink:#FFFDF7;
+  --felt:#2F5B45; --felt-ink:#FBF5E6; --felt-muted:#D9CB9F;
+  --shadow:0 1px 0 rgba(120,95,40,.06),0 8px 22px -12px rgba(120,95,40,.35);
+  color-scheme:light;
+}
+:root[data-skin="royal"] body,:root[data-skin="royal"] .lobby,:root[data-skin="royal"] .splash{background-color:#FAF6EC;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke-width='1.2'%3E%3Cpath d='M36 6 L46 36 L36 66 L26 36 Z' stroke='%23C9A34A' stroke-opacity='.16'/%3E%3Ccircle cx='36' cy='36' r='5' stroke='%232F6B4F' stroke-opacity='.14'/%3E%3Cpath d='M0 0 Q18 18 0 36 M72 0 Q54 18 72 36 M0 36 Q18 54 0 72 M72 36 Q54 54 72 72' stroke='%232F6B4F' stroke-opacity='.08'/%3E%3Ccircle cx='0' cy='0' r='3' fill='%23C9A34A' fill-opacity='.18'/%3E%3Ccircle cx='72' cy='72' r='3' fill='%23C9A34A' fill-opacity='.18'/%3E%3C/g%3E%3C/svg%3E")}
+:root[data-skin="royal"] .center,:root[data-skin="royal"] .settle-card{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 4 L31 24 L24 44 L17 24 Z' fill='none' stroke='%23E2C46B' stroke-opacity='.22'/%3E%3Ccircle cx='24' cy='24' r='2.5' fill='%23E2C46B' fill-opacity='.25'/%3E%3C/svg%3E"),radial-gradient(circle at 50% 0%,rgba(255,240,200,.18),transparent 60%);border:1px solid #C9A34A}
+:root[data-skin="royal"] .btn.primary{background:linear-gradient(135deg,#B8923A,#9C7726);border-color:#8A6A22}
+:root[data-skin="royal"] .card,:root[data-skin="royal"] .seat{border-color:#E2D3AE}
+:root[data-skin="royal"] header h1::after{content:" ✦";font-size:16px;color:#C9A34A}
 .lobby-top{display:flex;justify-content:flex-end;gap:6px;margin:-12px 0 -6px}
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--jade);margin-right:6px;vertical-align:middle;box-shadow:0 0 0 3px var(--jade-soft)}
 .live-dot.off{background:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
@@ -1777,7 +1797,7 @@ function renderLobby(){
   const spBadges = [...st.specials].map(([n,o])=>badgeHTML(n,o)).join("");
   box.innerHTML = `
     <div class="card">
-      <div class="hello"><div><b>你好，${esc(ONLINE.user.name)}</b><div class="uid">用戶 ID：${esc(ONLINE.user.name)} · #${esc(ONLINE.user.uid.slice(0,6))}</div></div><button class="iconbtn" id="lgOut">登出</button></div>
+      <div class="hello"><div><b>你好，${esc(ONLINE.user.name)}</b><div class="uid">用戶 ID：${esc(ONLINE.user.name)} · #${esc(ONLINE.user.uid.slice(0,6))}${ONLINE.me && ONLINE.me.vip ? ` <span class="vipb">VIP</span>` : ""}</div></div><button class="iconbtn" id="lgOut">登出</button></div>
     </div>
     ${ONLINE.games===null ? "" : (()=>{ const L = levelOf(totalXp()); return `<div class="card lvcard${L.max?" lvmax":""}">
       <div class="hello"><div><div class="lvbig">Lv ${L.lv}</div><div class="lvtitle">${esc(L.title)}</div></div><span class="uid">總經驗 ${totalXp().toLocaleString("en-US")}</span></div>
@@ -1803,6 +1823,7 @@ function renderLobby(){
       <p class="err" id="joinErr" hidden role="alert"></p>
       ${last ? `<button class="btn" id="rejoinBtn">返回上次房間 ${esc(last)}</button>` : ""}
     </div>
+    ${isAdminUser() ? `<a class="btn" href="admin.html" style="text-align:center;text-decoration:none">番鼠之神（管理員專頁）</a>` : ""}
     <button class="linkbtn" id="lgOffline">用單機模式（唔會記入小氣簿）</button>`;
   $("lgOut").onclick = async () => { leaveRoom(true); await ONLINE.backend.logout(); };
   $("lgLedger").onclick = openLedger;
@@ -1879,6 +1900,7 @@ function onRoomSnap(d){
   }
   ONLINE.firstSnap = false;
   if(ONLINE.isHost) hostProcess(d);
+  ensureProfiles(Object.keys(d.members || {}).concat(state.uids || []));
   render(); renderRoomBar();
   if(openSheet && openSheet.id==="roomSheet") renderRoomSheet();
 }
@@ -1953,11 +1975,7 @@ function renderRoomBar(){
 function renderRoomSheet(){
   const box = $("roomBody"); if(!box || !ONLINE.roomDoc) return;
   const d = ONLINE.roomDoc, members = Object.entries(d.members || {});
-  const missing = members.map(([u])=>u).filter(u=>!(u in ONLINE.profiles) && !ONLINE.profFetching.has(u));
-  if(missing.length){
-    missing.forEach(u=>ONLINE.profFetching.add(u));
-    ONLINE.backend.getProfiles(missing).then(P=>{ missing.forEach(u=>{ ONLINE.profiles[u] = P[u] || null; ONLINE.profFetching.delete(u); }); if(openSheet && openSheet.id==="roomSheet") renderRoomSheet(); }).catch(()=>{});
-  }
+  ensureProfiles(members.map(([u])=>u));
   const link = location.origin + location.pathname + "?room=" + ONLINE.room;
   const uids = state.uids || [null,null,null,null];
   let seats = "";
@@ -1976,7 +1994,7 @@ function renderRoomSheet(){
       <div class="grid2"><button class="btn" id="rmCopy">複製連結</button><button class="btn" id="rmShare">分享</button></div>
       <span class="hint">朋友打開連結登入就會入房；或者喺大廳輸入房間號碼 <b>${esc(ONLINE.room)}</b>。</span></div>
     <div class="field"><label>房間成員（${members.length}）</label><div class="mlist">
-      ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span><span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span></div>`).join("")}
+      ${members.map(([u,n])=>`<div class="mrow"><span><span class="${isVip(u)?"vipname":""}">${esc(n)}</span>${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span><span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span></div>`).join("")}
     </div></div>
     ${seats}
     <button class="btn danger" style="width:100%" id="rmLeave">離開房間</button>`;
@@ -1993,6 +2011,45 @@ function renderRoomSheet(){
     } else { state.uids[i] = null; if(uids[i]) state.players[i] = `玩家${i+1}`; }
     render(); save(); renderRoomSheet();
   });
+}
+
+/* ---------- VIP 同管理員 ---------- */
+const ADMIN_EMAIL = "ue7aea1e79086e593a1@fansyu.app";   // 暱稱「管理員」
+const isAdminUser = () => !!(ONLINE.user && nickEmail(ONLINE.user.name)===ADMIN_EMAIL);
+const isVip = uid => !!(uid && ONLINE.profiles[uid] && ONLINE.profiles[uid].vip);
+function ensureProfiles(uids){
+  const missing = [...new Set(uids.filter(u=>u && !(u in ONLINE.profiles) && !ONLINE.profFetching.has(u)))];
+  if(!missing.length) return;
+  missing.forEach(u=>ONLINE.profFetching.add(u));
+  ONLINE.backend.getProfiles(missing).then(P=>{
+    missing.forEach(u=>{ ONLINE.profiles[u] = P[u] || null; ONLINE.profFetching.delete(u); });
+    render();
+    if(openSheet && openSheet.id==="roomSheet") renderRoomSheet();
+  }).catch(()=>{ missing.forEach(u=>ONLINE.profFetching.delete(u)); });
+}
+const ROYAL = ["royal","尊爵不凡"];
+function applyVipPerks(){
+  const vip = !!(ONLINE.me && ONLINE.me.vip);
+  const i = SKINS.findIndex(x=>x[0]==="royal");
+  if(vip && i<0) SKINS.push(ROYAL);
+  if(!vip && i>=0) SKINS.splice(i,1);
+  let k = null; try{ k = localStorage.getItem("fansyu-skin"); }catch(e){}
+  if(!vip && (k==="royal" || state.skin==="royal")){ try{ localStorage.setItem("fansyu-skin","default"); }catch(e){} if(state.skin==="royal") state.skin = "default"; }
+  applySkin();
+}
+// 喺座位、結算、房間成員度，將 VIP 玩家個名加漸變色
+function decorateVip(){
+  if(!ONLINE.room) return;
+  const uids = state.uids || [];
+  document.querySelectorAll("#table .seat[data-seat]").forEach(b=>{ const n = b.querySelector(".name"); if(n) n.classList.toggle("vipname", isVip(uids[+b.dataset.seat])); });
+  if(state.ended && $("settleCard")){
+    const {order} = computeStats();
+    $("settleCard").querySelectorAll(".pl").forEach((row,i)=>{ const n = row.querySelector(".pname b"); if(n && order[i]) n.classList.toggle("vipname", isVip(uids[order[i].p])); });
+  }
+}
+{
+  const baseRender = render;
+  render = function(){ baseRender(); try{ decorateVip(); }catch(e){} };
 }
 
 /* ---------- 經驗值同等級 ---------- */
@@ -2173,7 +2230,10 @@ async function onlineStart(){
   ONLINE.backend.onUser(async u=>{
     const prev = ONLINE.user;
     ONLINE.user = u; ONLINE.games = null;
-    if(!u){ if(prev) leaveRoom(true); showLobby(); return; }
+    if(!u){ ONLINE.me = null; applyVipPerks(); if(prev) leaveRoom(true); showLobby(); return; }
+    if(await ONLINE.backend.isRemoved(u.uid)){ toast("呢個帳戶已經被管理員移除。"); await ONLINE.backend.logout(); return; }
+    ONLINE.backend.saveProfile(u.uid, {name:u.name, lastLogin:Date.now()}).catch(()=>{});
+    ONLINE.backend.getProfiles([u.uid]).then(P=>{ ONLINE.me = P[u.uid] || {}; ONLINE.profiles[u.uid] = ONLINE.me; applyVipPerks(); renderLobby(); }).catch(()=>{});
     renderLobby(); loadGames();
     if(wanted && !tried){
       tried = true;
