@@ -28,41 +28,41 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 
 /* Layout: a square mahjong table — four seats round a felt centre showing the round wind; actions and the hand log below. */
 :root{
-  --bg:#EEF1F5; --surface:#FFFFFF; --surface2:#F3F5F8; --fg:#17223B; --muted:#5B6578; --line:#D8DEE7;
-  --jade:#1F7A55; --jade-ink:#FFFFFF; --jade-soft:#DFEFE7;
+  --bg:#EDF2EE; --surface:#FFFFFF; --surface2:#F2F6F3; --fg:#14261D; --muted:#56685F; --line:#D5E0D9;
+  --jade:#1E7A52; --jade-ink:#FFFFFF; --jade-soft:#DCEEE3;
   --red:#C0282D; --red-soft:#F8E1E1;
-  --navy:#1E2F5C; --navy-ink:#FFFFFF;
-  --felt:#1F5C45; --felt-ink:#FFFFFF; --felt-muted:#B9D4C6;
-  --shadow:0 1px 0 rgba(20,40,30,.06),0 6px 18px -10px rgba(20,40,30,.25);
+  --navy:#1D4D38; --navy-ink:#FFFFFF;
+  --felt:#1F5A43; --felt-ink:#FFFFFF; --felt-muted:#B5D3C3;
+  --shadow:0 1px 0 rgba(20,45,32,.06),0 6px 18px -10px rgba(20,45,32,.28);
   --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --r:14px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F1520; --surface:#18202D; --surface2:#1F2836; --fg:#E6EBF2; --muted:#94A0B2; --line:#2B3546;
+  --bg:#0E1713; --surface:#16221C; --surface2:#1C2A23; --fg:#E4EEE8; --muted:#93A89C; --line:#29392F;
   --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
   --red:#F0766D; --red-soft:#3A1F1C;
-  --navy:#8DA6F2; --navy-ink:#0B1220;
+  --navy:#7CCBA3; --navy-ink:#0B1A13;
   --felt:#1B4A38; --felt-ink:#F2F5F0; --felt-muted:#9CC3AE;
   --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#0F1520; --surface:#18202D; --surface2:#1F2836; --fg:#E6EBF2; --muted:#94A0B2; --line:#2B3546;
+  --bg:#0E1713; --surface:#16221C; --surface2:#1C2A23; --fg:#E4EEE8; --muted:#93A89C; --line:#29392F;
   --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
   --red:#F0766D; --red-soft:#3A1F1C;
-  --navy:#8DA6F2; --navy-ink:#0B1220;
+  --navy:#7CCBA3; --navy-ink:#0B1A13;
   --felt:#1B4A38; --felt-ink:#F2F5F0; --felt-muted:#9CC3AE;
   --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
   color-scheme:dark;
 }
 /* Skins chosen in settings (預設／米色／萬聖節); placed after the dark blocks so they win in both modes */
 :root[data-skin="beige"]{
-  --bg:#F3EBDD; --surface:#FFFBF3; --surface2:#F7EFE2; --fg:#3A2E22; --muted:#7A6A58; --line:#E3D6C2;
-  --jade:#4F7A3A; --jade-ink:#FFFFFF; --jade-soft:#F1E2CC;
-  --navy:#8A5A2B; --navy-ink:#FFFFFF;
+  --bg:#F8F5EE; --surface:#FFFEFB; --surface2:#F4F0E7; --fg:#33291F; --muted:#7D7262; --line:#E8E1D3;
+  --jade:#4E7A41; --jade-ink:#FFFFFF; --jade-soft:#ECE6D6;
+  --navy:#9A6B3C; --navy-ink:#FFFFFF;
   --red:#B4412F; --red-soft:#F6DED7;
-  --felt:#6B4A2E; --felt-ink:#FBF3E6; --felt-muted:#D9C3A5;
+  --felt:#8A6A48; --felt-ink:#FFFBF2; --felt-muted:#E6D5BC;
   --shadow:0 1px 0 rgba(60,40,20,.06),0 6px 18px -10px rgba(60,40,20,.28);
   color-scheme:light;
 }
@@ -77,16 +77,17 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 }
 /* 薄霧: soft pink-lilac */
 :root[data-skin="mist"]{
-  --bg:#F4EEF6; --surface:#FFFFFF; --surface2:#F8F2FA; --fg:#3B2F45; --muted:#7F7193; --line:#E7DDEE;
-  --jade:#5E54B0; --jade-ink:#FFFFFF; --jade-soft:#EEE8F8;
-  --red:#C9467A; --red-soft:#FBE4EE;
-  --navy:#7B5DB0; --navy-ink:#FFFFFF;
-  --felt:#8E78BE; --felt-ink:#FFFFFF; --felt-muted:#EDE2FA;
+  --bg:#F3EDF7; --surface:#FFFFFF; --surface2:#F7F1FA; --fg:#33223F; --muted:#7A6A8A; --line:#E4D8EE;
+  --jade:#2F8A68; --jade-ink:#FFFFFF; --jade-soft:#EBE2F5;
+  --red:#C2416E; --red-soft:#FBE3EC;
+  --navy:#6A3D9A; --navy-ink:#FFFFFF;
+  --felt:#5B347F; --felt-ink:#FFF8EC; --felt-muted:#D9C7EC;
   --shadow:0 1px 0 rgba(90,60,120,.05),0 8px 22px -12px rgba(140,100,190,.35);
   color-scheme:light;
 }
-:root[data-skin="mist"] .center{background-image:radial-gradient(circle at 30% 20%,rgba(255,214,236,.45),transparent 60%),radial-gradient(circle at 80% 90%,rgba(255,255,255,.25),transparent 55%)}
-:root[data-skin="mist"] .settle-card{background-image:radial-gradient(circle at 20% 0%,rgba(255,214,236,.4),transparent 60%)}
+:root[data-skin="mist"] .center{background-image:radial-gradient(circle at 30% 20%,rgba(255,206,120,.22),transparent 55%),radial-gradient(circle at 80% 90%,rgba(196,150,240,.35),transparent 60%)}
+:root[data-skin="mist"] .settle-card{background-image:radial-gradient(circle at 20% 0%,rgba(255,206,120,.18),transparent 55%),radial-gradient(circle at 90% 100%,rgba(196,150,240,.3),transparent 60%)}
+:root[data-skin="beige"] .center,:root[data-skin="beige"] .settle-card{background-image:radial-gradient(circle at 50% 0%,rgba(255,240,210,.22),transparent 60%)}
 /* 便利店: white shop floor, green counter, orange + red signage */
 :root[data-skin="store"]{
   --bg:#F2F4F1; --surface:#FFFFFF; --surface2:#F6F7F5; --fg:#1D2A22; --muted:#5D6A62; --line:#DCE2DC;
@@ -190,6 +191,9 @@ input[type=text],input[type=number]{font:inherit;font-size:16px;padding:10px 12p
 .multi-row .opt{flex:1}
 .multi-row input{width:84px!important;flex:none;text-align:center}
 #bannerBox:empty,#revengeBox:empty,#surrBox:empty{display:none}
+.skinopt{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25;white-space:normal}
+.skinopt .ltd{font-size:10px;font-weight:700;color:var(--red);letter-spacing:.02em}
+.skinopt.on .ltd{color:inherit;opacity:.85}
 .surr{background:var(--surface);border:1.5px solid var(--red);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
 .surr.done{border:1px dashed var(--line);color:var(--muted)}
 .surr-btns{display:flex;flex-wrap:wrap;gap:6px}.surr-btns .btn{padding:8px 12px;color:var(--red);border-color:var(--red)}
@@ -364,11 +368,12 @@ button.modechip::after{content:" ⇄";font-size:11px}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
 .splash-name{font-family:var(--f-display);font-weight:900;font-size:44px;margin:8px 0 0;color:var(--navy);letter-spacing:.06em;line-height:1.1}
 .splash-name span{display:block;font-family:var(--f-body);font-size:16px;font-weight:700;letter-spacing:.3em;color:var(--muted);margin-top:4px}
-.splash-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:300px;margin-top:28px}
+.splash-pick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:340px;margin-top:28px}
 .splash-go{width:100%;padding:15px 8px;font-size:17px;border-radius:14px}
 .splash-note{margin:4px 0 0;font-size:13px;color:var(--red);font-weight:700}
 .modechip{font-family:var(--f-body);font-size:12px;font-weight:700;color:var(--navy);border:1.5px solid var(--navy);border-radius:999px;padding:1px 8px;letter-spacing:.04em}
-body.hk .side,body.hk #multiField,body.hk #revengeBox{display:none!important}
+body.hk #multiField,body.hk #revengeBox,body.hk .side .grid3,body.hk .side .dingrow,body.hk [data-side="zhading"]{display:none!important}
+body.hk .side .grid2{grid-template-columns:1fr}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.splash-logo{animation:none}
   .tag.gold::after,.tag.legend::after,.tag .spk,.pl.golden,.pl .tag.gold,.pl .tag.legend{animation:none!important}.tag .spk{opacity:1}}
 </style>
@@ -385,6 +390,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
     <div class="splash-pick">
       <button class="btn primary splash-go" data-mode="tw">台牌</button>
       <button class="btn primary splash-go" data-mode="hk">廣東牌</button>
+      <button class="btn primary splash-go" data-mode="pm">跑馬仔</button>
     </div>
     <p class="splash-note" id="splashNote" hidden></p>
   </div>
@@ -419,7 +425,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
   </div>
 
   <div class="side edit-only">
-    <span class="lbl">暗槓／圍骰／順骰／詐糊／詐叮</span>
+    <span class="lbl" id="sideLbl">暗槓／圍骰／順骰／詐糊／詐叮</span>
     <div class="grid4" id="sidePlayerSeg"></div>
     <div class="grid3">
       <button class="btn" data-side="angang" disabled>暗槓<small>收三家</small></button>
@@ -452,6 +458,13 @@ const SHELL = `<div class="splash" id="splash" hidden>
 </div>
 <div class="savebar" id="savingBar" hidden role="status"></div>
 
+<div class="sheet" id="modeSheet" hidden role="dialog" aria-label="揀牌種">
+  <div class="grab"></div>
+  <h3>揀牌種</h3>
+  <div class="grid3" id="modePick"></div>
+  <p class="hint" style="margin:10px 0 0">轉換牌種會清除記錄、重新開局，會先問你確認。</p>
+  <button class="btn" style="width:100%;margin-top:14px" onclick="hideSheet()">取消</button>
+</div>
 <div class="sheet" id="shareSheet" hidden role="dialog" aria-label="分享戰績">
   <div class="grab"></div>
   <h3>分享戰績</h3>
@@ -468,7 +481,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <div class="grab"></div>
   <div id="helpListView">
     <h3 id="helpTitle">牌型說明</h3>
-    <div class="grid2" id="helpModeSeg" style="margin-bottom:10px"></div>
+    <div class="grid3" id="helpModeSeg" style="margin-bottom:10px"></div>
     <div class="seg help-tabs" id="helpTabs"></div>
     <div class="help-grid" id="helpList"></div>
   </div>
@@ -498,7 +511,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
   </div>
   <div class="field">
     <label>牌種</label>
-    <div class="grid2" id="modeSeg2"></div>
+    <div class="grid3" id="modeSeg2"></div>
     <span class="hint" id="modeHint">轉換牌種會清除記錄、重新開局，會先問你確認。</span>
   </div>
   <div id="twFields">
@@ -509,6 +522,12 @@ const SHELL = `<div class="splash" id="splash" hidden>
     <div class="field"><label for="streakFan">每連莊（連+拉，番）</label><input type="number" id="streakFan" inputmode="numeric" min="0" step="1"></div>
   </div>
   <p class="hint">莊家番：莊家食糊或莊家出銃／被自摸時才計。連莊 n 次時另加「每連莊番 × n」（即台灣「連 n 拉 n」）。</p>
+  </div>
+  <div id="pmFields" hidden>
+    <div class="field"><label for="pmUnit">每底</label><div class="prefix"><span>HK$</span><input type="number" id="pmUnit" inputmode="decimal" min="0" step="0.5"></div></div>
+    <div class="field"><label>封頂</label><div class="grid2" id="pmCapSeg"></div></div>
+    <div class="field"><label>莊家連莊加注（跑馬）</label><div class="grid2" id="pmDealerSeg"></div></div>
+    <p class="hint" id="pmTable"></p>
   </div>
   <div id="hkFields">
     <div class="grid2">
@@ -643,9 +662,33 @@ const HK_CATALOG = [
   ["天糊",13,"莊家起手即糊"],["地糊",13,"閒家第一隻摸牌即糊"],["人糊",13,"第一巡食人"],["八仙過海",13,"八隻花"],["七搶一",13,""]]},
 ];
 const FAN_OF = {}; CATALOG.concat(HK_CATALOG).forEach(c=>c.items.forEach(i=>{ if(!(i[0] in FAN_OF)) FAN_OF[i[0]]=i[1]; }));
+// 跑馬仔：香港家庭玩法，雞糊都食得；番數細、封頂低；莊家連莊每鋪加注（跑馬）
+const PM_CATALOG = [
+ {g:"基本", items:[
+  ["雞糊",0,"冇任何番種都食得"],["自摸",1,""],["門前清",1,"冇上冇碰冇明槓"],["平糊",1,"全順子，冇番子、冇花"],["無花",1,""],["正花",1,"自己位嘅花，每隻 1 番"],
+  ["番子（中／發／白）",1,"每組刻子 1 番"],["正風（門風）",1,""],["圈風",1,""],["搶槓",1,""],["海底撈月",1,"摸最後一隻牌自摸"],["槓上自摸",1,""]]},
+ {g:"牌型", items:[
+  ["對對糊",1,"全刻子"],["混一色",1,"一門數字 + 番子"],["清一色",2,"全一門數字"],["混么九",2,"全 1／9 + 番子"],
+  ["小三元",2,"中發白兩組刻子 + 一對"],["大三元",3,"中發白三組刻子"],["坎坎糊",3,"全暗刻自摸"],["小四喜",3,"四風三組刻子 + 一對"]]},
+ {g:"例牌（封頂）", items:[
+  ["大四喜",13,""],["字一色",13,""],["清么九",13,""],["十三么",13,""],["九子連環",13,""],["十八羅漢",13,"四個槓"],
+  ["天糊",13,"莊家起手即糊"],["地糊",13,"閒家第一隻摸牌即糊"],["人糊",13,"第一巡食人"],["八仙過海",13,"八隻花"]]},
+];
 const isHK = () => state.mode === "hk";
-const curCatalog = () => isHK() ? HK_CATALOG : CATALOG;
-const unitRate = () => { const r = isHK() ? state.hk.unit : state.rate; return r > 0 ? r : 1; };
+const isPM = () => state.mode === "pm";
+const isCant = () => state.mode === "hk" || state.mode === "pm";     // 廣東牌一族（13 張）
+const catalogOf = m => m==="hk" ? HK_CATALOG : m==="pm" ? PM_CATALOG : CATALOG;
+const curCatalog = () => catalogOf(state.mode);
+const curCap = () => isPM() ? state.pm.cap : state.hk.cap;
+const curMin = () => isPM() ? 0 : state.hk.min;
+const unitRate = () => { const r = isHK() ? state.hk.unit : isPM() ? state.pm.unit : state.rate; return r > 0 ? r : 1; };
+const PT_UNIT = () => isHK() ? "點" : isPM() ? "底" : "番";
+const RATE_TXT = () => isHK() ? `每點 HK$${state.hk.unit}` : isPM() ? `每底 HK$${state.pm.unit}` : `每番 HK$${state.rate}`;
+// 詐糊（廣東牌／跑馬仔）：賠三家，每家按「封頂自摸」嗰份計
+function cantZhahuEach(){
+  if(isPM()) return Math.round(Math.pow(2, state.pm.cap) * state.pm.unit * 100)/100;
+  return Math.round(hkPoints(state.hk.cap) * state.hk.unit / 2 * 100)/100;
+}
 // 廣東牌點數：半辣上 = 4 番後每番 ×1.5／×1.33 交替（16,24,32,48,64…）；全辣上 = 每番 ×2
 function hkPoints(fan){
   const f = Math.max(0, Math.min(fan, state.hk.cap));
@@ -658,7 +701,8 @@ function askConfirm(title, text, okText, onOk){
   $("cfNo").onclick = ()=>{ box.hidden = true; };
   $("cfYes").onclick = ()=>{ box.hidden = true; onOk(); };
 }
-const MODE_NAME = m => m==="hk" ? "廣東牌" : "台牌";
+const MODE_NAME = m => m==="hk" ? "廣東牌" : m==="pm" ? "跑馬仔" : "台牌";
+const MODES = [["tw","台牌"],["hk","廣東牌"],["pm","跑馬仔"]];
 function switchMode(m, after){
   if(!canWrite || saving || m===state.mode){ if(after) after(); return; }
   const n = state.hands.length;
@@ -682,7 +726,7 @@ function closeSplash(){
 const DEFAULT_STATE = () => ({
   v:1, players:["阿明","阿強","阿芬","阿珍"], rate:1, base:5, dealerFan:1, streakFan:2,
   startDealer:0, dealer:0, streak:0, round:0, hands:[], updatedAt:0,
-  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}
+  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}, pm:{unit:1, cap:3, dealer:true}
 });
 let state = DEFAULT_STATE();
 const KEY = "hktw-mj-standalone";
@@ -701,6 +745,18 @@ const cls = v => v>0?"pos":v<0?"neg":"zero";
 
 function computeWin(winner, discarder, fan){
   const deltas = [0,0,0,0], rows = [];
+  if(isPM()){
+    // 跑馬仔：每份 = 每底 × 2^番（封頂）；自摸三家各俾一份，出銃包一份；莊家有份就另加 (1 + 連莊數) 底
+    const P = state.pm, f = Math.max(0, Math.min(fan, P.cap)), X = Math.pow(2, f) * P.unit;
+    const payers = discarder===null ? [0,1,2,3].filter(p=>p!==winner) : [discarder];
+    for(const p of payers){
+      const dl = (P.dealer && (winner===state.dealer || p===state.dealer)) ? (1 + state.streak) * P.unit : 0;
+      const amt = Math.round((X + dl)*100)/100;
+      deltas[p] -= amt; deltas[winner] += amt;
+      rows.push({p, bonus:dl, total:fan, amt, label:`${f}番 = ${Math.pow(2,f)}底${dl?` + 莊${1+state.streak}底`:""}`});
+    }
+    return {deltas, rows};
+  }
   if(isHK()){
     const pts = hkPoints(fan), X = pts * state.hk.unit;
     const shares = discarder===null
@@ -728,7 +784,7 @@ function computeWin(winner, discarder, fan){
 // 投降：閒家喺連莊 3／6／9… 時投降，之後佢同莊家之間嘅連莊番由 0 重新計（過莊後清除）
 const surrOf = p => (state.surr && state.surr[p]) || 0;
 const effStreak = p => Math.max(0, state.streak - surrOf(p));
-const canSurrNow = p => !isHK() && !state.ended && p!==state.dealer && state.streak>=3 && state.streak%3===0 && surrOf(p) < state.streak;
+const canSurrNow = p => !isCant() && !state.ended && p!==state.dealer && state.streak>=3 && state.streak%3===0 && surrOf(p) < state.streak;
 function recordSurrender(p){
   if(!canSurrNow(p)) return;
   const prev = snap();
@@ -752,7 +808,7 @@ function advanceDealer(){
 const MULTI = {2:{name:"雙響", fan:5, revenge:10}, 3:{name:"三響", fan:10, revenge:20}};
 function recordWins(list, discarder){
   const prev = snap();
-  const n = list.length, M = isHK() ? null : (MULTI[n] || null);
+  const n = list.length, M = isCant() ? null : (MULTI[n] || null);
   const group = n>1 ? Date.now() : null;
   const R = state.revenge;
   let usedRevenge = false;
@@ -794,9 +850,10 @@ let dingIdx = 0;
 function sideFan(type){ const S = SIDE[type]; return S.fan ? S.fan + (S.ding ? DING[dingIdx][1] : 0) : state.base; }
 function recordSide(type, p){
   const fanEach = sideFan(type);
-  const amt = Math.round(fanEach * state.rate * 100)/100;
+  const cz = isCant() && type==="zhahu";
+  const amt = cz ? cantZhahuEach() : Math.round(fanEach * state.rate * 100)/100;
   const S = SIDE[type];
-  const desc = S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}` : S.desc;
+  const desc = cz ? `賠三家各 $${amt}（按封頂自摸計）` : S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}` : S.desc;
   const sign = SIDE[type].collect ? 1 : -1;
   const deltas = [0,0,0,0].map((_,i)=> i===p ? sign*amt*3 : -sign*amt);
   const prev = snap();
@@ -817,7 +874,30 @@ function undo(){
 const $ = id => document.getElementById(id);
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 
-const SKINS = [["default","預設"],["beige","米色"],["mist","薄霧"],["store","便利店"],["halloween","萬聖節"]];
+const SKINS = [["default","墨綠"],["beige","米白"],["mist","紫薯"],["store","便利店"],["halloween","萬聖節"]];
+// 限時主題：到期後非 VIP 喺選項度見唔到；正在用緊嘅人照用，直至自己換走（換走前會提示）
+const SKIN_LIMIT = {halloween: new Date("2026-11-01T00:00:00+08:00").getTime()};
+const skinName = k => (SKINS.find(x=>x[0]===k) || [k,k])[1];
+const skinVip = () => !!(window.__isVip && window.__isVip());
+const skinExpired = k => !!SKIN_LIMIT[k] && Date.now() >= SKIN_LIMIT[k];
+const curSkin = () => (window.__getSkin ? window.__getSkin() : state.skin) || "default";
+function skinButtonsHTML(){
+  const cur = curSkin();
+  return SKINS.filter(([k])=>!skinExpired(k) || skinVip() || k===cur).map(([k,n])=>{
+    const lim = SKIN_LIMIT[k] ? new Date(SKIN_LIMIT[k] - 1) : null;
+    return `<button class="opt skinopt${k===cur?" on":""}" data-k="${k}">${n}${lim ? `<small class="ltd">${skinExpired(k) ? "限時 · 已下架" : `限時 · 至 ${lim.getMonth()+1}/${lim.getDate()}`}</small>` : ""}</button>`;
+  }).join("");
+}
+function chooseSkin(k, done){
+  const cur = curSkin();
+  if(k===cur){ if(done) done(); return; }
+  const go = () => { if(window.__setSkin) window.__setSkin(k); else { state.skin = k; save(); } applySkin(); if(done) done(); };
+  if(skinExpired(cur) && !skinVip()){
+    askConfirm(`${skinName(cur)}為限時主題`, `修改為其他主題後，將無法再次選擇${skinName(cur)}。`, "確認修改", go);
+    return;
+  }
+  go();
+}
 function applySkin(){
   let k = null; try{ k = localStorage.getItem("fansyu-skin"); }catch(e){}
   k = k || state.skin || "default";
@@ -832,7 +912,7 @@ function render(){
   const handNo = state.hands.filter(isHandStart).length + 1;
   let html = `<div class="center"><div class="rw">${rw}</div><div class="rwl">${rw}風圈${state.round>=4?` · 第${Math.floor(state.round/4)+1}將`:""}</div>
     <div class="hn">第 ${handNo} 鋪 · ${esc(state.players[state.dealer])} 做莊</div>
-    ${state.streak>0?`<div class="streak">${isHK()?`連莊 ${state.streak}`:`連${state.streak} 拉${state.streak}`}</div>`:""}</div>`;
+    ${state.streak>0?`<div class="streak">${isCant()?`連莊 ${state.streak}`:`連${state.streak} 拉${state.streak}`}</div>`:""}</div>`;
   for(let p=0;p<4;p++){
     const isD = p===state.dealer;
     html += `<button class="seat${isD?" dealer":""}" style="grid-area:${SEAT_AREA[p]}" data-seat="${p}" aria-label="${esc(state.players[p])} 食糊">
@@ -845,9 +925,11 @@ function render(){
   $("table").innerHTML = html;
   $("table").querySelectorAll(".seat").forEach(b=>b.onclick=()=>openWin(+b.dataset.seat));
 
-  document.body.classList.toggle("hk", isHK());
-  $("modeChip").textContent = isHK() ? "廣東牌" : "台牌";
-  $("rulesLine").innerHTML = isHK()
+  document.body.classList.toggle("hk", isCant());
+  $("modeChip").textContent = MODE_NAME(state.mode);
+  $("rulesLine").innerHTML = isPM()
+    ? `<span>每底 <b>HK$${state.pm.unit}</b></span><span><b>雞糊</b>起糊</span><span><b>${state.pm.cap}</b> 番封頂（×${Math.pow(2,state.pm.cap)}）</span><span>自摸三家各俾</span>${state.pm.dealer?`<span>莊家<b>跑馬</b>加注</span>`:""}`
+    : isHK()
     ? `<span>每點 <b>HK$${state.hk.unit}</b></span><span><b>${state.hk.min}</b> 番起糊</span><span><b>${state.hk.cap}</b> 番爆棚</span><span><b>${state.hk.scale==="full"?"全辣上":"半辣上"}</b></span><span><b>${state.hk.shoot==="half"?"半銃":"全銃"}</b></span>`
     : `<span>每番 <b>HK$${state.rate}</b></span><span>底 <b>${state.base}</b> 番</span><span>莊 <b>${state.dealerFan}</b> 番</span><span>每連莊 <b>${state.streakFan}</b> 番</span>`;
 
@@ -861,9 +943,9 @@ function render(){
     const done = [0,1,2,3].filter(p=>p!==state.dealer && surrOf(p)>0);
     const btns = offer.filter(showSurrBtn);
     let h = "";
-    if(!isHK() && offer.length) h += `<div class="surr"><span><b>${esc(state.players[state.dealer])} 連莊 ${state.streak}</b>：閒家可以投降，之後對佢嘅連莊番由 0 重新計。</span>
+    if(!isCant() && offer.length) h += `<div class="surr"><span><b>${esc(state.players[state.dealer])} 連莊 ${state.streak}</b>：閒家可以投降，之後對佢嘅連莊番由 0 重新計。</span>
       ${btns.length ? `<div class="surr-btns">${btns.map(p=>`<button class="btn" data-surr="${p}">${esc(state.players[p])} 投降</button>`).join("")}</div>` : `<span class="hint">等閒家喺自己手機揀。</span>`}</div>`;
-    if(!isHK() && done.length) h += `<div class="surr done">已投降：${done.map(p=>`${esc(state.players[p])}（連${surrOf(p)}）`).join("、")}</div>`;
+    if(!isCant() && done.length) h += `<div class="surr done">已投降：${done.map(p=>`${esc(state.players[p])}（連${surrOf(p)}）`).join("、")}</div>`;
     $("surrBox").innerHTML = h;
     $("surrBox").querySelectorAll("[data-surr]").forEach(b=>b.onclick=()=>askSurrender(+b.dataset.surr));
   }
@@ -902,23 +984,26 @@ function renderSide(){
   const amt = Math.round(state.base * state.rate * 100)/100;
   $("dingSeg").innerHTML = DING.map((d,i)=>`<button class="opt${i===dingIdx?" on":""}" data-d="${i}">${d[0]}${d[1]?" "+d[1]:""}</button>`).join("");
   $("dingSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ dingIdx=+b.dataset.d; renderSide(); });
-  document.querySelector('[data-side="zhahu"] small').textContent = `比三家各 ${sideFan("zhahu")} 番`;
+  $("sideLbl").textContent = isCant() ? "詐糊" : "暗槓／圍骰／順骰／詐糊／詐叮";
+  document.querySelector('[data-side="zhahu"] small').textContent = isCant() ? `賠三家各 $${cantZhahuEach()}（按封頂自摸計）` : `比三家各 ${sideFan("zhahu")} 番`;
   document.querySelector('[data-side="zhading"] small').textContent = `比三家各 ${sideFan("zhading")} 番`;
   document.querySelectorAll("[data-side]").forEach(b=>{
     b.disabled = sidePlayer===null;
     b.onclick = ()=>{
       if(sidePlayer===null || !canWrite || saving) return;
       const p = sidePlayer, t = b.dataset.side; sidePlayer = null;
-      const each = Math.round(sideFan(t) * state.rate * 100)/100;
+      const each = (isCant() && t==="zhahu") ? cantZhahuEach() : Math.round(sideFan(t) * state.rate * 100)/100;
       recordSide(t, p);
       $("sideHint").textContent = `已記錄：${state.players[p]} ${SIDE[t].name}，${SIDE[t].collect?"收":"比"}三家各 $${each}。`;
     };
   });
-  if(sidePlayer!==null) $("sideHint").textContent = `${state.players[sidePlayer]}：暗槓／圍骰收三家各 $${amt}，順骰比三家各 $${amt}；詐糊／詐叮按掣上番數比三家。`;
+  if(sidePlayer!==null) $("sideHint").textContent = isCant()
+    ? `${state.players[sidePlayer]} 詐糊：賠三家各 $${cantZhahuEach()}（${isPM()?`封頂 ${state.pm.cap} 番自摸`:`${state.hk.cap} 番爆棚自摸`}嗰份）。`
+    : `${state.players[sidePlayer]}：暗槓／圍骰收三家各 $${amt}，順骰比三家各 $${amt}；詐糊／詐叮按掣上番數比三家。`;
 }
 
 function resetGame(){
-  const keep = {mode:state.mode, hk:state.hk, skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
+  const keep = {mode:state.mode, hk:state.hk, pm:state.pm, skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
   state = Object.assign(DEFAULT_STATE(), keep, {dealer:keep.startDealer});
   render(); save();
 }
@@ -945,7 +1030,7 @@ const TAGS = [
   {id:20, name:"Sugar Daddy",      desc:"最受歡迎麻雀腳。",                  test:s=>s.rank===4 && s.pts<-500},
 ];
 // 廣東牌：照搬台牌 18 個稱號，門檻按 10 番封頂嘅點數比例調整（U = 1 鋪起糊+1番嘅點數 ÷ 16，預設 3 番起糊、半辣上 = 1）
-const HK_U = () => hkPoints((state.hk.min||3)+1) / 16;
+const HK_U = () => isPM() ? Math.pow(2, Math.min(1, state.pm.cap)) * 0.1 : hkPoints((state.hk.min||3)+1) / 16;
 const HK_TAGS = [
   {id:1,  name:"根本不是一個Level", desc:"大佬比左$20我，今晚唱K我既", test:s=>s.rank===1 && s.lead>600*HK_U()},
   {id:2,  name:"人生勝利組",       desc:"No Bullshit! 我地一齊贏!",         test:s=>s.rank===1 && s.lead>400*HK_U() && s.lead<=600*HK_U()},
@@ -959,14 +1044,14 @@ const HK_TAGS = [
   {id:12, name:"強迫症",           desc:"唔對稱既糊唔食。",                  test:s=>s.ddh>6},
   {id:13, name:"羅莽連彈",         desc:"我跟羅莽學左一招半式。",            test:s=>s.maxConsec>5},
   {id:14, name:"路人甲",           desc:"我只係路過，你地繼續。",            test:s=>s.pts>0 && s.wins<2 && s.discards<2 && s.discards!==0},
-  {id:15, name:"奪命劍客",         desc:"報酬唔高，我唔出手。",              test:s=>s.pts>0 && s.wins>3 && s.winFans.every(f=>f>=8)},
+  {id:15, name:"奪命劍客",         desc:"報酬唔高，我唔出手。",              test:s=>s.pts>0 && s.wins>3 && s.winFans.every(f=>f>=(isPM() ? Math.min(3, state.pm.cap) : 8))},
   {id:16, name:"臥龍",             desc:"觀星不需要望遠鏡。",                test:s=>s.pts>0 && s.discards===0},
   {id:17, name:"小人物",           desc:"存在過，但不多。",                  test:s=>s.pts>0 && s.pts<20*HK_U()},
   {id:18, name:"單槓運動員",       desc:"我既目標從來唔係靠食糊。",          test:s=>s.kangWins>=1},
   {id:19, name:"大老闆",           desc:"大水喉，派人頭。",                  test:s=>s.discards>10 && s.rank>=3},
   {id:20, name:"Sugar Daddy",      desc:"最受歡迎麻雀腳。",                  test:s=>s.rank===4 && s.pts<-350*HK_U()},
 ];
-const curTags = () => isHK() ? HK_TAGS : TAGS;
+const curTags = () => isCant() ? HK_TAGS : TAGS;
 /* 特殊牌型稱號：legend = 金光（傳說），rare = 銀色（稀有）；冇 mode = 兩邊共用 */
 const SPECIALS = [
   {id:"s1",  tier:"legend", name:"天選之人",   desc:"未開波已經贏咗。",               items:["天糊"]},
@@ -993,14 +1078,14 @@ const SPECIALS = [
   {id:"t5",  tier:"rare",   name:"天生叮者",   desc:"未摸牌已經叮。",                 items:["天叮"], mode:"tw"},
   {id:"t6",  tier:"rare",   name:"乞衣幫幫主", desc:"全靠大家施捨。",                 items:["全求人"], mode:"tw"},
   {id:"h1",  tier:"rare",   name:"槓上加槓",   desc:"開槓開到開花結果。",             items:["槓上槓自摸"], mode:"hk"},
-  {id:"h2",  tier:"rare",   name:"頂心頂肺",   desc:"番數已經頂到天花板。",           items:[], mode:"hk", test:h=>h.fan>=state.hk.cap},
+  {id:"h2",  tier:"rare",   name:"頂心頂肺",   desc:"番數已經頂到天花板。",           items:[], mode:"hk", test:h=>h.fan>=curCap()},
 ];
 const WITNESS = {id:"w1", tier:"rare", name:"見證歷史", desc:"我出嗰隻，成就咗佢嘅傳說。"};
 const SPECIAL_BY_ID = Object.fromEntries(SPECIALS.concat([WITNESS]).map(t=>[t.id,t]));
 const TIER_RANK = {legend:2, rare:1};
 function specialsFor(h){
   const names = new Set((h.items||[]).map(x=>x.name));
-  return SPECIALS.filter(t=>(!t.mode || t.mode===state.mode) && (t.items.some(n=>names.has(n)) || (t.test && t.test(h))));
+  return SPECIALS.filter(t=>(!t.mode || t.mode===state.mode || (t.mode==="hk" && isPM())) && (t.items.some(n=>names.has(n)) || (t.test && t.test(h))));
 }
 const betterSp = (a,b) => !b || TIER_RANK[a.t.tier]>TIER_RANK[b.t.tier] || (TIER_RANK[a.t.tier]===TIER_RANK[b.t.tier] && a.fan>b.fan);
 const r2 = v => Math.round(v*100)/100;
@@ -1017,7 +1102,7 @@ function computeStats(){
     if(posSum>0) h.deltas.forEach((di,i)=>{ if(di<0) h.deltas.forEach((dj,j)=>{ if(dj>0){ const f = -di*dj/posSum; S[j].vs[i]+=f; S[i].vs[j]-=f; } }); });
     h.deltas.forEach((d,i)=>{ const s=S[i]; s.money += d; s.pts += d/rate; s.minRun = Math.min(s.minRun, s.pts); if(Math.abs(s.pts) > 1e-9) s.started = true; if(s.started && s.pts <= 1e-9) s.everNeg = true; });
     if(h.kind==="win"){
-      const w = S[h.winner]; w.wins++; w.winFans.push(h.fan); if(isHK() ? h.fan<=(state.hk.min||3) : h.fan<10) w.smallWins++;
+      const w = S[h.winner]; w.wins++; w.winFans.push(h.fan); if(isPM() ? h.fan<=0 : isHK() ? h.fan<=(state.hk.min||3) : h.fan<10) w.smallWins++;
       if((h.items||[]).some(x=>x.name==="槓上自摸"||x.name==="槓上槓自摸")) w.kangWins++;
       const lead = !h.group || h.groupFirst;
       if(h.discarder===null) w.selfDraws++; else if(lead) S[h.discarder].discards++;
@@ -1085,13 +1170,13 @@ function settleHTML(forShare){
       <div class="rk">${s.rank}</div>
       <div class="pname">${first?`<span class="crown" aria-label="冠軍">👑</span>`:""}<b>${esc(state.players[s.p])}</b>
         <span class="pstats num">食糊 ${s.wins} · 自摸 ${s.selfDraws} · 出銃 ${s.discards}</span></div>
-      <div class="pscore num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} ${isHK()?"點":"番"}</small></div>
+      <div class="pscore num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} ${PT_UNIT()}</small></div>
       ${forShare ? "" : spHtml + (tagsHtml ? `<div class="tags">${tagsHtml}</div>` : "")}
       ${extra}
     </div>`;
   }).join("");
   return `<div class="settle-card">
-    <div class="st-head"><span class="st-brand">${forShare?`<span class="slogo">${LOGO_D}</span>`:""}<span class="st-title">結算</span><span class="st-mode">${MODE_NAME(state.mode)}</span></span><span class="st-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</span></div>
+    <div class="st-head"><span class="st-brand">${forShare?`<span class="slogo">${LOGO_D}</span>`:""}<span class="st-title">結算</span><span class="st-mode">${MODE_NAME(state.mode)}</span></span><span class="st-meta num">${date} · ${pu} 鋪 · ${RATE_TXT()}</span></div>
     ${rows}
     ${forShare?`<div class="st-foot"><span class="flogo">${LOGO_D}</span>番鼠 · 港台麻雀計番</div>`:""}
   </div>`;
@@ -1111,9 +1196,9 @@ function storyHTML(){
     const legendRk = (sp && sp.t.tier==="legend") || s.tags.some(t=>t.id===1);
     return `<div class="sty-row${first?" first":""}"><div class="sty-rk${legendRk?" goldrk":""}">${s.rank}</div>
       <div><div class="sty-name">${first?"👑 ":""}${esc(state.players[s.p])}</div><div class="sty-stats">食糊 ${s.wins} · 自摸 ${s.selfDraws} · 出銃 ${s.discards}</div></div>
-      <div class="sty-score num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} ${isHK()?"點":"番"}</small></div>${tags}</div>`;
+      <div class="sty-score num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} ${PT_UNIT()}</small></div>${tags}</div>`;
   }).join("");
-  return `<div class="story"><div class="sty-head"><span class="sty-logo">${LOGO_D}</span><div><div class="sty-title">結算<span class="st-mode">${MODE_NAME(state.mode)}</span></div><div class="sty-meta num">${date} · ${pu} 鋪 · ${isHK()?`每點 HK$${state.hk.unit}`:`每番 HK$${state.rate}`}</div></div></div>
+  return `<div class="story"><div class="sty-head"><span class="sty-logo">${LOGO_D}</span><div><div class="sty-title">結算<span class="st-mode">${MODE_NAME(state.mode)}</span></div><div class="sty-meta num">${date} · ${pu} 鋪 · ${RATE_TXT()}</div></div></div>
     <div class="sty-list">${rows}</div><div class="sty-foot"><span>${LOGO_D}</span>番鼠 · 港台麻雀計番</div></div>`;
 }
 function renderSettle(){
@@ -1201,6 +1286,7 @@ $("closeShare").onclick = hideSheet;
 
 /* 牌型說明：d = 解釋，ex = 例子（m 萬、p 筒、s 索；E S W N 東南西北；C 中、F 發、P 白；f1–f8 花：梅蘭菊竹春夏秋冬） */
 const HELP = {
+ "雞糊":{d:"冇任何番種嘅糊（0 番）。跑馬仔雞糊都食得，計一份底。", ex:"123m 456p 789s EEE CC"},
  "門清":{d:"由開局到食糊，冇上、冇碰、冇明槓，所有牌都係自己摸返嚟。"},
  "自摸":{d:"食糊嗰隻牌係自己摸返嚟，唔係食人哋打出嘅牌。"},
  "門清自摸":{d:"門清之餘，最後嗰隻牌仲係自己摸返嚟。"},
@@ -1319,14 +1405,15 @@ function tilesHTML(ex){
 }
 let helpTab = 0, helpMode = null;
 const helpLocked = () => window.__helpLocked ? window.__helpLocked() : false;
-const helpHK = () => (helpLocked() ? state.mode : (helpMode || state.mode)) === "hk";
-function helpFor(name){ return (helpHK() && HELP["hk:"+name]) || HELP[name] || null; }
+const helpM = () => helpLocked() ? state.mode : (helpMode || state.mode);
+const helpHK = () => helpM() !== "tw";
+function helpFor(name){ const m = helpM(); return (m!=="tw" && (HELP[m+":"+name] || HELP["hk:"+name])) || HELP[name] || null; }
 function renderHelpList(){
-  const cat = helpHK() ? HK_CATALOG : CATALOG;
+  const cat = catalogOf(helpM());
   if(helpTab >= cat.length) helpTab = 0;
-  $("helpTitle").textContent = `牌型說明（${helpHK()?"廣東牌":"台牌"}）`;
+  $("helpTitle").textContent = `牌型說明（${MODE_NAME(helpM())}）`;
   $("helpModeSeg").hidden = helpLocked();
-  $("helpModeSeg").innerHTML = [["tw","台牌"],["hk","廣東牌"]].map(([k,n])=>`<button class="opt${(helpHK()?"hk":"tw")===k?" on":""}" data-hm="${k}">${n}</button>`).join("");
+  $("helpModeSeg").innerHTML = MODES.map(([k,n])=>`<button class="opt${helpM()===k?" on":""}" data-hm="${k}">${n}</button>`).join("");
   $("helpModeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ helpMode = b.dataset.hm; helpTab = 0; renderHelpList(); });
   $("helpTabs").innerHTML = cat.map((c,i)=>`<button class="opt${i===helpTab?" on":""}" data-t="${i}">${esc(c.g)}</button>`).join("");
   $("helpTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{ helpTab=+b.dataset.t; renderHelpList(); });
@@ -1347,7 +1434,12 @@ function showHelpDetail(it){
 $("openHelp").onclick = ()=>{ helpMode = null; $("helpListView").hidden = false; $("helpDetailView").hidden = true; renderHelpList(); showSheet($("helpSheet")); };
 $("helpBack").onclick = ()=>{ $("helpDetailView").hidden = true; $("helpListView").hidden = false; };
 $("closeHelp").onclick = hideSheet;
-$("modeChip").onclick = ()=>{ if(state.ended) return; switchMode(isHK() ? "tw" : "hk"); };
+$("modeChip").onclick = ()=>{
+  if(state.ended || !canWrite) return;
+  $("modePick").innerHTML = MODES.map(([k,n])=>`<button class="btn${k===state.mode?" primary":""}" data-pm="${k}">${n}</button>`).join("");
+  $("modePick").querySelectorAll("button").forEach(b=>b.onclick=()=>{ hideSheet(); if(b.dataset.pm!==state.mode) switchMode(b.dataset.pm); });
+  showSheet($("modeSheet"));
+};
 
 /* ---------- sheets ---------- */
 let openSheet = null;
@@ -1365,10 +1457,15 @@ function fillSetup(){
   $("startDealerSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(state.hands.length) return; state.startDealer = state.dealer = +b.dataset.i; state.streak=0; state.round=0; save(); fillSetup(); render(); });
   $("startDealerHint").textContent = locked ? "已開始記錄，要改開局莊家請先重新開局。" : "開局莊家坐東風位，之後按逆時針過莊。";
   resetArmed=false; $("resetBtn").textContent = "清除所有記錄，重新開局";
-  const MODES = [["tw","台牌"],["hk","廣東牌"]];
   $("modeSeg2").innerHTML = MODES.map(([k,n])=>`<button class="opt${k===state.mode?" on":""}" data-m="${k}">${n}</button>`).join("");
   $("modeSeg2").querySelectorAll("button").forEach(b=>b.onclick=()=>switchMode(b.dataset.m, fillSetup));
-  $("twFields").hidden = isHK(); $("hkFields").hidden = !isHK();
+  $("twFields").hidden = isCant(); $("hkFields").hidden = !isHK(); $("pmFields").hidden = !isPM();
+  $("pmUnit").value = state.pm.unit;
+  const pseg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.pm[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
+    $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.pm[key] = v==="true" ? true : v==="false" ? false : +v; render(); save(); fillSetup(); }); };
+  pseg("pmCapSeg", [[2,"2 番（×4）"],[3,"3 番（×8）"],[4,"4 番（×16）"],[5,"5 番（×32）"]], "cap");
+  pseg("pmDealerSeg", [[true,"有（跑馬）"],[false,"冇"]], "dealer");
+  $("pmTable").textContent = `每份 = 每底 × 2^番：雞糊 $${state.pm.unit}、1 番 $${state.pm.unit*2}、封頂 ${state.pm.cap} 番 $${state.pm.unit*Math.pow(2,state.pm.cap)}。自摸三家各俾一份，出銃者包一份。${state.pm.dealer?"莊家食糊或者俾錢時，另加（1 + 連莊數）底。":""}`;
   $("hkUnit").value = state.hk.unit; $("hkMin").value = state.hk.min;
   const seg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.hk[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
     $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.hk[key] = isNaN(+v) ? v : +v; render(); save(); fillSetup(); }); };
@@ -1378,14 +1475,15 @@ function fillSetup(){
   const ex = [state.hk.min, Math.min(state.hk.min+2,state.hk.cap), state.hk.cap].map(f=>`${f}番 ${hkPoints(f)}點（$${Math.round(hkPoints(f)*state.hk.unit*100)/100}）`).join("、");
   $("hkTable").textContent = `${state.hk.shoot==="half"?"出銃者俾一半，其餘兩家各俾四分之一":"出銃者俾全數"}；自摸三家各俾一半。例：${ex}。`;
   const cur = state.skin || "default";
-  $("skinSeg").innerHTML = SKINS.map(([k,n])=>`<button class="opt${k===cur?" on":""}" data-k="${k}">${n}</button>`).join("");
-  $("skinSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ try{ localStorage.setItem("fansyu-skin", b.dataset.k); }catch(e){} state.skin = b.dataset.k; applySkin(); save(); fillSetup(); });
+  $("skinSeg").innerHTML = skinButtonsHTML();
+  $("skinSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>chooseSkin(b.dataset.k, fillSetup));
 }
 $("openSetup").onclick = ()=>{ fillSetup(); showSheet($("setupSheet")); };
 $("closeSetup").onclick = hideSheet;
 for(let i=0;i<4;i++) $("p"+i).addEventListener("change", e=>{ state.players[i] = e.target.value.trim() || `玩家${i+1}`; render(); save(); fillSetup(); });
 [["hkUnit","unit"],["hkMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v); if(!isNaN(v) && v>=0 && (k!=="min" || v<=state.hk.cap)){ state.hk[k]=v; render(); save(); fillSetup(); } else e.target.value = state.hk[k]; }));
 [["rate",0.1],["base",0],["dealerFan",0],["streakFan",0]].forEach(([k])=>$(k).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state[k]=v; render(); save(); } else e.target.value = state[k]; }));
+$("pmUnit").addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.pm.unit = v; render(); save(); fillSetup(); } else e.target.value = state.pm.unit; });
 $("resetBtn").onclick = ()=>{
   if(!resetArmed){ resetArmed=true; $("resetBtn").textContent = "再按一次確認清除"; return; }
   resetGame(); fillSetup();
@@ -1433,7 +1531,7 @@ function renderWin(){
     $("discarderSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder=+b.dataset.i; renderWin(); });
   }
   // fan
-  $("fanLbl").textContent = isHK() ? `番數（${state.hk.min} 番起糊，${state.hk.cap} 番爆棚）` : "番數（不含底及莊）";
+  $("fanLbl").textContent = isPM() ? `番數（雞糊 0 番都食得，${state.pm.cap} 番封頂）` : isHK() ? `番數（${state.hk.min} 番起糊，${state.hk.cap} 番爆棚）` : "番數（不含底及莊）";
   if(document.activeElement !== $("fanInput")) $("fanInput").value = fanTotal();
   if(fanTotal() > 0) $("winErr").hidden = true;
   const selHtml = ws.items.map((it,i)=>`<button class="chip sel" data-i="${i}">${esc(it.name)} <b>${it.fan}</b><span class="x">✕</span></button>`).join("")
@@ -1446,7 +1544,7 @@ function winList(){
   return [{winner:ws.winner, fan:fanTotal()}].concat(Object.keys(ws.extra).map(k=>({winner:+k, fan:ws.extra[k]||0})));
 }
 function renderPay(){
-  const list = winList(), M = isHK() ? null : MULTI[list.length];
+  const list = winList(), M = isCant() ? null : MULTI[list.length];
   let html = `<div class="lbl" style="margin-bottom:4px">找數${M?`（一炮${M.name}，每位食糊 +${M.fan} 番）`:""}</div>`;
   const R = state.revenge;
   list.forEach(x=>{
@@ -1487,7 +1585,7 @@ $("fanInput").addEventListener("keydown", e=>{ if(e.key==="Enter") e.target.blur
 $("fanMinus").onclick = ()=>{ ws.adj--; if(fanTotal()===0 && ws.adj<0 && ws.items.length===0) ws.adj=0; renderWin(); };
 $("cancelWin").onclick = hideSheet;
 $("confirmWin").onclick = ()=>{
-  if(fanTotal() <= 0 && !(isHK() && state.hk.min===0)){
+  if(fanTotal() <= 0 && !(isCant() && curMin()===0)){
     $("winErr").textContent = "未輸入番數。請揀番種、按 ＋，或直接輸入番數。";
     $("winErr").hidden = false; $("fanInput").focus(); return;
   }
@@ -1495,7 +1593,7 @@ $("confirmWin").onclick = ()=>{
     $("winErr").textContent = `未夠起糊番數（${state.hk.min} 番起糊）。`;
     $("winErr").hidden = false; return;
   }
-  if(isHK()) ws.extra = {};
+  if(isCant()) ws.extra = {};
   const missing = Object.keys(ws.extra).filter(k=>!(ws.extra[k]>0));
   if(missing.length){
     $("winErr").textContent = `請輸入 ${missing.map(k=>state.players[k]).join("、")} 嘅番數。`;
@@ -1518,6 +1616,10 @@ const ONLINE = {
 };
 ONLINE.enabled = !!(ONLINE.cfg || ONLINE.mock);
 let canWriteLocal = true;
+// 主題：每部手機自己記住；VIP 可以揀限時主題
+window.__getSkin = () => { try{ return localStorage.getItem("fansyu-skin"); }catch(e){ return null; } };
+window.__setSkin = k => { try{ localStorage.setItem("fansyu-skin", k); }catch(e){} };
+window.__isVip = () => !!(ONLINE.me && ONLINE.me.vip);
 function applyMode(){ document.body.classList.toggle("ro", !canWrite); }
 
 /* ---------- helpers ---------- */
@@ -1863,7 +1965,7 @@ function renderLobby(){
     </div>
     <div class="card">
       <h3>開房間</h3>
-      <div class="grid2"><button class="btn primary" data-new="tw">台牌房間</button><button class="btn primary" data-new="hk">廣東牌房間</button></div>
+      <div class="grid3"><button class="btn primary" data-new="tw">台牌</button><button class="btn primary" data-new="hk">廣東牌</button><button class="btn primary" data-new="pm">跑馬仔</button></div>
       <p class="hint" style="margin:0">你會做房主，只有房主可以記錄同改資料。</p>
     </div>
     <div class="card">
@@ -2209,7 +2311,7 @@ function xpForGame(){
     let sum = 0;
     for(const h of state.hands){
       if(h.kind!=="win" || h.winner!==p) continue;
-      const f = isHK() ? Math.min(h.fan, state.hk.cap) * XP.hkMult : h.fan;
+      const f = isPM() ? 10 + Math.min(h.fan, state.pm.cap) * 10 : isHK() ? Math.min(h.fan, state.hk.cap) * XP.hkMult : h.fan;
       sum += Math.min(XP.perHand, Math.max(0, f));
     }
     xp[p] = Math.min(XP.perGame, XP.join + sum);
@@ -2306,9 +2408,8 @@ function openLite(){
   $("liteNameField").hidden = !inRoom;
   if(inRoom) $("liteName").value = (ONLINE.roomDoc && ONLINE.roomDoc.members && ONLINE.roomDoc.members[ONLINE.user.uid]) || ONLINE.user.name;
   $("liteNote").textContent = inRoom ? "番數同牌局設定只有房主可以改。" : "番數同牌局設定喺開房或者單機牌局入面嘅「設定」度改。";
-  const cur = (()=>{ try{ return localStorage.getItem("fansyu-skin"); }catch(e){ return null; } })() || state.skin || "default";
-  $("liteSkin").innerHTML = SKINS.map(([k,n])=>`<button class="opt${k===cur?" on":""}" data-k="${k}">${n}</button>`).join("");
-  $("liteSkin").querySelectorAll("button").forEach(b=>b.onclick = () => { try{ localStorage.setItem("fansyu-skin", b.dataset.k); }catch(e){} applySkin(); openLite(); });
+  $("liteSkin").innerHTML = skinButtonsHTML();
+  $("liteSkin").querySelectorAll("button").forEach(b=>b.onclick = () => chooseSkin(b.dataset.k, openLite));
   bindFrameField($("liteFrame"), openLite);
   if(openSheet!==$("liteSheet")) showSheet($("liteSheet"));
 }
