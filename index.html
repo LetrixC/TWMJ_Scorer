@@ -1721,6 +1721,15 @@ async function firebaseBackend(cfg){
     setFrame(uid, frame){ return db.collection("users").doc(uid).update({frame}); },
     async getProfiles(uids){ const out = {}; await Promise.all(uids.map(async u=>{ try{ const s = await db.collection("users").doc(u).get(); if(s.exists) out[u] = s.data(); }catch(e){} })); return out; },
     deleteGame(uid, gameId){ return db.collection("users").doc(uid).collection("games").doc(gameId).delete(); },
+    // 約局
+    async yueCreate(data){ const r = await db.collection("yue").add(data); return r.id; },
+    yueWatch(id, cb){ return db.collection("yue").doc(id).onSnapshot(s=>cb(s.exists ? Object.assign({id:s.id}, s.data()) : null), ()=>cb(null)); },
+    yueWatchMine(uid, cb){ return db.collection("yue").where("members", "array-contains", uid).onSnapshot(q=>cb(q.docs.map(d=>Object.assign({id:d.id}, d.data()))), ()=>cb(null)); },
+    yueHost(id, data){ return db.collection("yue").doc(id).update(Object.assign({}, data, {updatedAt:Date.now()})); },
+    yueSelf(id, uid, entry, join){ const F = firebase.firestore.FieldValue; return db.collection("yue").doc(id).update({["people." + uid]:entry, members: join ? F.arrayUnion(uid) : F.arrayRemove(uid), updatedAt:Date.now()}); },
+    yueGuest(id, key, entry){ return db.collection("yue").doc(id).update({["people." + key]:entry, lastGuest:key, updatedAt:Date.now()}); },
+    yueSetRoom(id, date, r){ return db.collection("yue").doc(id).update({["rooms." + date]:r, updatedAt:Date.now()}); },
+    yueDelete(id){ return db.collection("yue").doc(id).delete(); },
   };
 }
 function mockBackend(){
@@ -1730,6 +1739,11 @@ function mockBackend(){
   let userCb = null;
   const setMe = u => { if(u) sessionStorage.setItem("mock:me", JSON.stringify(u)); else sessionStorage.removeItem("mock:me"); if(userCb) userCb(u); };
   const fail = code => { const e = new Error(code); e.code = code; return e; };
+  const watchKeys = (match, f) => {
+    const a = e => { if(match(e.detail)) f(); }, b = e => { if(e.key && e.key.startsWith("mock:") && match(e.key.slice(5))) f(); };
+    window.addEventListener("mockchange", a); window.addEventListener("storage", b); setTimeout(f, 0);
+    return () => { window.removeEventListener("mockchange", a); window.removeEventListener("storage", b); };
+  };
   return {
     onUser(cb){ userCb = cb; setTimeout(()=>{ const u = me(); cb(u ? Object.assign({email:nickEmail(u.name)}, u) : null); }, 0); },
     async register(nick, pin){ const U = L("users") || {}; const k = nickEmail(nick); if(U[k]) throw fail("auth/email-already-in-use");
@@ -1762,6 +1776,15 @@ function mockBackend(){
     async setFrame(uid, frame){ const P = L("profiles") || {}; (P[uid] = P[uid] || {}).frame = frame; W("profiles", P); },
     async getProfiles(uids){ const P = L("profiles") || {}; const o = {}; uids.forEach(u=>{ if(P[u]) o[u] = P[u]; }); return o; },
     async deleteGame(uid, gameId){ const g = L("games:"+uid) || {}; delete g[gameId]; W("games:"+uid, g); },
+    // 約局（假後台）
+    async yueCreate(data){ const C = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; const id = Array.from({length:20}, ()=>C[Math.floor(Math.random()*62)]).join(""); W("yue:"+id, data); return id; },
+    yueWatch(id, cb){ return watchKeys(k=>k==="yue:"+id, ()=>{ const d = L("yue:"+id); cb(d ? Object.assign({id}, d) : null); }); },
+    yueWatchMine(uid, cb){ return watchKeys(k=>k.startsWith("yue:"), ()=>{ const out = []; for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(k && k.startsWith("mock:yue:")){ const d = L(k.slice(5)); if(d && (d.members||[]).includes(uid)) out.push(Object.assign({id:k.slice(9)}, d)); } } cb(out); }); },
+    async yueHost(id, data){ const d = L("yue:"+id); if(!d) throw fail("not-found"); if(!me() || d.host!==me().uid) throw fail("permission-denied"); W("yue:"+id, Object.assign(d, data, {updatedAt:Date.now()})); },
+    async yueSelf(id, uid, entry, join){ const d = L("yue:"+id); if(!d) throw fail("not-found"); if(!me() || me().uid!==uid) throw fail("permission-denied"); d.people = d.people || {}; d.people[uid] = entry; d.members = (d.members||[]).filter(x=>x!==uid).concat(join ? [uid] : []); d.updatedAt = Date.now(); W("yue:"+id, d); },
+    async yueGuest(id, key, entry){ const d = L("yue:"+id); if(!d) throw fail("not-found"); if(!/^g_/.test(key) || (d.people||{})[key]) throw fail("permission-denied"); d.people = d.people || {}; d.people[key] = entry; d.updatedAt = Date.now(); W("yue:"+id, d); },
+    async yueSetRoom(id, date, r){ const d = L("yue:"+id); if(!d || !me() || d.host!==me().uid) throw fail("permission-denied"); d.rooms = d.rooms || {}; d.rooms[date] = r; W("yue:"+id, d); },
+    async yueDelete(id){ const d = L("yue:"+id); if(!d || !me() || d.host!==me().uid) throw fail("permission-denied"); localStorage.removeItem("mock:yue:"+id); window.dispatchEvent(new CustomEvent("mockchange", {detail:"yue:"+id})); },
   };
 }
 
@@ -1825,6 +1848,25 @@ const ONLINE_CSS = `
 .cal-grid .cd.today{box-shadow:inset 0 0 0 1.5px var(--navy);font-weight:700}
 .cal-grid .cd.mk{background:var(--pop);color:var(--pop-ink);font-weight:700}
 .cal-grid.pk{margin-bottom:8px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px}
+.cal-nav .iconbtn{padding:4px 12px;font-size:16px}
+.cal-grid button.cd{font:inherit;font-size:13px;border:0;cursor:pointer}
+.cal-grid .cd.mk.past{opacity:.55}
+button.yue-row{font:inherit;color:var(--fg);border:0;text-align:left;cursor:pointer;width:100%}
+.yue-n{flex:none;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.yr-room{font-style:normal;font-weight:700;color:var(--jade);border:1px solid var(--jade);border-radius:999px;padding:0 6px}
+.ycard{gap:8px}
+.yc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.yc-top b{font-size:17px}
+.yc-time{font-weight:700;color:var(--navy)}
+.yc-room{display:flex;align-items:center;gap:8px;justify-content:space-between;background:var(--jade-soft);border-radius:10px;padding:8px 10px;font-size:14px}
+.yc-room b{letter-spacing:.12em}.yc-room .btn{padding:6px 14px}
+.yc-acts{display:flex;flex-direction:column;gap:8px}
+.yc-acts a.btn{text-align:center;text-decoration:none;color:var(--fg)}
+.yin-d label{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer}
+.yin-d input{width:20px;height:20px;flex:none;accent-color:var(--navy)}
+.yin-d span{display:flex;flex-direction:column;min-width:0}
+.yin-d small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yin-ok{color:var(--jade)!important;font-weight:700}
 .pkd{background:var(--surface);border:1px solid var(--line);font:inherit;font-size:14px;padding:9px 0!important}
 .pkd.on{background:var(--navy)!important;color:var(--navy-ink);border-color:var(--navy)}
 .pk-month{font-weight:700;font-size:13px;color:var(--muted);margin:6px 0 4px}
@@ -1945,7 +1987,7 @@ function buildOnlineUI(){
   <p class="hint" id="liteNote" style="margin:0 0 10px"></p>
   <button class="btn primary" style="width:100%" id="closeLite">完成</button></div>
 <div class="sheet" id="yueSheet" hidden role="dialog" aria-label="快速約局"><div class="grab"></div>
-  <h3>快速約局</h3><p class="hint" style="margin:0 0 8px">揀未來 31 日內你得閒嘅日子，可以揀多日。</p>
+  <h3 id="yueTitle">快速約局</h3><p class="hint" style="margin:0 0 8px">揀未來 31 日內你得閒嘅日子，可以揀多日。</p>
   <div id="yueCal"></div>
   <p class="hint" id="yueChosen" style="margin:8px 0"></p>
   <div class="field"><label for="yueTime">開枱時間</label><input type="time" id="yueTime" value="20:00"></div>
@@ -1959,16 +2001,11 @@ function buildOnlineUI(){
   <button class="btn" data-sh="copy" style="width:100%;margin-top:8px">複製邀請文字</button>
   <div id="yueImgWrap" hidden><p class="hint" id="yueImgHint"></p><img id="yueImg" alt="番鼠約局邀請函" hidden><button class="btn primary" id="yueImgShare" hidden style="width:100%">分享到 IG</button></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeYueShare">完成</button></div>
-<div class="yinbox" id="yinBox" hidden role="dialog" aria-label="約局邀請"><div class="yin-card">
-  <div class="yin-logo">${LOGO}</div>
-  <div class="yin-title"><b id="yinHost"></b> 約你打麻雀！</div>
-  <p class="hint" style="margin:0">建議日期（揀你得閒嘅加入行事曆）：</p>
-  <div class="yue-list" id="yinDates"></div>
-  <div class="grid2"><button class="btn primary" id="yinApple">加入 iPhone 行事曆</button><button class="btn pop" id="yinSave">記入番鼠日曆</button></div>
-  <button class="btn" id="yinClose">開始用番鼠</button>
-</div></div>
+<div class="yinbox" id="yinBox" hidden role="dialog" aria-label="約局邀請"><div class="yin-card" id="yinCard"></div></div>
+<div class="sheet" id="yueDaySheet" hidden role="dialog" aria-label="約局"><div class="grab"></div><div id="yueDayBody"></div>
+  <button class="btn" style="width:100%;margin-top:14px" id="closeYueDay">關閉</button></div>
 <div class="sheet" id="createSheet" hidden role="dialog" aria-label="創建房間"><div class="grab"></div>
-  <h3>創建房間</h3><p class="hint" style="margin:0 0 12px">揀牌種。你會做房主，只有房主可以記錄同改資料。</p>
+  <h3>創建房間</h3><p class="hint" style="margin:0 0 12px" id="createHint">揀牌種。你會做房主，只有房主可以記錄同改資料。</p>
   <div class="mode-pick"><button class="btn primary big" data-new="hk">廣東牌</button><button class="btn primary big" data-new="tw">台灣牌</button><button class="btn primary big" data-new="pm">跑馬仔</button></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeCreate">取消</button></div>
 <div class="sheet" id="joinSheet" hidden role="dialog" aria-label="加入房間"><div class="grab"></div>
@@ -1985,11 +2022,10 @@ function buildOnlineUI(){
   $("closeLedger").onclick = () => { hideSheet(); liftReset(); };
   $("closeLite").onclick = () => { hideSheet(); liftReset(); };
   $("closeInbox").onclick = () => { hideSheet(); liftReset(); };
-  $("closeCreate").onclick = $("closeJoin").onclick = $("closeYue").onclick = $("closeYueShare").onclick = () => { hideSheet(); liftReset(); };
+  $("closeCreate").onclick = $("closeJoin").onclick = $("closeYue").onclick = $("closeYueShare").onclick = $("closeYueDay").onclick = () => { hideSheet(); liftReset(); };
   $("yueOk").onclick = confirmYue;
   document.querySelectorAll("[data-sh]").forEach(b=>b.onclick = () => shareYue(b.dataset.sh));
   $("yueImgShare").onclick = async () => { try{ await navigator.share({files:[ONLINE.yueFile], title:"番鼠約局"}); }catch(e){} };
-  bindInviteBox();
   document.querySelectorAll("#createSheet [data-new]").forEach(b=>b.onclick = async () => { hideSheet(); liftReset(); await createRoom(b.dataset.new, b); });
   $("joinBtn").onclick = () => joinByCode($("joinCode").value, $("joinBtn"));
   $("joinCode").addEventListener("keydown", ev=>{ if(ev.key==="Enter") joinByCode($("joinCode").value, $("joinBtn")); });
@@ -2104,7 +2140,7 @@ function renderLobby(){
   bindCalendarCard();
   $("lgLedger").onclick = openLedger;
   $("lgInbox").onclick = openInbox;
-  $("lgCreate").onclick = () => showSheet($("createSheet"));
+  $("lgCreate").onclick = () => { ONLINE.yueRoomFor = null; $("createHint").textContent = "揀牌種。你會做房主，只有房主可以記錄同改資料。"; showSheet($("createSheet")); };
   $("lgJoin").onclick = () => { $("joinErr").hidden = true; $("joinCode").value = ""; showSheet($("joinSheet")); setTimeout(()=>$("joinCode").focus(), 50); };
   if($("rejoinBtn")) $("rejoinBtn").onclick = () => joinByCode(last, $("rejoinBtn"));
   $("lgOffline").onclick = () => { leaveRoom(true); hideLobby(); };
@@ -2126,6 +2162,13 @@ async function createRoom(mode, btn){
     let code = null;
     const fresh = Object.assign(DEFAULT_STATE(), {mode, skin:state.skin, gameId:newGameId(),
       players:[ONLINE.user.name, "玩家2", "玩家3", "玩家4"], uids:[ONLINE.user.uid, null, null, null]});
+    // 由約局開房：按報名先後入座（約局者坐東），訪客用佢哋輸入嘅名
+    const yf = ONLINE.yueRoomFor; ONLINE.yueRoomFor = null;
+    const yy = yf && findYue(yf.id);
+    if(yy){
+      const ppl = yPeople(yy, yf.d).filter(p=>p.k!==ONLINE.user.uid).slice(0,3);
+      ppl.forEach((p,i)=>{ fresh.players[i+1] = String(p.name || `玩家${i+2}`).slice(0,8); fresh.uids[i+1] = isGuestKey(p.k) ? null : p.k; });
+    }
     for(let i=0;i<5 && !code;i++){
       const c = newRoomCode();
       const ok = await ONLINE.backend.createRoom(c, {host:ONLINE.user.uid, hostName:ONLINE.user.name, members:{[ONLINE.user.uid]:ONLINE.user.name},
@@ -2133,6 +2176,7 @@ async function createRoom(mode, btn){
       if(ok) code = c;
     }
     if(!code) throw new Error("開唔到房間，請再試。");
+    if(yy) ONLINE.backend.yueSetRoom(yy.id, yf.d, {code, at:Date.now()}).catch(()=>{});
     await enterRoom(code);
     showSheet($("roomSheet")); renderRoomSheet();
   }catch(e){ toast(e.message && !e.code ? e.message : errText(e)); }
@@ -2265,6 +2309,7 @@ function renderRoomSheet(){
       ${[0,1,2,3].map(i=>`<div class="seatrow"><span class="w">${seatWind(i)}</span><select data-seat="${i}">
         <option value="">訪客：${esc(uids[i] ? "（自己打名）" : state.players[i])}</option>
         ${members.map(([u,n])=>`<option value="${esc(u)}"${uids[i]===u?" selected":""}>${esc(n)}${u===d.host?"（房主）":""}</option>`).join("")}
+        ${uids[i] && !(uids[i] in (d.members||{})) ? `<option value="${esc(uids[i])}" selected>${esc(state.players[i])}（未入房）</option>` : ""}
       </select></div>`).join("")}
       <span class="hint">揀咗帳戶嘅座位，結算時會自動記入嗰位玩家嘅小氣簿。訪客名可以喺「設定」改。</span></div>`;
   } else {
@@ -2338,67 +2383,223 @@ function decorateVip(){
   render = function(){ baseRender(); try{ decorateVip(); }catch(e){} };
 }
 
-/* ---------- 約局：揀日子、分享、個人日曆（iPhone／Google） ---------- */
+/* ---------- 約局：存喺資料庫 yue/{id}；約局者管理、帳戶報名、訪客報名、按報名開房 ---------- */
 const WD = "日一二三四五六";
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 const parseYmd = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
 const dayTxt = s => { const d = parseYmd(s); return `${d.getMonth()+1}/${d.getDate()}（${WD[d.getDay()]}）`; };
+const todayYmd = () => ymd(new Date());
 const b64u = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const unb64u = t => JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,"+").replace(/_/g,"/")))));
 const SITE = "https://letrixc.github.io/TWMJ_Scorer/";
-const inviteURL = y => SITE + "?yue=" + b64u({n:y.host, d:y.dates, t:y.time, i:y.id});
-const inviteText = y => `🀄 ${y.host} 約你打麻雀！\n建議日期：${y.dates.map(dayTxt).join("、")}\n時間：${y.time}\n撳入番鼠睇詳情同加入行事曆：\n${inviteURL(y)}`;
-// 我嘅日曆：users/{uid}.yue（同步到其他裝置）；未登入就存喺本機
-function myYue(){ return (ONLINE.me && ONLINE.me.yue) || (()=>{ try{ return JSON.parse(localStorage.getItem("fansyu-yue") || "[]"); }catch(e){ return []; } })(); }
-async function saveYue(list){
-  const keep = list.filter(y=>y.dates.some(d=>parseYmd(d) >= new Date(new Date().toDateString()))).slice(-30);
-  if(ONLINE.user){ ONLINE.me = ONLINE.me || {}; ONLINE.me.yue = keep; try{ await ONLINE.backend.saveProfile(ONLINE.user.uid, {yue:keep}); }catch(e){} }
-  else { try{ localStorage.setItem("fansyu-yue", JSON.stringify(keep)); }catch(e){} }
-  renderLobby();
+const YUE_ID = /^[A-Za-z0-9]{15,40}$/;
+const inviteURL = y => SITE + "?yue=" + y.id;
+const upDates = y => (y.dates || []).filter(d=>d >= todayYmd());
+const inviteText = y => `🀄 ${y.hostName} 約你打麻雀！\n日期：${(upDates(y).length ? upDates(y) : y.dates).map(dayTxt).join("、")}\n時間：${y.time}\n撳入番鼠報名：\n${inviteURL(y)}`;
+const newGuestKey = () => "g_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+const isGuestKey = k => /^g_/.test(k);
+const meUid = () => ONLINE.user ? ONLINE.user.uid : null;
+
+// 報名者：約局者排第一，其他按報名先後
+function yPeople(y, d){
+  return Object.entries(y.people || {}).map(([k,p])=>Object.assign({k}, p))
+    .filter(p=>p.st!=="no" && (!d || (p.dates || []).includes(d)))
+    .sort((a,b)=>(a.k===y.host ? -1 : b.k===y.host ? 1 : 0) || (a.at||0) - (b.at||0));
 }
-function addYue(y){ const list = myYue().filter(x=>x.id!==y.id); list.push(y); return saveYue(list); }
+const yDeclined = y => Object.values(y.people || {}).filter(p=>p.st==="no").map(p=>p.name);
+// 我喺邊幾日有份（約局者：全部日子）
+function myDates(y){
+  const u = meUid(); if(!u) return [];
+  if(y.host===u) return y.dates || [];
+  const p = (y.people || {})[u];
+  return p && p.st!=="no" ? (p.dates || []).filter(d=>(y.dates || []).includes(d)) : [];
+}
+// members：約局者 + 有報名（最少一日）嘅帳戶
+function yMembers(y, people){
+  return [y.host].concat(Object.entries(people).filter(([k,p])=>!isGuestKey(k) && k!==y.host && p.st!=="no" && (p.dates || []).length).map(([k])=>k));
+}
+
 // 行事曆：iPhone 用 .ics；Google 用新增活動連結
 const hkUTC = (date, time, addH=0) => { const [h,m] = time.split(":").map(Number); const d = parseYmd(date); const t = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), h - 8 + addH, m); return new Date(t).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,""); };
-function icsFor(y){
-  const ev = y.dates.map(d=>["BEGIN:VEVENT", `UID:${y.id}-${d}@fansyu`, `DTSTAMP:${hkUTC(ymd(new Date()),"12:00")}`, `DTSTART:${hkUTC(d,y.time)}`, `DTEND:${hkUTC(d,y.time,4)}`,
-    `SUMMARY:番鼠約局（${y.host}）`, `DESCRIPTION:${y.role==="host"?"你":"由 "+y.host} 發起嘅麻雀局。${y.dates.length>1?"候選日期之一，":""}詳情：${inviteURL(y)}`, "END:VEVENT"].join("\r\n"));
+function icsFor(y, dates){
+  const ev = dates.map(d=>["BEGIN:VEVENT", `UID:${y.id}-${d}@fansyu`, `DTSTAMP:${hkUTC(ymd(new Date()),"12:00")}`, `DTSTART:${hkUTC(d,y.time)}`, `DTEND:${hkUTC(d,y.time,4)}`,
+    `SUMMARY:番鼠約局（${y.hostName}）`, `DESCRIPTION:${y.host===meUid()?"你":y.hostName} 發起嘅麻雀局。詳情：${y.legacy ? SITE : inviteURL(y)}`, "END:VEVENT"].join("\r\n"));
   return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//FanSyu//TC","CALSCALE:GREGORIAN"].concat(ev, ["END:VCALENDAR"]).join("\r\n");
 }
-function addToApple(y){
-  const ics = icsFor(y);
+function addToApple(y, dates){
+  if(!dates || !dates.length){ toast("請先揀日子。"); return; }
+  const ics = icsFor(y, dates);
   if(/iPhone|iPad|iPod/.test(navigator.userAgent)){ location.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics); return; }
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([ics], {type:"text/calendar"})); a.download = "番鼠約局.ics";
   document.body.appendChild(a); a.click(); a.remove();
 }
-const googleURL = (y, d) => "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(`番鼠約局（${y.host}）`) +
-  "&dates=" + hkUTC(d, y.time) + "/" + hkUTC(d, y.time, 4) + "&ctz=Asia/Hong_Kong&details=" + encodeURIComponent(`${y.host} 發起嘅麻雀局。詳情：${inviteURL(y)}`);
+const googleURL = (y, d) => "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(`番鼠約局（${y.hostName}）`) +
+  "&dates=" + hkUTC(d, y.time) + "/" + hkUTC(d, y.time, 4) + "&ctz=Asia/Hong_Kong&details=" + encodeURIComponent(`${y.hostName} 發起嘅麻雀局。詳情：${y.legacy ? SITE : inviteURL(y)}`);
 
-// 個人頁面：日曆卡（今個月＋下個月有約局嘅日子會標示）
+/* 我嘅約局：即時監聽 yue（members 有我） */
+function startYueWatch(){
+  stopYueWatch();
+  if(!ONLINE.user || !ONLINE.backend.yueWatchMine) return;
+  const uid = ONLINE.user.uid;
+  ONLINE.yueUnsub = ONLINE.backend.yueWatchMine(uid, list=>{
+    if(!ONLINE.user || ONLINE.user.uid!==uid) return;
+    if(list===null){ ONLINE.yueErr = true; return; }
+    ONLINE.yueErr = false;
+    ONLINE.yueList = list;
+    yueAutoJoin();
+    if(!$("lobby").hidden) renderLobby();
+    if(openSheet && openSheet.id==="yueDaySheet") renderYueDay();
+  });
+}
+function stopYueWatch(){ if(ONLINE.yueUnsub){ try{ ONLINE.yueUnsub(); }catch(e){} } ONLINE.yueUnsub = null; ONLINE.yueList = []; }
+const findYue = id => (ONLINE.yueList || []).find(y=>y.id===id) || (ONLINE.yueIn && ONLINE.yueIn.id===id ? ONLINE.yueIn : null);
+
+// 約局者開咗房：有報名嗰日嘅帳戶自動入房（12 個鐘內開嘅房先會自動入）
+function yueAutoJoin(){
+  const u = meUid(); if(!u) return;
+  let done = []; try{ done = JSON.parse(localStorage.getItem("fansyu-yue-rooms-" + u) || "[]"); }catch(e){}
+  const mark = c => { done.push(c); try{ localStorage.setItem("fansyu-yue-rooms-" + u, JSON.stringify(done.slice(-50))); }catch(e){} };
+  for(const y of ONLINE.yueList || []){
+    if(y.host===u) continue;
+    for(const d of myDates(y)){
+      const r = (y.rooms || {})[d];
+      if(!r || !r.code || done.includes(r.code) || Date.now() - (r.at || 0) > 12*3600e3) continue;
+      mark(r.code);
+      if(ONLINE.room){ if(ONLINE.room!==r.code) toast(`${y.hostName} 開咗房 ${r.code}，可以喺日曆入房。`); continue; }
+      joinRoom(r.code).then(()=>toast(`已自動加入 ${y.hostName} 嘅房間 ${r.code}。`)).catch(e=>toast(e.message && !e.code ? e.message : errText(e)));
+      return;
+    }
+  }
+}
+
+/* 大廳：日曆卡（可以轉月；撳有約局嘅日子睇報名） */
+ONLINE.calOff = 0;
 function calendarCardHTML(){
-  const list = myYue(), today = new Date(new Date().toDateString());
-  const marks = new Set(list.flatMap(y=>y.dates));
-  const upcoming = list.flatMap(y=>y.dates.map(d=>({y, d}))).filter(x=>parseYmd(x.d) >= today).sort((a,b)=>a.d<b.d?-1:1);
-  const m0 = new Date(today.getFullYear(), today.getMonth(), 1);
+  const today = new Date(new Date().toDateString()), tk = ymd(today);
+  const list = ONLINE.yueList || [];
+  const marks = new Map();
+  for(const y of list) for(const d of myDates(y)) marks.set(d, (marks.get(d) || 0) + 1);
+  const m0 = new Date(today.getFullYear(), today.getMonth() + ONLINE.calOff, 1);
   const cells = [];
   for(let i=0;i<m0.getDay();i++) cells.push(`<span></span>`);
-  const dim = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-  for(let d=1; d<=dim; d++){ const k = ymd(new Date(today.getFullYear(), today.getMonth(), d)); cells.push(`<span class="cd${d===today.getDate()?" today":""}${marks.has(k)?" mk":""}">${d}</span>`); }
+  const dim = new Date(m0.getFullYear(), m0.getMonth()+1, 0).getDate();
+  for(let d=1; d<=dim; d++){
+    const k = ymd(new Date(m0.getFullYear(), m0.getMonth(), d));
+    cells.push(marks.has(k) ? `<button type="button" class="cd mk${k===tk?" today":""}${k<tk?" past":""}" data-cday="${k}" aria-label="${dayTxt(k)}，${marks.get(k)} 個約局">${d}</button>`
+      : `<span class="cd${k===tk?" today":""}">${d}</span>`);
+  }
+  const upcoming = list.flatMap(y=>myDates(y).filter(d=>d>=tk).map(d=>({y, d}))).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:(a.y.time<b.y.time?-1:1));
   return `<div class="card cal-card">
-    <div class="cal-head"><h3>日曆 · ${today.getMonth()+1} 月</h3><button class="btn pop" id="lgYue">快速約局</button></div>
+    <div class="cal-head"><h3>日曆</h3><button class="btn pop" id="lgYue">快速約局</button></div>
+    <div class="cal-nav"><button class="iconbtn" id="calPrev" aria-label="上個月"${ONLINE.calOff<=-6?" disabled":""}>‹</button><b>${m0.getFullYear()} 年 ${m0.getMonth()+1} 月</b><button class="iconbtn" id="calNext" aria-label="下個月"${ONLINE.calOff>=6?" disabled":""}>›</button></div>
     <div class="cal-grid">${[..."日一二三四五六"].map(w=>`<b>${w}</b>`).join("")}${cells.join("")}</div>
-    ${upcoming.length ? `<div class="yue-list">${upcoming.slice(0,6).map(({y,d})=>`<div class="yue-row"><span><b>${dayTxt(d)}</b> ${esc(y.time)} · ${y.role==="host"?"你發起":esc(y.host)+" 約"}</span>
-      <span class="yue-acts"><button class="iconbtn" data-ics="${esc(y.id)}">iPhone</button><a class="iconbtn" target="_blank" rel="noopener" href="${googleURL(y,d)}">Google</a></span></div>`).join("")}</div>`
-      : `<p class="hint" style="margin:0">未有約局。撳「快速約局」揀日子，再分享俾朋友。</p>`}
+    ${upcoming.length ? `<div class="yue-list">${upcoming.slice(0,6).map(({y,d})=>{
+        const n = yPeople(y, d).length, r = (y.rooms || {})[d];
+        return `<button type="button" class="yue-row yue-go" data-cday="${d}"><span><b>${dayTxt(d)}</b> ${esc(y.time)} · ${y.host===meUid()?"你發起":esc(y.hostName)+" 約"}</span>
+          <span class="yue-n">${r ? `<i class="yr-room">已開房</i>` : ""}${n} 人 ›</span></button>`; }).join("")}</div>`
+      : `<p class="hint" style="margin:0">${ONLINE.yueErr ? "暫時讀唔到約局，請檢查網絡。" : "未有約局。撳「快速約局」揀日子，再分享俾朋友報名。"}</p>`}
   </div>`;
 }
 function bindCalendarCard(){
-  if($("lgYue")) $("lgYue").onclick = openYuePicker;
-  document.querySelectorAll("[data-ics]").forEach(b=>b.onclick = () => { const y = myYue().find(x=>x.id===b.dataset.ics); if(y) addToApple(y); });
+  if($("lgYue")) $("lgYue").onclick = () => openYuePicker(null);
+  if($("calPrev")) $("calPrev").onclick = () => { ONLINE.calOff--; renderLobby(); };
+  if($("calNext")) $("calNext").onclick = () => { ONLINE.calOff++; renderLobby(); };
+  document.querySelectorAll("#lobbyBody [data-cday]").forEach(b=>b.onclick = () => openYueDay(b.dataset.cday));
 }
 
-// 快速約局：揀未來 31 日內嘅日子（可以揀多日）
+/* 某一日嘅約局：報名名單、約局者管理 */
+function openYueDay(d){ ONLINE.yueDay = d; renderYueDay(); showSheet($("yueDaySheet")); }
+function renderYueDay(){
+  const d = ONLINE.yueDay, box = $("yueDayBody"); if(!d || !box) return;
+  const u = meUid();
+  const ys = (ONLINE.yueList || []).filter(y=>myDates(y).includes(d)).sort((a,b)=>a.time<b.time?-1:1);
+  box.innerHTML = `<h3>${dayTxt(d)} 嘅約局</h3>` + (ys.length ? ys.map(y=>{
+    const host = y.host===u, ppl = yPeople(y, d), r = (y.rooms || {})[d], others = (y.dates || []).filter(x=>x!==d && x>=todayYmd());
+    const no = yDeclined(y);
+    const rows = ppl.map(p=>`<div class="mrow"><span>${esc(p.name)}${p.k===y.host?`<span class="pill-host">約局者</span>`:""}${isGuestKey(p.k)?` <span class="uid">（訪客）</span>`:""}</span>
+      ${host && p.k!==y.host ? `<button class="iconbtn" data-yrm="${esc(y.id)}|${esc(p.k)}">移除</button>` : p.k===u ? `<span class="uid">你</span>` : ""}</div>`).join("");
+    return `<div class="card ycard">
+      <div class="yc-top"><b>${host ? "你發起" : esc(y.hostName) + " 約"}</b><span class="yc-time">${esc(y.time)} 開枱</span></div>
+      ${others.length ? `<p class="hint" style="margin:0">其他日子：${others.map(dayTxt).join("、")}</p>` : ""}
+      ${r ? `<div class="yc-room">已開房 <b>${esc(r.code)}</b>${ONLINE.room===r.code ? "（你喺房入面）" : `<button class="btn pop" data-yjoin="${esc(r.code)}">入房</button>`}</div>` : ""}
+      <span class="lbl">報名（${ppl.length} 人${ppl.length>4?"，頭 4 位入座":""}）</span>
+      <div class="mlist">${rows}</div>
+      ${no.length ? `<p class="hint" style="margin:0">唔得閒：${no.map(esc).join("、")}</p>` : ""}
+      <div class="yc-acts">
+        ${host ? `${r ? "" : `<button class="btn primary" data-yroom="${esc(y.id)}">按報名創建房間</button>`}
+          <button class="btn" data-yshare="${esc(y.id)}">分享邀請</button>
+          <div class="grid2"><button class="btn" data-yedit="${esc(y.id)}">改日期／時間</button><button class="btn danger" data-ydel="${esc(y.id)}">刪除約局</button></div>`
+        : `<div class="grid2"><button class="btn" data-yshare="${esc(y.id)}">分享邀請</button><button class="btn danger" data-ycancel="${esc(y.id)}">取消報名</button></div>`}
+        <div class="grid2"><button class="btn" data-yics="${esc(y.id)}">iPhone 行事曆</button><a class="btn" target="_blank" rel="noopener" href="${googleURL(y,d)}">Google 日曆</a></div>
+      </div></div>`;
+  }).join("") : `<p class="hint">呢日冇約局。</p>`);
+  const pick = (attr, fn) => box.querySelectorAll(`[${attr}]`).forEach(b=>b.onclick = () => fn(b.getAttribute(attr), b));
+  pick("data-yrm", v=>{ const [id,k] = v.split("|"); const y = findYue(id); if(y) yueRemovePerson(y, k, d); });
+  pick("data-yjoin", (code,b)=>{ hideSheet(); liftReset(); joinByCode(code, b); });
+  pick("data-yroom", id=>{ const y = findYue(id); if(y) startYueRoom(y, d); });
+  pick("data-yshare", id=>{ const y = findYue(id); if(y){ hideSheet(); openYueShare(y); } });
+  pick("data-yedit", id=>{ const y = findYue(id); if(y){ hideSheet(); openYuePicker(y); } });
+  pick("data-ydel", id=>{ const y = findYue(id); if(y) yueDelete(y); });
+  pick("data-ycancel", id=>{ const y = findYue(id); if(y) yueRespond(y, [], d); });
+  pick("data-yics", id=>{ const y = findYue(id); if(y) addToApple(y, [d]); });
+}
+
+/* 約局者動作 */
+async function yueHostSave(y, data, okMsg){
+  try{ await ONLINE.backend.yueHost(y.id, data); if(okMsg) toast(okMsg); return true; }
+  catch(e){ toast("改唔到約局：" + errText(e)); return false; }
+}
+function yueRemovePerson(y, k, d){
+  const p = (y.people || {})[k]; if(!p) return;
+  askConfirm(`移除 ${p.name}？`, `${p.name} 會喺 ${dayTxt(d)} 嘅報名名單消失。`, "移除", async ()=>{
+    const people = Object.assign({}, y.people);
+    const left = (p.dates || []).filter(x=>x!==d);
+    if(left.length) people[k] = Object.assign({}, p, {dates:left}); else delete people[k];
+    await yueHostSave(y, {people, members:yMembers(y, people)}, `已移除 ${p.name}。`);
+  });
+}
+function yueDelete(y){
+  askConfirm("刪除呢個約局？", "所有報名都會一齊刪除，朋友條邀請連結亦會失效。刪除咗就冇得還原。", "刪除約局", async ()=>{
+    try{ await ONLINE.backend.yueDelete(y.id); toast("已刪除約局。"); hideSheet(); liftReset(); }
+    catch(e){ toast("刪除唔到：" + errText(e)); }
+  });
+}
+// 按某日報名開房：約局者坐東，其他人按報名先後；登入咗嘅會自動入房
+function startYueRoom(y, d){
+  ONLINE.yueRoomFor = {id:y.id, d};
+  hideSheet(); showSheet($("createSheet"));
+  $("createHint").textContent = `按 ${dayTxt(d)} 嘅報名開房：頭 4 位會自動入座，登入咗嘅朋友會自動入房。`;
+}
+
+/* 報名者動作（已登入） */
+async function yueRespond(y, dates, d){
+  const u = ONLINE.user; if(!u) return;
+  const prev = (y.people || {})[u.uid];
+  const go = async () => {
+    const entry = dates.length ? {name:u.name, uid:u.uid, dates:dates.slice().sort(), st:"in", at:(prev && prev.st!=="no" && prev.at) || Date.now()}
+      : {name:u.name, uid:u.uid, dates:[], st:"no", at:Date.now()};
+    try{ await ONLINE.backend.yueSelf(y.id, u.uid, entry, !!dates.length); toast(dates.length ? "已報名，約局已加入你嘅日曆。" : "已回覆唔得閒。"); return true; }
+    catch(e){ toast("報唔到名：" + errText(e)); return false; }
+  };
+  if(d && !dates.length){
+    // 喺日曆撳「取消報名」：只係取消嗰日
+    const left = myDates(y).filter(x=>x!==d);
+    askConfirm("取消報名？", `你會喺 ${dayTxt(d)} 嘅報名名單消失。`, "取消報名", async ()=>{ dates = left; await go(); if(!left.length){ hideSheet(); liftReset(); } });
+    return;
+  }
+  return go();
+}
+
+/* 快速約局／改日期時間：揀未來 31 日（可以揀多日） */
 let yuePick = new Set();
-function openYuePicker(){ yuePick = new Set(); renderYuePicker(); showSheet($("yueSheet")); }
+function openYuePicker(edit){
+  ONLINE.yueEdit = edit || null;
+  yuePick = new Set(edit ? upDates(edit) : []);
+  $("yueTitle").textContent = edit ? "改約局日期／時間" : "快速約局";
+  $("yueTime").value = edit ? edit.time : "20:00";
+  $("yueOk").textContent = edit ? "儲存" : "確認";
+  renderYuePicker(); showSheet($("yueSheet"));
+}
 function renderYuePicker(){
   const today = new Date(new Date().toDateString());
   const days = [...Array(32).keys()].map(i=>new Date(today.getFullYear(), today.getMonth(), today.getDate()+i));
@@ -2420,16 +2621,36 @@ function renderYuePicker(){
   $("yueOk").disabled = !yuePick.size;
 }
 async function confirmYue(){
-  if(!yuePick.size) return;
-  const y = {id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), host: ONLINE.user ? ONLINE.user.name : "朋友",
-    dates: [...yuePick].sort(), time: $("yueTime").value || "20:00", role:"host", at: Date.now()};
-  await addYue(y);
-  hideSheet(); liftReset();
-  openYueShare(y);
+  if(!yuePick.size || !ONLINE.user) return;
+  const dates = [...yuePick].sort(), time = $("yueTime").value || "20:00", u = ONLINE.user;
+  $("yueOk").disabled = true;
+  try{
+    const ed = ONLINE.yueEdit;
+    if(ed){
+      // 改期：原本一日改去另一日，報名跟住搬；其他情況保留仲喺新日子入面嘅報名
+      const old = ed.dates || [], move = old.length===1 && dates.length===1 && old[0]!==dates[0];
+      const people = {};
+      for(const [k,p] of Object.entries(ed.people || {})){
+        const nd = k===ed.host ? dates : move ? ((p.dates || []).includes(old[0]) ? dates.slice() : []) : (p.dates || []).filter(x=>dates.includes(x));
+        people[k] = Object.assign({}, p, {dates:nd});
+      }
+      const rooms = {}; for(const [k,r] of Object.entries(ed.rooms || {})) if(dates.includes(k)) rooms[k] = r;
+      if(await yueHostSave(ed, {dates, time, people, members:yMembers(ed, people), rooms}, "已更新約局，報名嘅朋友會見到新日期時間。")){ hideSheet(); liftReset(); }
+    } else {
+      const data = {host:u.uid, hostName:u.name, dates, time, people:{[u.uid]:{name:u.name, uid:u.uid, dates, st:"in", at:Date.now()}},
+        members:[u.uid], rooms:{}, createdAt:Date.now(), updatedAt:Date.now()};
+      const id = await ONLINE.backend.yueCreate(data);
+      hideSheet(); liftReset();
+      openYueShare(Object.assign({id}, data));
+    }
+  }catch(e){ toast("儲存唔到約局：" + errText(e)); }
+  finally{ $("yueOk").disabled = !yuePick.size; }
 }
+
+/* 分享 */
 function openYueShare(y){
   ONLINE.yueCur = y;
-  $("yueSum").innerHTML = `<b>${y.dates.map(dayTxt).join("、")}</b> · ${esc(y.time)}`;
+  $("yueSum").innerHTML = `<b>${(upDates(y).length ? upDates(y) : y.dates).map(dayTxt).join("、")}</b> · ${esc(y.time)}<br>朋友撳連結就可以報名，唔使註冊都得。`;
   $("yueImgWrap").hidden = true;
   showSheet($("yueShareSheet"));
 }
@@ -2447,12 +2668,13 @@ async function shareYue(kind){
 }
 // IG 限時動態邀請函（9:16）
 function inviteCardHTML(y){
+  const ds = upDates(y).length ? upDates(y) : y.dates;
   return `<div class="invite"><div class="iv-in">
     <div class="iv-top">番鼠 · 雀局邀請函</div>
     <div class="iv-logo">${LOGO}</div>
     <div class="iv-title">誠邀天下豪傑<br>到桌前一坐</div>
-    <div class="iv-host">${esc(y.host)} 恭候大駕</div>
-    <div class="iv-dates">${y.dates.slice(0,8).map(d=>`<span>${dayTxt(d)}</span>`).join("")}${y.dates.length>8?`<span>⋯</span>`:""}</div>
+    <div class="iv-host">${esc(y.hostName)} 恭候大駕</div>
+    <div class="iv-dates">${ds.slice(0,8).map(d=>`<span>${dayTxt(d)}</span>`).join("")}${ds.length>8?`<span>⋯</span>`:""}</div>
     <div class="iv-time">${esc(y.time)} 開枱</div>
     <div class="iv-foot">有興趣就一齊打麻雀！<br><small>番鼠 FanSyu · letrixc.github.io/TWMJ_Scorer</small></div>
   </div></div>`;
@@ -2477,22 +2699,101 @@ async function makeInviteImage(y){
   }catch(e){ $("yueImgHint").textContent = "暫時整唔到圖片，請再試一次。"; }
   finally{ holder.remove(); }
 }
-// 收到邀請：網址有 ?yue=…
+
+/* 收到邀請：網址 ?yue=<約局 id>（舊版連結係 base64，只可以加入行事曆） */
 function checkInviteParam(){
   const t = new URLSearchParams(location.search).get("yue");
   if(!t) return;
-  let o = null; try{ o = unb64u(t); }catch(e){ return; }
-  if(!o || !Array.isArray(o.d) || !o.d.length) return;
-  const y = {id: String(o.i || t.slice(0,10)), host: String(o.n || "朋友").slice(0,12), dates: o.d.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).slice(0,31), time: /^\d{2}:\d{2}$/.test(o.t||"") ? o.t : "20:00", role:"guest", at: Date.now()};
-  ONLINE.yueIn = y;
-  $("yinHost").textContent = y.host;
-  $("yinDates").innerHTML = y.dates.map(d=>`<div class="yue-row"><span><b>${dayTxt(d)}</b> ${esc(y.time)}</span><a class="iconbtn" target="_blank" rel="noopener" href="${googleURL(y,d)}">Google 日曆</a></div>`).join("");
-  $("yinBox").hidden = false;
+  ONLINE.yueInId = t; ONLINE.yueIn = undefined; ONLINE.yinSel = null;
+  if(!YUE_ID.test(t)){
+    let o = null; try{ o = unb64u(t); }catch(e){}
+    ONLINE.yueIn = o && Array.isArray(o.d) ? {legacy:true, id:"legacy", hostName:String(o.n || "朋友").slice(0,12),
+      dates:o.d.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)).slice(0,31), time:/^\d{2}:\d{2}$/.test(o.t||"") ? o.t : "20:00", people:{}} : null;
+  }
+  renderInvite();
 }
-function bindInviteBox(){
-  $("yinApple").onclick = () => ONLINE.yueIn && addToApple(ONLINE.yueIn);
-  $("yinSave").onclick = async () => { if(!ONLINE.yueIn) return; await addYue(ONLINE.yueIn); toast(ONLINE.user ? "已記入你嘅番鼠日曆。" : "已記入呢部機嘅番鼠日曆，登入後可以同步。"); };
-  $("yinClose").onclick = () => { $("yinBox").hidden = true; history.replaceState(null, "", location.pathname + (ONLINE.mock ? "?mock=1" : "")); };
+function watchInvite(){
+  if(!ONLINE.yueInId || !YUE_ID.test(ONLINE.yueInId) || ONLINE.yueInUnsub || !ONLINE.backend) return;
+  const id = ONLINE.yueInId;
+  ONLINE.yueInUnsub = ONLINE.backend.yueWatch(id, d=>{ if(ONLINE.yueInId!==id) return; ONLINE.yueIn = d; renderInvite(); });
+}
+function closeInvite(){
+  if(ONLINE.yueInUnsub){ try{ ONLINE.yueInUnsub(); }catch(e){} }
+  ONLINE.yueInUnsub = null; ONLINE.yueInId = null; ONLINE.yueIn = null;
+  try{ sessionStorage.removeItem("fansyu-yue-pending"); }catch(e){}
+  $("yinBox").hidden = true;
+  history.replaceState(null, "", location.pathname + (ONLINE.mock ? "?mock=1" : ""));
+}
+const guestSaved = id => { try{ return JSON.parse(localStorage.getItem("fansyu-yg-" + id) || "null"); }catch(e){ return null; } };
+function renderInvite(){
+  const box = $("yinBox"), card = $("yinCard");
+  if(!ONLINE.yueInId || ONLINE.yinHidden){ box.hidden = true; return; }
+  box.hidden = false;
+  const y = ONLINE.yueIn, u = ONLINE.user;
+  let h = `<div class="yin-logo">${LOGO}</div>`;
+  if(y===undefined) h += `<p class="hint" style="text-align:center;margin:0">讀緊約局…</p>`;
+  else if(y===null) h += `<div class="yin-title">搵唔到呢個約局</div><p class="hint" style="text-align:center;margin:0">約局者可能已經刪除咗，或者連結唔完整。</p>`;
+  else {
+    const isHost = !!(u && u.uid===y.host), up = upDates(y);
+    const mine = u && (y.people || {})[u.uid], g = !u && guestSaved(y.id);
+    if(!ONLINE.yinSel) ONLINE.yinSel = new Set(mine && mine.st!=="no" && (mine.dates||[]).length ? mine.dates.filter(d=>up.includes(d)) : up);
+    const sel = ONLINE.yinSel, canPick = !y.legacy && !isHost && !g;
+    h += `<div class="yin-title"><b>${esc(y.hostName)}</b> 約你打麻雀！</div>
+      <p class="hint" style="margin:0;text-align:center">${esc(y.time)} 開枱${canPick && up.length ? " · 剔你得閒嘅日子" : ""}</p>`;
+    h += up.length ? `<div class="yue-list">${up.map(d=>{
+        const ppl = yPeople(y, d);
+        return `<div class="yue-row yin-d"><label>${canPick ? `<input type="checkbox" data-yd="${d}"${sel.has(d)?" checked":""}>` : ""}<span><b>${dayTxt(d)}</b>
+          <small>${ppl.length ? `${ppl.length} 人：${ppl.slice(0,4).map(p=>esc(p.name)).join("、")}${ppl.length>4?"⋯":""}` : "未有人報名"}</small></span></label>
+          <a class="iconbtn" target="_blank" rel="noopener" href="${googleURL(y,d)}">Google</a></div>`; }).join("")}</div>`
+      : `<p class="hint" style="margin:0;text-align:center">呢個約局嘅日子已經過咗。</p>`;
+    if(y.legacy) h += `<p class="hint" style="margin:0">呢條係舊版邀請連結，只可以加入行事曆。請叫約局者喺番鼠重新分享，就可以報名。</p>`;
+    else if(isHost) h += `<p class="hint" style="margin:0;text-align:center">呢個係你發起嘅約局。</p>${up.length ? `<button class="btn primary" id="yinManage">管理約局</button>` : ""}`;
+    else if(u){
+      if(mine && mine.st!=="no" && (mine.dates||[]).length) h += `<p class="hint yin-ok" style="margin:0">你已報名：${mine.dates.filter(d=>up.includes(d)).map(dayTxt).join("、") || "（日子已過）"}</p>
+        <div class="grid2"><button class="btn danger" id="yinNo">取消報名</button><button class="btn primary" id="yinYes">更新報名</button></div>`;
+      else h += `${mine && mine.st==="no" ? `<p class="hint" style="margin:0">你回覆咗唔得閒，可以改返接受。</p>` : ""}
+        <div class="grid2"><button class="btn" id="yinNo">拒絕</button><button class="btn primary" id="yinYes">接受</button></div>`;
+    } else if(g) h += `<p class="hint yin-ok" style="margin:0">你已用「${esc(g.name)}」報名。想改或者取消，請搵 ${esc(y.hostName)}。</p>`;
+    else if(up.length) h += `<div class="field" style="margin:0"><label for="yinName">你嘅名（唔使註冊）</label><input type="text" id="yinName" maxlength="10" placeholder="例如：阿明"></div>
+        <button class="btn pop" id="yinGuest">報名</button>
+        <button class="btn" id="yinLogin">已有帳戶？登入或註冊再報名</button>
+        <p class="hint" style="margin:0">用帳戶報名，約局會自動入你嘅日曆，開房時亦會自動入房同記錄戰績。</p>`;
+    if(up.length) h += `<button class="btn" id="yinApple">加入 iPhone 行事曆</button>`;
+  }
+  h += `<button class="btn" id="yinClose">${u ? "關閉" : "開始用番鼠"}</button>`;
+  card.innerHTML = h;
+  const on = (id, fn) => { if($(id)) $(id).onclick = fn; };
+  card.querySelectorAll("[data-yd]").forEach(c=>c.onchange = () => { if(c.checked) ONLINE.yinSel.add(c.dataset.yd); else ONLINE.yinSel.delete(c.dataset.yd); });
+  on("yinClose", closeInvite);
+  on("yinApple", () => addToApple(y, y.legacy || (u && u.uid===y.host) ? upDates(y) : [...ONLINE.yinSel].sort()));
+  on("yinManage", () => { const d = upDates(y)[0]; closeInvite(); showLobby(); openYueDay(d); });
+  on("yinYes", async () => {
+    const ds = [...ONLINE.yinSel].filter(d=>upDates(y).includes(d));
+    if(!ds.length){ toast("請剔最少一日。"); return; }
+    $("yinYes").disabled = true;
+    if(await yueRespond(y, ds)){ ONLINE.yinSel = null; }
+    if($("yinYes")) $("yinYes").disabled = false;
+  });
+  on("yinNo", async () => { if(await yueRespond(y, [])) ONLINE.yinSel = null; });
+  on("yinGuest", async () => {
+    const name = $("yinName").value.trim().slice(0,10);
+    const ds = [...ONLINE.yinSel].filter(d=>upDates(y).includes(d));
+    if(!name){ toast("請輸入你嘅名。"); $("yinName").focus(); return; }
+    if(!ds.length){ toast("請剔最少一日。"); return; }
+    $("yinGuest").disabled = true;
+    const key = newGuestKey();
+    try{
+      await ONLINE.backend.yueGuest(y.id, key, {name, uid:null, guest:true, dates:ds, st:"in", at:Date.now()});
+      try{ localStorage.setItem("fansyu-yg-" + y.id, JSON.stringify({key, name})); }catch(e){}
+      toast("已報名！"); renderInvite();
+    }catch(e){ toast("報唔到名：" + errText(e)); if($("yinGuest")) $("yinGuest").disabled = false; }
+  });
+  on("yinLogin", () => {
+    try{ sessionStorage.setItem("fansyu-yue-pending", ONLINE.yueInId); }catch(e){}
+    ONLINE.yinHidden = true; renderInvite(); showLobby();
+    setTimeout(()=>{ if($("lgNick")) $("lgNick").focus(); }, 50);
+    toast("登入或者註冊之後，會返返嚟報名。");
+  });
 }
 
 /* ---------- 通知同外框 ---------- */
@@ -2642,7 +2943,9 @@ function buildRecords(){
   });
 }
 async function sendRecords(){
-  const list = buildRecords();
+  const mem = (ONLINE.roomDoc && ONLINE.roomDoc.members) || {};
+  const all = buildRecords(), list = all.filter(r=>r.uid in mem);
+  if(all.length > list.length) setTimeout(()=>toast(`有 ${all.length - list.length} 位玩家未入房，今場唔會記入佢哋嘅小氣簿。`), 3400);
   if(!list.length){ toast("冇玩家揀咗帳戶，今場唔會記入小氣簿。可以喺「房間」分配座位。"); return; }
   try{
     await ONLINE.backend.saveRecords(list);
@@ -2744,17 +3047,23 @@ async function onlineStart(){
     ONLINE.enabled = false; hideLobby(); renderRoomBar();
     toast("連唔到伺服器，暫時用單機模式。"); return;
   }
+  watchInvite();
   const wanted = (new URLSearchParams(location.search).get("room") || (()=>{ try{ return sessionStorage.getItem("fansyu-room"); }catch(e){ return null; } })() || "").toUpperCase();
   let tried = false;
   ONLINE.backend.onUser(async u=>{
     const prev = ONLINE.user;
     ONLINE.user = u; ONLINE.games = null;
-    if(!u){ ONLINE.me = null; applyVipPerks(); if(prev) leaveRoom(true); showLobby(); return; }
+    if(!u){ ONLINE.me = null; stopYueWatch(); applyVipPerks(); if(prev) leaveRoom(true); showLobby(); renderInvite(); return; }
     if(isAdminUser()){ location.replace("admin.html" + (ONLINE.mock ? "?mock=1" : "")); return; }
     if(await ONLINE.backend.isRemoved(u.uid)){ toast("呢個帳戶已經被管理員移除。"); await ONLINE.backend.logout(); return; }
     ONLINE.backend.saveProfile(u.uid, {name:u.name, lastLogin:Date.now()}).catch(()=>{});
     ONLINE.backend.getProfiles([u.uid]).then(P=>{ ONLINE.me = P[u.uid] || {}; ONLINE.profiles[u.uid] = ONLINE.me; applyVipPerks(); renderLobby(); }).catch(()=>{});
     loadInbox();
+    startYueWatch();
+    // 未登入時撳咗「登入再報名」：登入後返返去個邀請
+    let pend = null; try{ pend = sessionStorage.getItem("fansyu-yue-pending"); }catch(e){}
+    if(pend && pend===ONLINE.yueInId){ ONLINE.yinHidden = false; ONLINE.yinSel = null; try{ sessionStorage.removeItem("fansyu-yue-pending"); }catch(e){} }
+    renderInvite();
     renderLobby(); loadGames();
     if(wanted && !tried){
       tried = true;
