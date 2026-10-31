@@ -201,6 +201,7 @@ input[type=text],input[type=number]{font:inherit;font-size:16px;padding:10px 12p
 .side .grid2 .btn{display:flex;flex-direction:column;align-items:center;gap:0;padding:10px 6px}
 .side .dingrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .side .dingrow .opt{padding:6px 10px;font-size:13px}
+.side .dingrow[hidden]{display:none!important}
 .multi-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .multi-row .opt{flex:1}
 .multi-row input{width:84px!important;flex:none;text-align:center}
@@ -271,7 +272,7 @@ body:not(.ro) .view-only{display:none!important}
 /* 特殊稱號：金光（根本不是一個Level／傳說）、銀色（稀有） */
 .tag.gold,.tag.legend{position:relative;overflow:hidden;border:1px solid #B8860B;color:#5A3A00;
   background:linear-gradient(135deg,#F7E08A,#E2B53E 45%,#FFF1B8 60%,#C9962A);box-shadow:0 0 0 3px rgba(226,181,62,.28);padding:4px 14px}
-.tag.legend.tw{color:#8E1B1B}.tag.legend.hk{color:#0F4D36}
+.tag.legend.tw{color:#8E1B1B}.tag.legend.hk{color:#0F4D36}.tag.legend.vn{color:#6B1D52}.tag.rare.vn{color:#6B1D52}.sty-tags b.pill.legend.vn,.sty-tags b.pill.rare.vn{color:#6B1D52}
 .tag.gold::after,.tag.legend::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.85) 48%,transparent 66%);transform:translateX(-120%);animation:shine 2.6s ease-in-out infinite}
 .tag.gold .ti-crown{font-style:normal;margin-right:3px}
@@ -343,6 +344,10 @@ button.modechip::after{content:" ⇄";font-size:11px}
 .help-tabs{margin-bottom:12px}
 .help-tabs .opt{padding:7px 11px;font-size:13px}
 .help-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vn-card{grid-column:1/-1;margin:0 0 4px}.vn-card h3{margin:0 0 8px}
+.vn-jk{display:grid;grid-template-columns:1fr;gap:4px}.vn-jk div{display:grid;grid-template-columns:80px 1fr;gap:8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)}
+.vn-jk b{font-family:var(--f-display);font-weight:900;color:var(--navy)}
+.vn-rules{margin:0;padding-left:20px;font-size:14px;line-height:1.6}
 .help-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:6px;min-width:0}
 .help-item span{font-weight:700;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .help-item b{font-size:12px;color:var(--jade);flex:none}
@@ -389,7 +394,14 @@ button.modechip::after{content:" ⇄";font-size:11px}
 @keyframes tapblink{0%,100%{opacity:.35}50%{opacity:1}}
 .splash-note{margin:4px 0 0;font-size:13px;color:var(--red);font-weight:700}
 .modechip{font-family:var(--f-body);font-size:12px;font-weight:700;color:var(--navy);border:1.5px solid var(--navy);border-radius:999px;padding:1px 8px;letter-spacing:.04em}
-body.hk #multiField,body.hk #revengeBox,body.hk .side .grid3,body.hk .side .dingrow,body.hk [data-side="zhading"]{display:none!important}
+.swaprow{display:grid;grid-template-columns:40px 1fr auto;gap:8px;align-items:center;margin-bottom:6px}
+.swaprow .w{font-weight:900;text-align:center}.swaprow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.swaprow select{font:inherit;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);max-width:170px}
+.payup{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.pu-head{display:flex;justify-content:space-between;align-items:baseline}.pu-head b{font-family:var(--f-display);font-size:18px}.pu-head span{font-size:12px;color:var(--muted)}
+.pu-row{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center;font-size:15px;padding:6px 2px;border-bottom:1px solid var(--line)}
+.pu-row i{font-style:normal;color:var(--muted)}.pu-row b{color:var(--navy)}
+body.hk #multiField,body.hk #revengeBox,body.hk .side .grid3,body.hk .side .flowerrow,body.hk .side .dingrow,body.hk [data-side="zhading"]{display:none!important}
 body.hk .side .grid2{grid-template-columns:1fr}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.splash-logo{animation:none}
   .tag.gold::after,.tag.legend::after,.tag .spk,.pl.golden,.pl .tag.gold,.pl .tag.legend{animation:none!important}.tag .spk{opacity:1}}
@@ -419,6 +431,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
 
   <section class="settle" id="settle" hidden>
     <div id="settleCard"></div>
+    <div id="payupBox"></div>
     <div class="settle-actions">
       <button class="btn primary full" id="shareBtn">分享戰績圖</button>
       <button class="btn edit-only" id="backBtn">返回牌局</button>
@@ -439,22 +452,26 @@ const SHELL = `<div class="splash" id="splash" hidden>
   </div>
 
   <div class="side edit-only">
-    <span class="lbl" id="sideLbl">暗槓／圍骰／順骰／詐糊／詐叮</span>
+    <span class="lbl" id="sideLbl">暗槓／圍骰／順骰／花／詐糊／詐叮</span>
     <div class="grid4" id="sidePlayerSeg"></div>
     <div class="grid3">
       <button class="btn" data-side="angang" disabled>暗槓<small>收三家</small></button>
       <button class="btn" data-side="wai" disabled>圍骰<small>收三家</small></button>
       <button class="btn" data-side="shun" disabled>順骰<small>比三家</small></button>
     </div>
+    <div class="grid2 flowerrow">
+      <button class="btn" data-side="hua" disabled>一台花<small>收三家各 1 底</small></button>
+      <button class="btn" data-side="cao" disabled>一台草<small>收三家各半底</small></button>
+    </div>
     <div class="grid2">
       <button class="btn" data-side="zhahu" disabled>詐糊<small>比三家各 30 番</small></button>
       <button class="btn" data-side="zhading" disabled>詐叮<small>比三家各 20 番</small></button>
     </div>
-    <div class="dingrow"><span class="lbl">詐糊／詐叮另計叮</span><span id="dingSeg" class="dingrow"></span></div>
+    <div class="dingrow" hidden><span class="lbl">詐糊／詐叮另計叮</span><span id="dingSeg" class="dingrow"></span></div>
     <span class="hint" id="sideHint">先揀玩家，再按項目。</span>
   </div>
 
-  <button class="btn edit-only endbtn" id="endBtn">結束遊戲 · 睇結算</button>
+  <button class="btn pop edit-only endbtn" id="endBtn">結束遊戲 · 睇結算</button>
 
   <section>
     <h2>牌局記錄</h2>
@@ -477,7 +494,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
 <div class="sheet" id="modeSheet" hidden role="dialog" aria-label="揀牌種">
   <div class="grab"></div>
   <h3>揀牌種</h3>
-  <div class="grid3" id="modePick"></div>
+  <div class="grid4" id="modePick"></div>
   <p class="hint" style="margin:10px 0 0">轉換牌種會清除記錄、重新開局，會先問你確認。</p>
   <button class="btn" style="width:100%;margin-top:14px" onclick="hideSheet()">取消</button>
 </div>
@@ -497,7 +514,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <div class="grab"></div>
   <div id="helpListView">
     <h3 id="helpTitle">牌型說明</h3>
-    <div class="grid3" id="helpModeSeg" style="margin-bottom:10px"></div>
+    <div class="grid4" id="helpModeSeg" style="margin-bottom:10px"></div>
     <div class="seg help-tabs" id="helpTabs"></div>
     <div class="help-grid" id="helpList"></div>
   </div>
@@ -525,9 +542,14 @@ const SHELL = `<div class="splash" id="splash" hidden>
       <input type="text" id="p3" maxlength="8">
     </div>
   </div>
+  <div class="field" id="swapField">
+    <label>換位（輸贏跟人走）</label>
+    <div id="swapRows"></div>
+    <span class="hint">揀「同邊個換位」，兩個人即刻對調位置，之前嘅輸贏同記錄都跟返自己。</span>
+  </div>
   <div class="field">
     <label>牌種</label>
-    <div class="grid3" id="modeSeg2"></div>
+    <div class="grid4" id="modeSeg2"></div>
     <span class="hint" id="modeHint">轉換牌種會清除記錄、重新開局，會先問你確認。</span>
   </div>
   <div id="twFields">
@@ -544,6 +566,14 @@ const SHELL = `<div class="splash" id="splash" hidden>
     <div class="field"><label>封頂</label><div class="grid2" id="pmCapSeg"></div></div>
     <div class="field"><label>莊家連莊加注（跑馬）</label><div class="grid2" id="pmDealerSeg"></div></div>
     <p class="hint" id="pmTable"></p>
+  </div>
+  <div id="vnFields">
+    <div class="grid2">
+      <div class="field"><label for="vnUnit">每分</label><div class="prefix"><span>HK$</span><input type="number" id="vnUnit" inputmode="decimal" min="0" step="0.1"></div></div>
+      <div class="field"><label for="vnExtra">滿以外每番（分）</label><input type="number" id="vnExtra" inputmode="numeric" min="0" step="1"></div>
+    </div>
+    <div class="field"><label for="vnBonus">每滿獎勵（分，冇就 0）</label><input type="number" id="vnBonus" inputmode="numeric" min="0" step="1"></div>
+    <p class="hint" id="vnTable"></p>
   </div>
   <div id="hkFields">
     <div class="grid2">
@@ -644,7 +674,7 @@ const CATALOG = [
   ["缺一門",5,"無字"],["缺五",10,"無字"],["斷么九",5,"無字"],["三缺",40,"不重複計缺一門、缺五、斷么九"]]},
  {g:"混數字類", items:[
   ["混帶么",30,"123／789 + 番子（只可碰 1／9）"],["全帶么",60,"123／789，無番子（只可碰 1／9）"],["混么九",80,"全 1／9 + 番子"],["么九",160,"全 1／9，無番子"],
-  ["混帶X(10)",10,"包含同一數字（最少 2 坎數字牌）"],["混帶X(20)",20,""],["混帶X(30)",30,""],["滿庭芳",60,"包含同一數字 + 無番子"],["純滿庭芳",80,"全部順子一樣數字"]]},
+  ["混帶X(10)",10,"每組同眼都有同一數字或係番子（最少 2 坎數字牌）"],["混帶X(20)",20,""],["混帶X(30)",30,""],["滿庭芳",60,"每組同眼都有同一數字，無番子"],["純滿庭芳",80,"全部順子，每組同眼都有同一數字"]]},
  {g:"暗刻類", items:[["2暗刻",5,""],["3暗刻",15,""],["4暗刻",30,""],["5暗刻",120,""]]},
  {g:"同刻／連刻類", items:[
   ["2同刻",5,"如 111 / 一一一"],["3同刻(小)",15,""],["3同刻(大)",30,"111 / 一一一 / one one one"],
@@ -663,7 +693,7 @@ const CATALOG = [
   ["一般高(明)",5,"123 / 123"],["一般高(暗)",10,""],["雙般高(明)",15,"123 / 123 + 一二三 / 一二三"],["雙般高(暗)",30,""],
   ["三般高(明)",15,"123 / 123 / 123"],["三般高(暗)",30,""],["四般高(明)",40,"123 ×4"],["四般高(暗)",80,""]]},
  {g:"特殊類", items:[
-  ["圍骰/順骰",5,"圍收 順比"],["斷追",2,""],["追",5,""],["雙響",5,""],["三響",10,""],["反雪(10)",10,"雙輸"],["反雪(20)",20,"三響後食出／自摸"],
+  ["斷追",2,""],["追",5,""],["反雪(10)",10,"雙輸"],["反雪(20)",20,"三響後食出／自摸"],
   ["海底撈月",10,"最後一隻自摸"],["河底出統",10,"最後一隻出銃"],["半求人",20,""],["全求人",40,""],["大雞",40,"番子一對，只計到花，不能叮"],["鴨糊",20,"自摸雞"]]},
 ];
 /* 廣東牌常用番種（各檯規矩可能唔同，可用 ＋／− 或直接輸入調整） */
@@ -691,21 +721,67 @@ const PM_CATALOG = [
   ["大四喜",13,""],["字一色",13,""],["清么九",13,""],["十三么",13,""],["九子連環",13,""],["十八羅漢",13,"四個槓"],
   ["天糊",13,"莊家起手即糊"],["地糊",13,"閒家第一隻摸牌即糊"],["人糊",13,"第一巡食人"],["八仙過海",13,"八隻花"]]},
 ];
+// 越南牌：廣東牌計法（點數、起糊、爆棚、自摸／出銃），加百搭番種
+// 越南牌（按《How to Play Vietnamese Mahjong》）：單位係番（phán），6 番 = 1 滿（mủn）；下面番數已經將滿換算做番（1 滿 = 6 番）
+const VN_CATALOG = [
+ {g:"基本", items:[
+  ["雞糊",0,"冇任何番：每家俾 1 分"],["單吊（自摸）",1,"自摸，只等一種牌完成順子"],["單吊眼（自摸）",1,"自摸，只等一種牌完成對子"],["平糊",1,"四組順子＋一對；眼唔可以係門風、圈風或者三元"],
+  ["門清自摸",1,"自摸，冇上冇碰"],["門風刻",1,"門風刻子或槓"],["圈風刻",1,"圈風刻子或槓"],["三元刻",1,"每組中／發／白刻子或槓"],["槓",1,"每個明槓、加槓或暗槓"],
+  ["全求人",3,"食出銃，四組都係上／碰返嚟，單吊眼"],["混一色",3,"一門數字＋番子"],["對對糊",3,"四組刻子或槓＋一對"],["對對糊無百搭",1,"對對糊冇用百搭，額外 1 番"]]},
+ {g:"大牌（滿）", items:[
+  ["小三元",6,"1 滿：兩組三元刻＋第三隻做眼"],["清一色",6,"1 滿"],["混么九",6,"1 滿：全 1／9＋番子（唔再計對對糊）"],["七對子",6,"1 滿：七對，要自摸（要事先講好用唔用）"],
+  ["無百搭雞糊",6,"1 滿：冇番，但冇用百搭"],["大三元",9,"9 番（唔再計三元刻）"],["十三么",13,"13 番（或者當 2 滿）"],["九蓮寶燈",18,"3 滿"],["坎坎糊",18,"3 滿：四組暗刻自摸"],
+  ["清么九",24,"4 滿"],["字一色",24,"4 滿"],["小四喜",24,"4 滿"],["十八羅漢",24,"4 滿：四個槓"],["四暗槓",30,"5 滿"],["大四喜",48,"8 滿"]]},
+ {g:"獎勵／情況", items:[
+  ["無百搭獎",6,"1 滿：1 滿或以上嘅牌冇用百搭"],["單吊門清獎",6,"1 滿：2 滿或以上嘅牌，加單吊（或單吊眼）同門清（代替各 1 番）"],
+  ["搶槓",1,""],["槓上自摸",1,"摸花牆補牌食糊"],["海底撈月",1,"摸最後一隻牌食糊"],["六連勝",6,"1 滿：連續第六鋪或以上食糊（要事先講好）"],
+  ["天糊",12,"2 滿：莊家第一手食糊"],["地糊",12,"2 滿：食莊家第一隻打出嘅牌"],["人糊",12,"2 滿：閒家第一次摸牌即糊（要事先講好）"]]},
+ {g:"花", items:[
+  ["正花",1,"每隻同自己門風對應嘅花（1 東 2 南 3 西 4 北）"],["一套花",6,"1 滿：同一組四隻花（唔再計正花）"],["一套正花",12,"2 滿：四隻都係自己嘅正花"],["八花",6,"1 滿：八隻或以上花（要事先講好）"],["十花",12,"2 滿：十隻或以上花"]]},
+ {g:"百搭（補花）", items:[
+  ["總",2,"萬能百搭；東位 3 番；開局補 3 番"],["筒",1,"筒子百搭；南位 2 番"],["索",1,"索子百搭；西位 2 番"],["萬",1,"萬子百搭；北位 2 番"],["大花",2,"任何位都係 2 番"],
+  ["喜",1,"風牌百搭；南位 2 番"],["元",1,"三元百搭；西位 2 番"],["合",2,"數字百搭；北位 3 番；開局補 3 番"],["加 1 番（坐位對應）",1,"百搭同自己門風對應時撳多下"],
+  ["兩總",6,"1 滿：同時補兩隻總（開局 9 番）"],["兩合",6,"1 滿：同時補兩隻合（開局 9 番）"],["總合",6,"1 滿：同時補總同合"],["一套百搭",6,"1 滿：同色同框四隻百搭（另加各隻補花番）"]]},
+ {g:"無花無葉", items:[
+  ["打花打百搭",6,"1 滿：安全打出三隻花／百搭，冇番子，下一隻數字牌即糊；打出 5–6 隻再加 1 滿"],["打藍百搭",6,"1 滿：安全打出三隻藍百搭；之後每多打一隻加 1 滿"],
+  ["打花",6,"1 滿：安全打出三隻花（要事先講好）"],["真無花無葉",6,"1 滿（現代玩法 2 滿）：冇花、冇百搭、冇番子完成食糊"]]},
+];
+// 越南牌 8 隻百搭＋花（說明用）
+const VN_JOKERS = [["總（Tổng）","萬能百搭：當任何數字牌或番子"],["筒（Thùng）","當任何筒子"],["索（Soọc）","當任何索子"],["萬（Màn）","當任何萬子"],
+  ["喜（Hỉ）","當任何風牌"],["元（Nguyên）","當任何三元牌（中／發／白）"],["合（Hợp）","當任何數字牌"],["大花（Đại Hoa）","唔係真百搭，當一隻值錢啲嘅花"],
+  ["花（16 隻）","四季、四花、四皇、四后；同門風對應嘅先計番"]];
+const VN_RULES = ["百搭可以用喺刻子、順子同對子，用幾多隻都得；但槓一定要四隻真牌，唔可以用百搭。",
+  "百搭分藍、紅兩色，每色四隻各對應一個門風；補出嚟嘅百搭有番，同自己門風對應會多啲。",
+  "6 番 = 1 滿。未夠 1 滿：0–5 番 = 1／2／4／8／16／32 分（雙）、1／1／2／4／8／16 分（單）。每滿 64 分（雙）／32 分（單），剩低每番另加 6 分。",
+  "自摸：三家都俾雙。食出銃：出銃嗰家俾雙，其餘兩家俾單。",
+  "漸進計法：已經有 1 滿或以上，再加每個 3 番牌型改計 1 滿。番鼠唔會自動計，可以用 ＋／− 調整。",
+  "詐糊：番鼠按「賠每家 1 滿」嗰種玩法計。"];
+const isVN = () => state.mode === "vn";
 const isHK = () => state.mode === "hk";
 const isPM = () => state.mode === "pm";
-const isCant = () => state.mode === "hk" || state.mode === "pm";     // 廣東牌一族（13 張）
-const catalogOf = m => m==="hk" ? HK_CATALOG : m==="pm" ? PM_CATALOG : CATALOG;
+const isCant = () => state.mode === "hk" || state.mode === "pm" || state.mode === "vn";     // 廣東牌一族（13 張）
+const catalogOf = m => m==="hk" ? HK_CATALOG : m==="vn" ? VN_CATALOG : m==="pm" ? PM_CATALOG : CATALOG;
 const curCatalog = () => catalogOf(state.mode);
-const curCap = () => isPM() ? state.pm.cap : state.hk.cap;
-const curMin = () => isPM() ? 0 : state.hk.min;
-const unitRate = () => { const r = isHK() ? state.hk.unit : isPM() ? state.pm.unit : state.rate; return r > 0 ? r : 1; };
-const PT_UNIT = () => isHK() ? "點" : isPM() ? "底" : "番";
-const RATE_TXT = () => isHK() ? `每點 HK$${state.hk.unit}` : isPM() ? `每底 HK$${state.pm.unit}` : `每番 HK$${state.rate}`;
+const curCap = () => isPM() ? state.pm.cap : isVN() ? 99 : state.hk.cap;
+const curMin = () => isPM() || isVN() ? 0 : state.hk.min;
+const unitRate = () => { const r = isHK() ? state.hk.unit : isVN() ? state.vn.unit : isPM() ? state.pm.unit : state.rate; return r > 0 ? r : 1; };
+const PT_UNIT = () => isHK() ? "點" : isVN() ? "分" : isPM() ? "底" : "番";
+const RATE_TXT = () => isHK() ? `每點 HK$${state.hk.unit}` : isVN() ? `每分 HK$${state.vn.unit}` : isPM() ? `每底 HK$${state.pm.unit}` : `每番 HK$${state.rate}`;
 // 詐糊（廣東牌／跑馬仔）：賠三家，每家按「封頂自摸」嗰份計
 function cantZhahuEach(){
   if(isPM()) return Math.round(Math.pow(2, state.pm.cap) * state.pm.unit * 100)/100;
+  if(isVN()) return Math.round(32 * state.vn.unit * 100)/100;      // 賠每家 1 滿（單）
   return Math.round(hkPoints(state.hk.cap) * state.hk.unit / 2 * 100)/100;
 }
+// 越南牌：6 番 = 1 滿；回傳 {single, double} 分
+function vnPts(fan){
+  const V = state.vn || {extra:6, bonus:0};
+  const f = Math.max(0, Math.round(fan)), mun = Math.floor(f/6), r = f % 6;
+  if(!mun) return {single:[1,1,2,4,8,16][r], double:[1,2,4,8,16,32][r], mun:0, r};
+  const add = r * V.extra + mun * (V.bonus || 0);
+  return {single:32*mun + add, double:64*mun + add, mun, r};
+}
+const vnTxt = f => { const v = vnPts(f); return v.mun ? `${v.mun} 滿${v.r?` ${v.r} 番`:""}` : `${f} 番`; };
 // 廣東牌點數：半辣上 = 4 番後每番 ×1.5／×1.33 交替（16,24,32,48,64…）；全辣上 = 每番 ×2
 function hkPoints(fan){
   const f = Math.max(0, Math.min(fan, state.hk.cap));
@@ -718,8 +794,8 @@ function askConfirm(title, text, okText, onOk){
   $("cfNo").onclick = ()=>{ box.hidden = true; };
   $("cfYes").onclick = ()=>{ box.hidden = true; onOk(); };
 }
-const MODE_NAME = m => m==="hk" ? "廣東牌" : m==="pm" ? "跑馬仔" : "台牌";
-const MODES = [["tw","台牌"],["hk","廣東牌"],["pm","跑馬仔"]];
+const MODE_NAME = m => m==="hk" ? "廣東牌" : m==="vn" ? "越南牌" : m==="pm" ? "跑馬仔" : "台牌";
+const MODES = [["tw","台牌"],["hk","廣東牌"],["vn","越南牌"],["pm","跑馬仔"]];
 function switchMode(m, after){
   if(!canWrite || saving || m===state.mode){ if(after) after(); return; }
   const n = state.hands.length;
@@ -743,7 +819,7 @@ function closeSplash(){
 const DEFAULT_STATE = () => ({
   v:1, players:["阿明","阿強","阿芬","阿珍"], rate:1, base:5, dealerFan:1, streakFan:2,
   startDealer:0, dealer:0, streak:0, round:0, hands:[], updatedAt:0,
-  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}, pm:{unit:1, cap:3, dealer:true}
+  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}, pm:{unit:1, cap:3, dealer:true}, vn:{unit:0.5, extra:6, bonus:0}
 });
 let state = DEFAULT_STATE();
 const KEY = "hktw-mj-standalone";
@@ -771,6 +847,17 @@ function computeWin(winner, discarder, fan){
       const amt = Math.round((X + dl)*100)/100;
       deltas[p] -= amt; deltas[winner] += amt;
       rows.push({p, bonus:dl, total:fan, amt, label:`${f}番 = ${Math.pow(2,f)}底${dl?` + 莊${1+state.streak}底`:""}`});
+    }
+    return {deltas, rows};
+  }
+  if(isVN()){
+    // 自摸：三家俾雙；出銃：出銃俾雙，其餘兩家俾單（雞糊每家 1 分）
+    const v = vnPts(fan), U = state.vn.unit;
+    for(const p of [0,1,2,3].filter(p=>p!==winner)){
+      const dbl = discarder===null || p===discarder, pts = dbl ? v.double : v.single;
+      const amt = Math.round(pts * U * 100)/100;
+      deltas[p] -= amt; deltas[winner] += amt;
+      rows.push({p, bonus:0, total:fan, amt, label:`${vnTxt(fan)} = ${pts}分（${dbl?"雙":"單"}）`});
     }
     return {deltas, rows};
   }
@@ -857,6 +944,8 @@ function recordDraw(){
 const SIDE = {
   angang:{name:"暗槓", collect:true,  desc:"收三家各 1 底"},
   wai:   {name:"圍骰", collect:true,  desc:"收三家各 1 底"},
+  hua:   {name:"一台花", collect:true, mult:1,   desc:"收三家各 1 底"},
+  cao:   {name:"一台草", collect:true, mult:0.5, desc:"收三家各半底"},
   shun:  {name:"順骰", collect:false, desc:"比三家各 1 底"},
   zhahu: {name:"詐糊", collect:false, fan:30, ding:true},
   zhading:{name:"詐叮", collect:false, fan:20, ding:true},
@@ -864,17 +953,35 @@ const SIDE = {
 };
 const DING = [["無",0],["天叮",60],["地叮",40],["四子叮",20],["七子叮",15],["十子",10]];
 let dingIdx = 0;
-function sideFan(type){ const S = SIDE[type]; return S.fan ? S.fan + (S.ding ? DING[dingIdx][1] : 0) : state.base; }
+function sideFan(type){ const S = SIDE[type]; return S.fan ? S.fan + (S.ding ? DING[dingIdx][1] : 0) : state.base * (S.mult || 1); }
+// 詐糊同莊家有關：台牌加莊番＋連拉番；跑馬仔（開咗莊家加注）加 (1+連莊) 底
+function zhahuDealerExtra(p, q){
+  if(p!==state.dealer && q!==state.dealer) return 0;
+  if(isPM()) return state.pm.dealer ? (1 + state.streak) * state.pm.unit : 0;
+  if(isHK() || isVN()) return 0;
+  return (state.dealerFan + state.streakFan * effStreak(p===state.dealer ? q : p)) * state.rate;
+}
 function recordSide(type, p){
   const fanEach = sideFan(type);
   const cz = isCant() && type==="zhahu";
   const amt = cz ? cantZhahuEach() : Math.round(fanEach * state.rate * 100)/100;
   const S = SIDE[type];
-  const desc = cz ? `賠三家各 $${amt}（按封頂自摸計）` : S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}` : S.desc;
-  const sign = SIDE[type].collect ? 1 : -1;
-  const deltas = [0,0,0,0].map((_,i)=> i===p ? sign*amt*3 : -sign*amt);
+  const sign = S.collect ? 1 : -1;
+  const deltas = [0,0,0,0];
+  let extra = 0;
+  for(let q=0;q<4;q++){
+    if(q===p) continue;
+    const x = type==="zhahu" ? zhahuDealerExtra(p, q) : 0;
+    const a = Math.round((amt + x)*100)/100;
+    extra = Math.max(extra, x);
+    deltas[q] -= sign*a; deltas[p] += sign*a;
+  }
+  const dTxt = extra ? (isPM() ? `；同莊家之間加 ${1+state.streak} 底` : `；同莊家之間加莊 ${state.dealerFan} 番${state.streak?`＋連${state.streak}拉${state.streak}`:""}`) : "";
+  const desc = cz ? `賠三家各 $${amt}（按封頂自摸計）${dTxt}` : S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}${dTxt}` : S.mult ? `收三家各 ${fanEach} 番（${S.mult===1?"1":"半"}底）` : S.desc;
   const prev = snap();
-  state.hands.push({kind:"side", type, player:p, desc, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, prev});
+  const isHand = type==="zhahu";   // 詐糊當完一鋪：閒家詐糊莊家連莊；莊家詐糊過莊
+  state.hands.push({kind:"side", type, player:p, desc, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, prev, hand:isHand||undefined});
+  if(isHand){ if(p===state.dealer) advanceDealer(); else state.streak++; }
   if(S.ding) dingIdx = 0;
   render(); save();
 }
@@ -920,9 +1027,9 @@ function applySkin(){
   k = k || state.skin || "default";
   if(k==="default") delete document.documentElement.dataset.skin; else document.documentElement.dataset.skin = k;
 }
-const isHandStart = h => h.kind!=="side" && !(h.group && !h.groupFirst);
+const isHandStart = h => (h.kind!=="side" || !!h.hand) && !(h.group && !h.groupFirst);
 function render(){
-  applySkin();
+  applySkin(); keepAwake();
   renderSettle();
   const t = totals();
   const rw = WINDS[state.round % 4];
@@ -946,6 +1053,8 @@ function render(){
   $("modeChip").textContent = MODE_NAME(state.mode);
   $("rulesLine").innerHTML = isPM()
     ? `<span>每底 <b>HK$${state.pm.unit}</b></span><span><b>雞糊</b>起糊</span><span><b>${state.pm.cap}</b> 番封頂（×${Math.pow(2,state.pm.cap)}）</span><span>自摸三家各俾</span>${state.pm.dealer?`<span>莊家<b>跑馬</b>加注</span>`:""}`
+    : isVN()
+    ? `<span>每分 <b>HK$${state.vn.unit}</b></span><span><b>6 番 = 1 滿</b></span><span>1 滿 = 雙 64／單 32 分</span><span>多出每番 <b>${state.vn.extra}</b> 分</span><span>自摸三家俾雙</span>`
     : isHK()
     ? `<span>每點 <b>HK$${state.hk.unit}</b></span><span><b>${state.hk.min}</b> 番起糊</span><span><b>${state.hk.cap}</b> 番爆棚</span><span><b>${state.hk.scale==="full"?"全辣上":"半辣上"}</b></span><span><b>${state.hk.shoot==="half"?"半銃":"全銃"}</b></span>`
     : `<span>每番 <b>HK$${state.rate}</b></span><span>底 <b>${state.base}</b> 番</span><span>莊 <b>${state.dealerFan}</b> 番</span><span>每連莊 <b>${state.streakFan}</b> 番</span>`;
@@ -977,10 +1086,10 @@ function render(){
   let pu = 0;
   log.innerHTML = state.hands.map((h)=>{
     if(isHandStart(h)) pu++;
-    const tag = `${WINDS[h.round%4]}圈<br>${h.kind==="side" ? pu+1 : pu}`;
+    const tag = `${WINDS[h.round%4]}圈<br>${h.kind==="side" && !h.hand ? pu+1 : pu}`;
     if(h.kind==="side"){
       const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
-      const what = `${esc(state.players[h.player])} ${SIDE[h.type].name}`;
+      const what = `${esc(state.players[h.player])} ${SIDE[h.type].name}${h.hand ? `<small class="hsub"> · ${h.player===h.dealer ? "莊家詐糊，過莊" : "莊家連莊"}</small>` : ""}`;
       return `<div class="hand"><span class="tag">${tag}</span><span class="what">${what}</span><span class="sub">${esc(h.desc || SIDE[h.type].desc)}</span><div class="deltas">${d}</div></div>`;
     }
     const dealerTxt = `${esc(state.players[h.dealer])}莊${h.streak?" 連"+h.streak:""}`;
@@ -1001,29 +1110,58 @@ function renderSide(){
   const amt = Math.round(state.base * state.rate * 100)/100;
   $("dingSeg").innerHTML = DING.map((d,i)=>`<button class="opt${i===dingIdx?" on":""}" data-d="${i}">${d[0]}${d[1]?" "+d[1]:""}</button>`).join("");
   $("dingSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ dingIdx=+b.dataset.d; renderSide(); });
-  $("sideLbl").textContent = isCant() ? "詐糊" : "暗槓／圍骰／順骰／詐糊／詐叮";
-  document.querySelector('[data-side="zhahu"] small').textContent = isCant() ? `賠三家各 $${cantZhahuEach()}（按封頂自摸計）` : `比三家各 ${sideFan("zhahu")} 番`;
+  $("sideLbl").textContent = isCant() ? "詐糊" : "暗槓／圍骰／順骰／花／詐糊／詐叮";
+  const bAmt = Math.round(state.base * state.rate * 100)/100;
+  document.querySelector('[data-side="hua"] small').textContent = `收三家各 1 底（$${bAmt}）`;
+  document.querySelector('[data-side="cao"] small').textContent = `收三家各半底（$${Math.round(bAmt*50)/100}）`;
+  document.querySelector('[data-side="zhahu"] small').textContent = isVN() ? `賠三家各 $${cantZhahuEach()}（每家 1 滿）` : isCant() ? `賠三家各 $${cantZhahuEach()}（按封頂自摸計）` : `比三家各 ${sideFan("zhahu")} 番`;
   document.querySelector('[data-side="zhading"] small').textContent = `比三家各 ${sideFan("zhading")} 番`;
   document.querySelectorAll("[data-side]").forEach(b=>{
     b.disabled = sidePlayer===null;
     b.onclick = ()=>{
       if(sidePlayer===null || !canWrite || saving) return;
       const p = sidePlayer, t = b.dataset.side; sidePlayer = null;
-      const each = (isCant() && t==="zhahu") ? cantZhahuEach() : Math.round(sideFan(t) * state.rate * 100)/100;
       recordSide(t, p);
-      $("sideHint").textContent = `已記錄：${state.players[p]} ${SIDE[t].name}，${SIDE[t].collect?"收":"比"}三家各 $${each}。`;
+      const h = state.hands[state.hands.length-1];
+      $("sideHint").textContent = `已記錄：${state.players[p]} ${SIDE[t].name}，${h.deltas.filter((v,i)=>i!==p).map((v,i)=>"$"+Math.abs(v)).join("／")}${SIDE[t].collect?"（收）":"（比）"}。${h.hand ? (h.player===h.dealer ? "莊家詐糊，過莊。" : "莊家連莊。") : ""}`;
     };
   });
   if(sidePlayer!==null) $("sideHint").textContent = isCant()
-    ? `${state.players[sidePlayer]} 詐糊：賠三家各 $${cantZhahuEach()}（${isPM()?`封頂 ${state.pm.cap} 番自摸`:`${state.hk.cap} 番爆棚自摸`}嗰份）。`
-    : `${state.players[sidePlayer]}：暗槓／圍骰收三家各 $${amt}，順骰比三家各 $${amt}；詐糊／詐叮按掣上番數比三家。`;
+    ? `${state.players[sidePlayer]} 詐糊：賠三家各 $${cantZhahuEach()}（${isVN()?"每家 1 滿":isPM()?`封頂 ${state.pm.cap} 番自摸嗰份`:`${state.hk.cap} 番爆棚自摸嗰份`}）。`
+    : `${state.players[sidePlayer]}：暗槓／圍骰／一台花收三家各 $${amt}，一台草各 $${Math.round(amt*50)/100}，順骰比三家各 $${amt}；詐糊／詐叮按掣上番數比三家，詐糊同莊家之間另加莊番同連拉番。`;
 }
 
 function resetGame(){
-  const keep = {mode:state.mode, hk:state.hk, pm:state.pm, skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
+  const keep = {mode:state.mode, hk:state.hk, pm:state.pm, vn:state.vn, skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
   state = Object.assign(DEFAULT_STATE(), keep, {dealer:keep.startDealer});
   render(); save();
 }
+
+// 換位：兩個座位對調，所有記錄（食糊、出銃、雜項、莊家、投降、反雪）都跟人走
+function swapSeats(a, b){
+  if(a===b || !canWrite) return;
+  const m = i => i===a ? b : i===b ? a : i;
+  const sw = arr => { if(!Array.isArray(arr)) return arr; const o = arr.slice(); o[a] = arr[b]; o[b] = arr[a]; return o; };
+  const fixRev = r => r ? Object.assign({}, r, {from:m(r.from), targets:(r.targets||[]).map(m)}) : r;
+  const fixSnap = x => { if(!x) return x; const o = Object.assign({}, x); if("dealer" in o) o.dealer = m(o.dealer); if(o.surr) o.surr = sw(o.surr); if(o.revenge) o.revenge = fixRev(o.revenge); return o; };
+  state.players = sw(state.players);
+  if(state.uids) state.uids = sw(state.uids);
+  state.dealer = m(state.dealer); state.startDealer = m(state.startDealer);
+  if(state.surr) state.surr = sw(state.surr);
+  if(state.revenge) state.revenge = fixRev(state.revenge);
+  state.hands = state.hands.map(h=>{
+    const o = Object.assign({}, h, {deltas:sw(h.deltas), dealer:m(h.dealer)});
+    if("winner" in h) o.winner = m(h.winner);
+    if(h.discarder!=null) o.discarder = m(h.discarder);
+    if("player" in h) o.player = m(h.player);
+    if(h.revenge) o.revenge = fixRev(h.revenge);
+    if(h.prev) o.prev = fixSnap(h.prev);
+    return o;
+  });
+  render(); save();
+  if(typeof toast==="function") toast(`${state.players[b]} 同 ${state.players[a]} 已經換位。`);
+}
+window.__swapSeats = swapSeats;
 
 /* ---------- settlement & tags ---------- */
 const TAGS = [
@@ -1047,7 +1185,7 @@ const TAGS = [
   {id:20, name:"Sugar Daddy",      desc:"最受歡迎麻雀腳。",                  test:s=>s.rank===4 && s.pts<-500},
 ];
 // 廣東牌：照搬台牌 18 個稱號，門檻按 10 番封頂嘅點數比例調整（U = 1 鋪起糊+1番嘅點數 ÷ 16，預設 3 番起糊、半辣上 = 1）
-const HK_U = () => isPM() ? Math.pow(2, Math.min(1, state.pm.cap)) * 0.1 : hkPoints((state.hk.min||3)+1) / 16;
+const HK_U = () => isPM() ? Math.pow(2, Math.min(1, state.pm.cap)) * 0.1 : isVN() ? vnPts(4).double * state.vn.unit / 16 : hkPoints((state.hk.min||3)+1) / 16;
 const HK_TAGS = [
   {id:1,  name:"根本不是一個Level", desc:"大佬比左$20我，今晚唱K我既", test:s=>s.rank===1 && s.lead>600*HK_U()},
   {id:2,  name:"人生勝利組",       desc:"No Bullshit! 我地一齊贏!",         test:s=>s.rank===1 && s.lead>400*HK_U() && s.lead<=600*HK_U()},
@@ -1102,7 +1240,7 @@ const SPECIAL_BY_ID = Object.fromEntries(SPECIALS.concat([WITNESS]).map(t=>[t.id
 const TIER_RANK = {legend:2, rare:1};
 function specialsFor(h){
   const names = new Set((h.items||[]).map(x=>x.name));
-  return SPECIALS.filter(t=>(!t.mode || t.mode===state.mode || (t.mode==="hk" && isPM())) && (t.items.some(n=>names.has(n)) || (t.test && t.test(h))));
+  return SPECIALS.filter(t=>(!t.mode || t.mode===state.mode || (t.mode==="hk" && isCant())) && (t.items.some(n=>names.has(n)) || (t.test && t.test(h))));
 }
 const betterSp = (a,b) => !b || TIER_RANK[a.t.tier]>TIER_RANK[b.t.tier] || (TIER_RANK[a.t.tier]===TIER_RANK[b.t.tier] && a.fan>b.fan);
 const r2 = v => Math.round(v*100)/100;
@@ -1119,7 +1257,7 @@ function computeStats(){
     if(posSum>0) h.deltas.forEach((di,i)=>{ if(di<0) h.deltas.forEach((dj,j)=>{ if(dj>0){ const f = -di*dj/posSum; S[j].vs[i]+=f; S[i].vs[j]-=f; } }); });
     h.deltas.forEach((d,i)=>{ const s=S[i]; s.money += d; s.pts += d/rate; s.minRun = Math.min(s.minRun, s.pts); if(Math.abs(s.pts) > 1e-9) s.started = true; if(s.started && s.pts <= 1e-9) s.everNeg = true; });
     if(h.kind==="win"){
-      const w = S[h.winner]; w.wins++; w.winFans.push(h.fan); if(isPM() ? h.fan<=0 : isHK() ? h.fan<=(state.hk.min||3) : h.fan<10) w.smallWins++;
+      const w = S[h.winner]; w.wins++; w.winFans.push(h.fan); if(isPM() || isVN() ? h.fan<=(isVN()?1:0) : isHK() ? h.fan<=(state.hk.min||3) : h.fan<10) w.smallWins++;
       if((h.items||[]).some(x=>x.name==="槓上自摸"||x.name==="槓上槓自摸")) w.kangWins++;
       const lead = !h.group || h.groupFirst;
       if(h.discarder===null) w.selfDraws++; else if(lead) S[h.discarder].discards++;
@@ -1224,11 +1362,60 @@ function renderSettle(){
   $("settle").hidden = !ended;
   if(!ended) return;
   $("settleCard").innerHTML = settleHTML(false);
+  renderPayUp();
   $("settleCard").querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{
     openTag = openTag===b.dataset.tag ? null : b.dataset.tag; renderSettle();
   });
 }
-$("endBtn").onclick = ()=>{ if(!canWrite || saving) return; state.ended = true; state.endedAt = Date.now(); openTag=null; render(); save(); window.scrollTo(0,0); };
+// 找數：用最少轉賬次數清數（輸家直接俾贏家）
+function payUpList(){
+  const t = totals().map((v,p)=>({p, v:Math.round(v*100)/100}));
+  const debt = t.filter(x=>x.v<0).map(x=>({p:x.p, v:-x.v})).sort((a,b)=>b.v-a.v);
+  const cred = t.filter(x=>x.v>0).map(x=>({p:x.p, v:x.v})).sort((a,b)=>b.v-a.v);
+  const out = [];
+  for(const d of debt){
+    for(const c of cred){
+      if(d.v<0.005) break; if(c.v<0.005) continue;
+      const a = Math.round(Math.min(d.v, c.v)*100)/100;
+      out.push({from:d.p, to:c.p, amt:a}); d.v -= a; c.v -= a;
+    }
+  }
+  return out;
+}
+function renderPayUp(){
+  const box = $("payupBox"); if(!box) return;
+  const L = payUpList();
+  if(!L.length){ box.innerHTML = ""; return; }
+  const money = a => "$" + (Number.isInteger(a) ? a : a.toFixed(2).replace(/0$/,""));
+  box.innerHTML = `<div class="payup"><div class="pu-head"><b>找數</b><span>${L.length} 次轉賬就清</span></div>
+    ${L.map(x=>`<div class="pu-row"><span>${esc(state.players[x.from])}</span><i aria-hidden="true">→</i><span>${esc(state.players[x.to])}</span><b class="num">${money(x.amt)}</b></div>`).join("")}
+    <button class="btn" id="payCopy">複製找數</button></div>`;
+  $("payCopy").onclick = async ()=>{
+    const txt = "🀄 番鼠找數\n" + L.map(x=>`${state.players[x.from]} → ${state.players[x.to]} ${money(x.amt)}`).join("\n");
+    try{ await navigator.clipboard.writeText(txt); $("payCopy").textContent = "已複製"; setTimeout(()=>{ if($("payCopy")) $("payCopy").textContent = "複製找數"; }, 1800); }
+    catch(e){ prompt("複製呢段：", txt); }
+  };
+}
+// 打緊牌時唔好熄 mon（支援嘅瀏覽器先有效）
+let wakeLock = null;
+async function keepAwake(){
+  try{
+    const want = state.hands.length>0 && !state.ended && document.visibilityState==="visible";
+    if(want && !wakeLock && navigator.wakeLock){ wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", ()=>{ wakeLock = null; }); }
+    else if(!want && wakeLock){ await wakeLock.release(); wakeLock = null; }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange", keepAwake);
+function endGame(){
+  if(!canWrite || saving) return;
+  state.ended = true; state.endedAt = Date.now(); openTag=null; render(); save(); window.scrollTo(0,0);
+  if(window.__afterEnd) window.__afterEnd();
+}
+$("endBtn").onclick = ()=>{
+  if(!canWrite || saving) return;
+  const n = state.hands.filter(isHandStart).length;
+  askConfirm("結束遊戲？", `打咗 ${n} 鋪。結束之後會顯示結算${window.__afterEnd ? "，有帳戶嘅玩家會記入各自嘅小氣簿同經驗值" : ""}。`, "結束並結算", endGame);
+};
 $("backBtn").onclick = ()=>{ if(!canWrite || saving) return; state.ended = false; render(); save(); };
 let newArmed = false;
 $("newGameBtn").onclick = ()=>{
@@ -1352,10 +1539,11 @@ const HELP = {
  "全帶么":{d:"每組牌都有一或九，冇番子。只可以碰一或九。",ex:"123m 789m 123p 789p 111s 99s"},
  "混么九":{d:"全部都係一、九同字牌。",ex:"111m 999p 111s EEE CCC 99m"},
  "么九":{d:"全部都係一同九，冇字牌。",ex:"111m 999m 111p 999p 111s 99s"},
- "混帶X(10)":{d:"每組牌都包含同一個數字，最少有兩坎數字牌。",ex:"345m 456m 567m 555p 456s 55s"},
- "混帶X(20)":{d:"同上，按你哋檯規分 10／20／30 番。"},"混帶X(30)":{d:"同上，按你哋檯規分 10／20／30 番。"},
- "滿庭芳":{d:"每組牌都包含同一個數字，而且冇番子。",ex:"345m 456m 567m 555p 456s 55s"},
- "純滿庭芳":{d:"全部順子都係同一組數字。",ex:"123m 123p 123s 123m 123p 11s"},
+ "混帶X(10)":{d:"好似混帶么，不過換成另一個數字 X：每一組牌同眼都要有數字 X（例如 5），唔係就要係番子（字牌）。最少要有 2 坎數字牌。冇番子就變做滿庭芳。例子係混帶五。",ex:"345m 456p 567s EEE CCC 55m"},
+ "混帶X(20)":{d:"同混帶X(10) 一樣：每組同眼都有數字 X 或者係番子。10／20／30 番點分按你哋檯規。例子只有 2 坎數字牌。",ex:"345m 555p EEE SSS CCC 55s"},
+ "混帶X(30)":{d:"同混帶X(10) 一樣：每組同眼都有數字 X 或者係番子。10／20／30 番點分按你哋檯規。",ex:"345m 456m 555p 567s CCC 55s"},
+ "滿庭芳":{d:"每一組牌同眼都有同一個數字，而且冇番子（即「全帶X」）。可以有刻子。",ex:"345m 567m 555p 456s 567s 55m"},
+ "純滿庭芳":{d:"滿庭芳再進一步：全部都係順子（冇刻子），每組同眼都有同一個數字。",ex:"345m 456m 567p 345s 456s 55p"},
  "2暗刻":{d:"有兩組自己摸返嚟嘅刻子。",ex:"222m 777p"},"3暗刻":{d:"有三組暗刻。",ex:"222m 777p 444s"},
  "4暗刻":{d:"有四組暗刻。",ex:"222m 777p 444s EEE"},"5暗刻":{d:"有五組暗刻。",ex:"222m 777p 444s EEE CCC"},
  "2同刻":{d:"兩門有同一個數字嘅刻子。",ex:"111m 111p"},"3同刻(小)":{d:"三門同一數字嘅刻子（按你哋檯規分大小）。",ex:"111m 111p 111s"},"3同刻(大)":{d:"三門同一數字嘅刻子，全部暗刻。",ex:"111m 111p 111s"},
@@ -1434,7 +1622,11 @@ function renderHelpList(){
   $("helpModeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ helpMode = b.dataset.hm; helpTab = 0; renderHelpList(); });
   $("helpTabs").innerHTML = cat.map((c,i)=>`<button class="opt${i===helpTab?" on":""}" data-t="${i}">${esc(c.g)}</button>`).join("");
   $("helpTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{ helpTab=+b.dataset.t; renderHelpList(); });
-  $("helpList").innerHTML = cat[helpTab].items.map((it,i)=>`<button class="help-item" data-i="${i}"><span>${esc(it[0])}</span><b>${it[1]} 番</b></button>`).join("");
+  $("helpList").innerHTML = (helpM()==="vn" && helpTab===0 ? `<div class="help-card vn-card"><h3>越南牌：8 隻百搭＋16 隻花</h3>
+      <div class="vn-jk">${VN_JOKERS.map(([n,d])=>`<div><b>${esc(n)}</b><span>${esc(d)}</span></div>`).join("")}</div>
+      <p class="help-label">使用規則</p><ol class="vn-rules">${VN_RULES.map(r=>`<li>${esc(r)}</li>`).join("")}</ol>
+      <p class="hint" style="margin:8px 0 0">規則同賠付表跟《How to Play Vietnamese Mahjong》（Bridget Young）。每分幾錢、滿以外每番幾分同每滿獎勵可以喺「設定」改。</p></div>` : "")
+    + cat[helpTab].items.map((it,i)=>`<button class="help-item" data-i="${i}"><span>${esc(it[0])}</span><b>${it[1]} 番</b></button>`).join("");
   $("helpList").querySelectorAll("button").forEach(b=>b.onclick=()=>showHelpDetail(cat[helpTab].items[+b.dataset.i]));
 }
 function showHelpDetail(it){
@@ -1487,6 +1679,9 @@ $("scrim").onclick = hideSheet;
 let resetArmed = false;
 function fillSetup(){
   for(let i=0;i<4;i++) $("p"+i).value = state.players[i];
+  $("swapRows").innerHTML = state.players.map((n,i)=>`<div class="swaprow"><span class="w">${seatWind(i)}</span><b>${esc(n)}</b>
+    <select data-sw="${i}" aria-label="${esc(n)} 同邊個換位"><option value="">同…換位</option>${state.players.map((m,j)=>j===i?"":`<option value="${j}">同 ${esc(m)}（${seatWind(j)}）換位</option>`).join("")}</select></div>`).join("");
+  $("swapRows").querySelectorAll("select").forEach(sel=>sel.onchange=()=>{ const j = sel.value; if(j==="") return; swapSeats(+sel.dataset.sw, +j); fillSetup(); });
   $("rate").value = state.rate; $("base").value = state.base; $("dealerFan").value = state.dealerFan; $("streakFan").value = state.streakFan;
   const locked = state.hands.length>0;
   $("startDealerSeg").innerHTML = state.players.map((n,i)=>`<button class="opt${i===state.startDealer?" redon":""}" data-i="${i}" ${locked?"disabled":""}>${esc(n)}</button>`).join("");
@@ -1495,7 +1690,7 @@ function fillSetup(){
   resetArmed=false; $("resetBtn").textContent = "清除所有記錄，重新開局";
   $("modeSeg2").innerHTML = MODES.map(([k,n])=>`<button class="opt${k===state.mode?" on":""}" data-m="${k}">${n}</button>`).join("");
   $("modeSeg2").querySelectorAll("button").forEach(b=>b.onclick=()=>switchMode(b.dataset.m, fillSetup));
-  $("twFields").hidden = isCant(); $("hkFields").hidden = !isHK(); $("pmFields").hidden = !isPM();
+  $("twFields").hidden = isCant(); $("hkFields").hidden = !isHK(); $("pmFields").hidden = !isPM(); $("vnFields").hidden = !isVN();
   $("pmUnit").value = state.pm.unit;
   const pseg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.pm[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
     $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.pm[key] = v==="true" ? true : v==="false" ? false : +v; render(); save(); fillSetup(); }); };
@@ -1503,6 +1698,9 @@ function fillSetup(){
   pseg("pmDealerSeg", [[true,"有（跑馬）"],[false,"冇"]], "dealer");
   $("pmTable").textContent = `每份 = 每底 × 2^番：雞糊 $${state.pm.unit}、1 番 $${state.pm.unit*2}、封頂 ${state.pm.cap} 番 $${state.pm.unit*Math.pow(2,state.pm.cap)}。自摸三家各俾一份，出銃者包一份。${state.pm.dealer?"莊家食糊或者俾錢時，另加（1 + 連莊數）底。":""}`;
   $("hkUnit").value = state.hk.unit; $("hkMin").value = state.hk.min;
+  state.vn = Object.assign({unit:0.5, extra:6, bonus:0}, state.vn || {});
+  $("vnUnit").value = state.vn.unit; $("vnExtra").value = state.vn.extra; $("vnBonus").value = state.vn.bonus;
+  $("vnTable").textContent = "例子（雙／單）：" + [1,3,6,9,12].map(f=>{ const v = vnPts(f); return `${vnTxt(f)} ${v.double}／${v.single}分`; }).join("、") + "。";
   const seg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.hk[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
     $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.hk[key] = isNaN(+v) ? v : +v; render(); save(); fillSetup(); }); };
   seg("hkCapSeg", [[8,"8 番"],[10,"10 番"],[13,"13 番"]], "cap");
@@ -1517,6 +1715,7 @@ function fillSetup(){
 $("openSetup").onclick = ()=>{ fillSetup(); showSheet($("setupSheet")); };
 $("closeSetup").onclick = hideSheet;
 for(let i=0;i<4;i++) $("p"+i).addEventListener("change", e=>{ state.players[i] = e.target.value.trim() || `玩家${i+1}`; render(); save(); fillSetup(); });
+[["vnUnit","unit"],["vnExtra","extra"],["vnBonus","bonus"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.vn[k] = k==="unit" ? v : Math.round(v); render(); save(); fillSetup(); } else e.target.value = state.vn[k]; }));
 [["hkUnit","unit"],["hkMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v); if(!isNaN(v) && v>=0 && (k!=="min" || v<=state.hk.cap)){ state.hk[k]=v; render(); save(); fillSetup(); } else e.target.value = state.hk[k]; }));
 [["rate",0.1],["base",0],["dealerFan",0],["streakFan",0]].forEach(([k])=>$(k).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state[k]=v; render(); save(); } else e.target.value = state[k]; }));
 $("pmUnit").addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.pm.unit = v; render(); save(); fillSetup(); } else e.target.value = state.pm.unit; });
@@ -1533,7 +1732,7 @@ $("undoBtn").onclick = ()=>{ if(canWrite && !saving) undo(); };
 let ws = null;
 function openWin(winner){
   if(!canWrite || saving || state.ended) return;
-  ws = {winner, discarder:null, items:[], adj:0, photo:null, extra:{}};
+  ws = {winner, discarder:(winner+3)%4, items:[], adj:0, photo:null, extra:{}};   // 預設食上家出銃
   $("winErr").hidden = true;
   buildCatalog();
   renderWin();
@@ -1567,7 +1766,7 @@ function renderWin(){
     $("discarderSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder=+b.dataset.i; renderWin(); });
   }
   // fan
-  $("fanLbl").textContent = isPM() ? `番數（雞糊 0 番都食得，${state.pm.cap} 番封頂）` : isHK() ? `番數（${state.hk.min} 番起糊，${state.hk.cap} 番爆棚）` : "番數（不含底及莊）";
+  $("fanLbl").textContent = isPM() ? `番數（雞糊 0 番都食得，${state.pm.cap} 番封頂）` : isHK() ? `番數（${state.hk.min} 番起糊，${state.hk.cap} 番爆棚）` : isVN() ? `番數（6 番 = 1 滿；而家 ${vnTxt(fanTotal())}）` : "番數（不含底及莊）";
   if(document.activeElement !== $("fanInput")) $("fanInput").value = fanTotal();
   if(fanTotal() > 0) $("winErr").hidden = true;
   const selHtml = ws.items.map((it,i)=>`<button class="chip sel" data-i="${i}">${esc(it.name)} <b>${it.fan}</b><span class="x">✕</span></button>`).join("")
@@ -1658,6 +1857,108 @@ window.__setSkin = k => { try{ localStorage.setItem("fansyu-skin", k); }catch(e)
 window.__isVip = () => !!(ONLINE.me && ONLINE.me.vip);
 function applyMode(){ document.body.classList.toggle("ro", !canWrite); }
 
+/* 細 QR code 產生器：byte 模式、M 級糾錯、版本 1–10（最多 213 bytes），輸出 SVG */
+const QR = (() => {
+  // [每塊數據碼字, 塊數] 組合, 每塊糾錯碼字
+  const BLK = [null, [[16,1],10],[[28,1],16],[[44,1],26],[[32,2],18],[[43,2],24],[[27,4],16],[[31,4],18],[[38,2,39,2],22],[[36,3,37,2],22],[[43,4,44,1],26]];
+  const ALIGN = [null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50]];
+  const EXP = new Array(512), LOG = new Array(256);
+  for(let i=0, x=1; i<255; i++){ EXP[i] = x; LOG[x] = i; x <<= 1; if(x & 256) x ^= 0x11d; }
+  for(let i=255; i<512; i++) EXP[i] = EXP[i-255];
+  const gmul = (a,b) => a && b ? EXP[LOG[a] + LOG[b]] : 0;
+  function rsGen(n){ let g = [1]; for(let i=0;i<n;i++){ const ng = new Array(g.length+1).fill(0); for(let j=0;j<g.length;j++){ ng[j] ^= g[j]; ng[j+1] ^= gmul(g[j], EXP[i]); } g = ng; } return g; }
+  function rsEnc(data, n){ const g = rsGen(n), r = new Array(n).fill(0); for(const d of data){ const f = d ^ r[0]; r.shift(); r.push(0); for(let i=0;i<n;i++) r[i] ^= gmul(g[i+1], f); } return r; }
+  const blocksOf = v => { const [b, ec] = [BLK[v][0], BLK[v][1]]; const out = []; for(let i=0;i<b.length;i+=2) for(let k=0;k<b[i+1];k++) out.push(b[i]); return {sizes:out, ec}; };
+  const dataCap = v => blocksOf(v).sizes.reduce((a,b)=>a+b, 0);
+  function bch(val, poly, bits){ let v = val << bits; const pl = Math.floor(Math.log2(poly)); while(Math.floor(Math.log2(v||1)) >= pl && v){ v ^= poly << (Math.floor(Math.log2(v)) - pl); } return (val << bits) | v; }
+  function make(text){
+    const bytes = [...new TextEncoder().encode(text)];
+    let v = 1; while(v<=10 && 4 + (v<10?8:16) + bytes.length*8 > dataCap(v)*8) v++;
+    if(v>10) throw new Error("QR 太長");
+    // 數據位元
+    const bits = []; const put = (x,n) => { for(let i=n-1;i>=0;i--) bits.push((x>>>i)&1); };
+    put(4,4); put(bytes.length, v<10?8:16); bytes.forEach(b=>put(b,8));
+    const cap = dataCap(v)*8;
+    put(0, Math.min(4, cap - bits.length)); while(bits.length % 8) bits.push(0);
+    const data = []; for(let i=0;i<bits.length;i+=8) data.push(parseInt(bits.slice(i,i+8).join(""),2));
+    for(let p=0; data.length < dataCap(v); p++) data.push(p%2 ? 0x11 : 0xEC);
+    // 分塊＋糾錯，交錯
+    const {sizes, ec} = blocksOf(v); const db = [], eb = []; let o = 0;
+    for(const s of sizes){ const d = data.slice(o, o+s); o += s; db.push(d); eb.push(rsEnc(d, ec)); }
+    const cw = []; const mx = Math.max(...sizes);
+    for(let i=0;i<mx;i++) for(const d of db) if(i<d.length) cw.push(d[i]);
+    for(let i=0;i<ec;i++) for(const e of eb) cw.push(e[i]);
+    // 矩陣
+    const N = 17 + 4*v, M = [], F = [];
+    for(let i=0;i<N;i++){ M.push(new Array(N).fill(0)); F.push(new Array(N).fill(false)); }
+    const set = (r,c,val) => { M[r][c] = val ? 1 : 0; F[r][c] = true; };
+    const finder = (r,c) => { for(let i=-1;i<=7;i++) for(let j=-1;j<=7;j++){ const rr=r+i, cc=c+j; if(rr<0||cc<0||rr>=N||cc>=N) continue;
+      const on = i>=0&&i<=6&&j>=0&&j<=6 && (i===0||i===6||j===0||j===6||(i>=2&&i<=4&&j>=2&&j<=4)); set(rr,cc,on); } };
+    finder(0,0); finder(0,N-7); finder(N-7,0);
+    for(let i=8;i<N-8;i++){ set(6,i,i%2===0); set(i,6,i%2===0); }
+    const A = ALIGN[v];
+    const last = A.length - 1;
+    A.forEach((r,ri)=>A.forEach((c,ci)=>{ if((ri===0&&ci===0)||(ri===0&&ci===last)||(ri===last&&ci===0)) return; for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++) set(r+i,c+j, Math.max(Math.abs(i),Math.abs(j))!==1); }));
+    set(N-8, 8, 1); // dark module
+    // 預留格式／版本資料
+    for(let i=0;i<9;i++){ if(!F[8][i]) set(8,i,0); if(!F[i][8]) set(i,8,0); }
+    for(let i=0;i<8;i++){ if(!F[8][N-1-i]) set(8,N-1-i,0); if(!F[N-1-i][8]) set(N-1-i,8,0); }
+    if(v>=7) for(let i=0;i<6;i++) for(let j=0;j<3;j++){ set(i, N-11+j, 0); set(N-11+j, i, 0); }
+    // 放數據（之字形）
+    const cbits = []; cw.forEach(b=>{ for(let i=7;i>=0;i--) cbits.push((b>>i)&1); });
+    let k = 0, up = true;
+    for(let c=N-1; c>0; c-=2){ if(c===6) c--;
+      for(let t=0;t<N;t++){ const r = up ? N-1-t : t;
+        for(let d=0; d<2; d++){ const cc = c-d; if(!F[r][cc]){ M[r][cc] = k < cbits.length ? cbits[k] : 0; k++; } } }
+      up = !up; }
+    const MASKS = [(r,c)=>(r+c)%2===0,(r,c)=>r%2===0,(r,c)=>c%3===0,(r,c)=>(r+c)%3===0,(r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0,
+      (r,c)=>(r*c)%2+(r*c)%3===0,(r,c)=>((r*c)%2+(r*c)%3)%2===0,(r,c)=>((r+c)%2+(r*c)%3)%2===0];
+    const withMask = m => {
+      const G = M.map((row,r)=>row.map((x,c)=>F[r][c] ? x : x ^ (MASKS[m](r,c)?1:0)));
+      const fmt = bch((0<<3)|m, 0x537, 10) ^ 0x5412;   // M 級 = 00
+      const fb = i => (fmt>>i)&1;
+      for(let i=0;i<=5;i++) G[i][8] = fb(i);
+      G[7][8] = fb(6); G[8][8] = fb(7); G[8][7] = fb(8);
+      for(let i=9;i<15;i++) G[8][14-i] = fb(i);
+      for(let i=0;i<8;i++) G[8][N-1-i] = fb(i);
+      for(let i=8;i<15;i++) G[N-15+i][8] = fb(i);
+      G[N-8][8] = 1;
+      if(v>=7){ const vi = bch(v, 0x1f25, 12); for(let i=0;i<18;i++){ const b = (vi>>i)&1, r = Math.floor(i/3), c = N-11+i%3; G[r][c] = b; G[c][r] = b; } }
+      return G;
+    };
+    const penalty = G => {
+      let p = 0;
+      for(let pass=0; pass<2; pass++) for(let i=0;i<N;i++){ let run = 1;
+        for(let j=1;j<N;j++){ const a = pass ? G[j][i] : G[i][j], b = pass ? G[j-1][i] : G[i][j-1];
+          if(a===b){ run++; if(run===5) p+=3; else if(run>5) p++; } else run = 1; } }
+      for(let i=0;i<N-1;i++) for(let j=0;j<N-1;j++){ const x = G[i][j]; if(x===G[i+1][j] && x===G[i][j+1] && x===G[i+1][j+1]) p+=3; }
+      const pat = [1,0,1,1,1,0,1,0,0,0,0], pat2 = pat.slice().reverse();
+      for(let i=0;i<N;i++) for(let j=0;j<=N-11;j++){
+        let h1=true,h2=true,v1=true,v2=true;
+        for(let t=0;t<11;t++){ if(G[i][j+t]!==pat[t]) h1=false; if(G[i][j+t]!==pat2[t]) h2=false; if(G[j+t][i]!==pat[t]) v1=false; if(G[j+t][i]!==pat2[t]) v2=false; }
+        p += 40*(h1+h2+v1+v2); }
+      let dark = 0; G.forEach(r=>r.forEach(x=>dark+=x));
+      p += 10*Math.floor(Math.abs(dark*100/(N*N) - 50)/5);
+      return p;
+    };
+    let best = null, bp = Infinity;
+    for(let m=0;m<8;m++){ const G = withMask(m), pp = penalty(G); if(pp < bp){ bp = pp; best = G; } }
+    return best;
+  }
+  function svg(text, opts){
+    const o = Object.assign({px:6, quiet:4, fg:"#14211B", bg:"#FFFFFF"}, opts || {});
+    const G = make(text), N = G.length, S = (N + o.quiet*2);
+    let d = ""; G.forEach((row,r)=>row.forEach((x,c)=>{ if(x) d += `M${c+o.quiet} ${r+o.quiet}h1v1h-1z`; }));
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S*o.px}" height="${S*o.px}" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="${S}" height="${S}" fill="${o.bg}"/><path d="${d}" fill="${o.fg}"/></svg>`;
+  }
+  return {make, svg};
+})();
+
+function qrBoxHTML(url, note){
+  let svg = ""; try{ svg = QR.svg(url, {px:5}); }catch(e){ return `<p class="hint">條連結太長，整唔到 QR code。</p>`; }
+  return `<div class="qrbox">${svg}<p class="hint" style="margin:0;text-align:center">${note}</p></div>`;
+}
+
 /* ---------- helpers ---------- */
 const nickKey = n => n.trim().toLowerCase();
 function nickEmail(n){ const b = new TextEncoder().encode(nickKey(n)); return "u" + [...b].map(x=>x.toString(16).padStart(2,"0")).join("") + "@fansyu.app"; }
@@ -1702,6 +2003,7 @@ async function firebaseBackend(cfg){
     async createRoom(code, data){ const ref = rooms.doc(code); if((await ref.get()).exists) return false; await ref.set(data); return true; },
     async getRoom(code){ const s = await rooms.doc(code).get(); return s.exists ? s.data() : null; },
     joinRoom(code, uid, name){ return rooms.doc(code).update({["members." + uid]: name}); },
+    kick(code, uid){ return rooms.doc(code).update({["members." + uid]: firebase.firestore.FieldValue.delete(), ["kicked." + uid]: true}); },
     watchRoom(code, cb){ return rooms.doc(code).onSnapshot(s=>cb(s.exists ? s.data() : null), ()=>cb(undefined)); },
     request(code, uid, r){ return rooms.doc(code).update({["req." + uid]: r}); },
     clearReq(code, uid){ return rooms.doc(code).update({["req." + uid]: firebase.firestore.FieldValue.delete()}); },
@@ -1753,6 +2055,7 @@ function mockBackend(){
     async createRoom(code, data){ if(L("room:"+code)) return false; W("room:"+code, data); return true; },
     async getRoom(code){ return L("room:"+code); },
     async joinRoom(code, uid, name){ const r = L("room:"+code); r.members[uid] = name; W("room:"+code, r); },
+    async kick(code, uid){ const r = L("room:"+code); if(!me() || r.host!==me().uid) throw fail("permission-denied"); delete r.members[uid]; r.kicked = r.kicked || {}; r.kicked[uid] = true; W("room:"+code, r); },
     async request(code, uid, req){ const r = L("room:"+code); r.req = r.req || {}; r.req[uid] = req; W("room:"+code, r); },
     async clearReq(code, uid){ const r = L("room:"+code); if(r.req) delete r.req[uid]; W("room:"+code, r); },
     watchRoom(code, cb){
@@ -1848,6 +2151,15 @@ const ONLINE_CSS = `
 .cal-grid .cd.today{box-shadow:inset 0 0 0 1.5px var(--navy);font-weight:700}
 .cal-grid .cd.mk{background:var(--pop);color:var(--pop-ink);font-weight:700}
 .cal-grid.pk{margin-bottom:8px}
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:10px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.qrbox svg{width:220px;height:220px;max-width:100%}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.btn.on{border-color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy)}
+.lg-pend{margin:0;background:var(--jade-soft);border-radius:10px;padding:8px 10px;color:var(--fg)!important}
+.ferr{color:var(--red);font-size:13px;font-weight:700}
+input.bad{border-color:var(--red)!important;box-shadow:0 0 0 2px var(--red-soft)}
+.rm-kick{padding:4px 10px!important;font-size:12px!important;color:var(--red);border-color:var(--red)}
+.gdel{font-size:12px;padding:0 0 0 8px;color:var(--red)!important}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px}
 .cal-nav .iconbtn{padding:4px 12px;font-size:16px}
 .cal-grid button.cd{font:inherit;font-size:13px;border:0;cursor:pointer}
@@ -1998,7 +2310,8 @@ function buildOnlineUI(){
     <button class="btn sh-wa" data-sh="wa">WhatsApp</button><button class="btn sh-tg" data-sh="tg">Telegram</button>
     <button class="btn sh-sg" data-sh="sys">Signal／其他</button><button class="btn sh-ig" data-sh="ig">IG 限時動態</button>
   </div>
-  <button class="btn" data-sh="copy" style="width:100%;margin-top:8px">複製邀請文字</button>
+  <div class="grid2" style="margin-top:8px"><button class="btn" data-sh="copy">複製邀請文字</button><button class="btn" data-sh="qr">QR code</button></div>
+  <div id="yueQr" hidden></div>
   <div id="yueImgWrap" hidden><p class="hint" id="yueImgHint"></p><img id="yueImg" alt="番鼠約局邀請函" hidden><button class="btn primary" id="yueImgShare" hidden style="width:100%">分享到 IG</button></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeYueShare">完成</button></div>
 <div class="yinbox" id="yinBox" hidden role="dialog" aria-label="約局邀請"><div class="yin-card" id="yinCard"></div></div>
@@ -2006,7 +2319,7 @@ function buildOnlineUI(){
   <button class="btn" style="width:100%;margin-top:14px" id="closeYueDay">關閉</button></div>
 <div class="sheet" id="createSheet" hidden role="dialog" aria-label="創建房間"><div class="grab"></div>
   <h3>創建房間</h3><p class="hint" style="margin:0 0 12px" id="createHint">揀牌種。你會做房主，只有房主可以記錄同改資料。</p>
-  <div class="mode-pick"><button class="btn primary big" data-new="hk">廣東牌</button><button class="btn primary big" data-new="tw">台灣牌</button><button class="btn primary big" data-new="pm">跑馬仔</button></div>
+  <div class="mode-pick"><button class="btn primary big" data-new="hk">廣東牌</button><button class="btn primary big" data-new="tw">台灣牌</button><button class="btn primary big" data-new="vn">越南牌</button><button class="btn primary big" data-new="pm">跑馬仔</button></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeCreate">取消</button></div>
 <div class="sheet" id="joinSheet" hidden role="dialog" aria-label="加入房間"><div class="grab"></div>
   <h3>加入房間</h3>
@@ -2073,6 +2386,12 @@ function ledgerStats(scope){
     for(const x of sp){ const o = out.specials.get(x.name) || {tier:x.tier, n:0}; o.n++; out.specials.set(x.name, o); }
     for(const t of g.tags || []) if(t!=="根本不是一個Level") out.tags.set(t, (out.tags.get(t)||0) + 1);
   }
+  // 同一個人：按帳戶 ID 累計；以訪客身份打過但同帳戶同名嘅，都併入佢個帳戶
+  const byName = new Map();
+  for(const [k,o] of out.opp) if(!o.guest) byName.set(o.name, k);
+  for(const [k,o] of [...out.opp]) if(o.guest && byName.has(o.name)){
+    const t = out.opp.get(byName.get(o.name)); t.money += o.money; t.n += o.n; out.opp.delete(k);
+  }
   out.net = Math.round(out.net*100)/100;
   return out;
 }
@@ -2089,8 +2408,9 @@ function renderLobby(){
   if(!ONLINE.user){
     box.innerHTML = `<div class="card">
       <h3>登入</h3>
-      <div class="field" style="margin:0"><label for="lgNick">暱稱</label><input type="text" id="lgNick" maxlength="10" autocomplete="username" placeholder="例如：阿明"></div>
-      <div class="field" style="margin:0"><label for="lgPin">4 位數 PIN</label><input type="password" id="lgPin" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="••••"></div>
+      <div class="field" style="margin:0"><label for="lgNick">暱稱</label><input type="text" id="lgNick" maxlength="10" autocomplete="username" placeholder="例如：阿明" aria-describedby="lgNickErr"><span class="ferr" id="lgNickErr" hidden>請輸入暱稱</span></div>
+      <div class="field" style="margin:0"><label for="lgPin">4 位數 PIN</label><input type="password" id="lgPin" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="••••" aria-describedby="lgPinErr"><span class="ferr" id="lgPinErr" hidden>請輸入 4 位數 PIN</span></div>
+      ${ONLINE.wantRoom ? `<p class="hint lg-pend">要登入先可以加入對局。登入或者註冊之後，會自動入房間 <b>${esc(ONLINE.wantRoom)}</b>。</p>` : ""}
       <p class="err" id="lgErr" hidden role="alert"></p>
       <div class="grid2"><button class="btn primary" id="lgLogin">登入</button><button class="btn" id="lgReg">新用戶註冊</button></div>
       <p class="hint" style="margin:0">第一次用請撳「新用戶註冊」。暱稱就係你嘅用戶 ID，朋友會見到。PIN 唔記得就要開過新帳戶。</p>
@@ -2099,8 +2419,11 @@ function renderLobby(){
     const go = async (fn) => {
       const nick = $("lgNick").value.trim(), pin = $("lgPin").value.trim(), e = $("lgErr");
       e.hidden = true;
-      if(!nick || nick.length>10){ e.textContent = "請輸入 1 至 10 個字嘅暱稱。"; e.hidden = false; return; }
-      if(!/^\d{4}$/.test(pin)){ e.textContent = "PIN 要係 4 位數字。"; e.hidden = false; return; }
+      const nErr = !nick ? "請輸入暱稱" : nick.length>10 ? "暱稱最多 10 個字" : "";
+      const pErr = !pin ? "請輸入 4 位數 PIN" : !/^\d{4}$/.test(pin) ? "PIN 要係 4 位數字" : "";
+      $("lgNickErr").textContent = nErr; $("lgNickErr").hidden = !nErr; $("lgNick").classList.toggle("bad", !!nErr);
+      $("lgPinErr").textContent = pErr; $("lgPinErr").hidden = !pErr; $("lgPin").classList.toggle("bad", !!pErr);
+      if(nErr || pErr){ (nErr ? $("lgNick") : $("lgPin")).focus(); return; }
       $("lgLogin").disabled = $("lgReg").disabled = true;
       try{ await ONLINE.backend[fn](nick, pin); }
       catch(err){ e.textContent = errText(err); e.hidden = false; $("lgLogin").disabled = $("lgReg").disabled = false; }
@@ -2108,6 +2431,7 @@ function renderLobby(){
     $("lgLogin").onclick = () => go("login");
     $("lgReg").onclick = () => go("register");
     $("lgPin").addEventListener("keydown", ev=>{ if(ev.key==="Enter") go("login"); });
+    ["lgNick","lgPin"].forEach(id=>$(id).addEventListener("input", ()=>{ $(id).classList.remove("bad"); $(id+"Err").hidden = true; }));
     $("lgOffline").onclick = () => { hideLobby(); renderRoomBar(); };
     return;
   }
@@ -2185,12 +2509,13 @@ async function createRoom(mode, btn){
 async function joinRoom(code){
   const d = await ONLINE.backend.getRoom(code);
   if(!d) throw new Error("搵唔到呢個房間，請檢查號碼。");
+  if(d.kicked && d.kicked[ONLINE.user.uid]) throw new Error("房主已經將你移出呢個房間。");
   if(!(ONLINE.user.uid in (d.members||{}))) await ONLINE.backend.joinRoom(code, ONLINE.user.uid, ONLINE.user.name);
   await enterRoom(code);
 }
 function enterRoom(code){
   leaveRoom(true);
-  ONLINE.room = code; ONLINE.firstSnap = true; ONLINE.lastSent = "";
+  ONLINE.room = code; ONLINE.firstSnap = true; ONLINE.lastSent = ""; ONLINE.lastEndKey = undefined;
   ONLINE.profiles = {}; ONLINE.handledReq = {};
   try{ sessionStorage.setItem("fansyu-room", code); localStorage.setItem("fansyu-lastroom", code); }catch(e){}
   canWrite = false; applyMode();
@@ -2217,11 +2542,24 @@ function subscribeRoom(code){
 function onRoomSnap(d){
   ONLINE.roomDoc = d; ONLINE.live = true; ONLINE.syncedAt = Date.now();
   ONLINE.isHost = d.host===ONLINE.user.uid;
+  if(!ONLINE.isHost && d.kicked && d.kicked[ONLINE.user.uid]){
+    toast("房主已經將你移出房間。");
+    try{ localStorage.removeItem("fansyu-lastroom"); }catch(e){}
+    leaveRoom(); return;
+  }
   canWrite = ONLINE.isHost; applyMode();
   if((!ONLINE.isHost || ONLINE.firstSnap) && d.state && d.state!==ONLINE.lastSent){
     try{ state = Object.assign(DEFAULT_STATE(), JSON.parse(d.state)); }catch(e){}
   }
   ONLINE.firstSnap = false;
+  // 房主結算咗：其他玩家即時讀返自己嘅小氣簿同經驗值
+  const endKey = state.ended ? (state.gameId || "") + ":" + (state.endedAt || "") : "";
+  if(!ONLINE.isHost && endKey && ONLINE.lastEndKey!==undefined && endKey!==ONLINE.lastEndKey && (state.uids || []).includes(ONLINE.user.uid)){
+    const gid = ONLINE.room + "_" + state.gameId;
+    setTimeout(async ()=>{ await loadGames(); const g = (ONLINE.games || []).find(x=>x.gameId===gid);
+      if(g) toast(`已記入你嘅小氣簿：${money(g.money)}${g.xp ? `，+${g.xp} 經驗` : ""}。`); }, 1800);
+  }
+  ONLINE.lastEndKey = endKey;
   if(state.profV && state.profV!==ONLINE.profV){ ONLINE.profV = state.profV; const me = ONLINE.user && ONLINE.profiles[ONLINE.user.uid]; ONLINE.profiles = {}; if(me) ONLINE.profiles[ONLINE.user.uid] = me; }
   if(ONLINE.isHost) hostProcess(d);
   ensureProfiles(Object.keys(d.members || {}).concat(state.uids || []));
@@ -2233,6 +2571,14 @@ function hostProcess(d){
   let changed = false;
   const uids = state.uids || [];
   uids.forEach((u,i)=>{ if(u && d.members && d.members[u] && state.players[i]!==d.members[u]){ state.players[i] = d.members[u]; changed = true; } });
+  // 新入房嘅朋友：自動坐入第一個空位（未改名嘅「玩家n」位）
+  if(!state.ended) for(const [u,n] of Object.entries(d.members || {})){
+    if((state.uids || []).includes(u)) continue;
+    const i = [0,1,2,3].find(k=>!(state.uids || [])[k] && state.players[k]===`玩家${k+1}`);
+    if(i===undefined) break;
+    state.uids = (state.uids || [null,null,null,null]).slice(); state.uids[i] = u; state.players[i] = n; changed = true;
+    toast(`${n} 已經坐入${seatWind(i)}位。`);
+  }
   for(const [u,r] of Object.entries(d.req || {})){
     if(!r || ONLINE.handledReq[u]===r.t) continue;
     ONLINE.handledReq[u] = r.t;
@@ -2290,8 +2636,9 @@ function renderRoomBar(){
   if(ONLINE.room && ONLINE.roomDoc){
     const d = ONLINE.roomDoc;
     bar.innerHTML = `<span class="rb-txt"><i class="live-dot${ONLINE.live?"":" off"}" title="${ONLINE.live?"即時同步中":"重新連接中"}"></i>房間 <b>${esc(ONLINE.room)}</b> · ${ONLINE.isHost ? "你係房主" : `房主 ${esc(d.hostName||"")} · 只可查看`}</span>
-      <button class="iconbtn" id="rbRoom">房間</button><button class="iconbtn" id="rbLobby">大廳</button>`;
+      <button class="iconbtn" id="rbSet">設定</button><button class="iconbtn" id="rbRoom">房間</button><button class="iconbtn" id="rbLobby">大廳</button>`;
     $("rbRoom").onclick = () => { renderRoomSheet(); showSheet($("roomSheet")); };
+    $("rbSet").onclick = () => $("openSetup").click();
   } else {
     bar.innerHTML = `<span class="rb-txt">${ONLINE.user ? "單機模式 · 唔會記入小氣簿" : "未登入 · 單機模式"}</span><button class="iconbtn" id="rbLobby">${ONLINE.user ? "大廳" : "登入"}</button>`;
   }
@@ -2305,37 +2652,55 @@ function renderRoomSheet(){
   const uids = state.uids || [null,null,null,null];
   let seats = "";
   if(ONLINE.isHost){
-    seats = `<div class="field"><label>座位分配（逆時針：自己 → 下家 → 對家 → 上家）</label>
-      ${[0,1,2,3].map(i=>`<div class="seatrow"><span class="w">${seatWind(i)}</span><select data-seat="${i}">
-        <option value="">訪客：${esc(uids[i] ? "（自己打名）" : state.players[i])}</option>
-        ${members.map(([u,n])=>`<option value="${esc(u)}"${uids[i]===u?" selected":""}>${esc(n)}${u===d.host?"（房主）":""}</option>`).join("")}
-        ${uids[i] && !(uids[i] in (d.members||{})) ? `<option value="${esc(uids[i])}" selected>${esc(state.players[i])}（未入房）</option>` : ""}
+    const mem = d.members || {};
+    const unseated = members.filter(([u])=>!uids.includes(u));
+    seats = `<div class="field"><label>座位（揀同邊個換位，或者換入房間成員）</label>
+      ${[0,1,2,3].map(i=>`<div class="seatrow"><span class="w">${seatWind(i)}</span><select data-seat="${i}" aria-label="${seatWind(i)}位">
+        <option value="" selected>${esc(state.players[i])}${uids[i] ? (uids[i] in mem ? (uids[i]===d.host?"（房主）":"") : "（未入房）") : "（訪客）"}</option>
+        ${[0,1,2,3].filter(j=>j!==i).map(j=>`<option value="sw:${j}">⇄ 同 ${esc(state.players[j])}（${seatWind(j)}）換位</option>`).join("")}
+        ${unseated.map(([u,n])=>`<option value="${esc(u)}">＋ 換入 ${esc(n)}</option>`).join("")}
+        ${uids[i] && uids[i]!==d.host ? `<option value="guest">改返做訪客位</option>` : ""}
       </select></div>`).join("")}
-      <span class="hint">揀咗帳戶嘅座位，結算時會自動記入嗰位玩家嘅小氣簿。訪客名可以喺「設定」改。</span></div>`;
+      <span class="hint">換位：兩個人對調，之前嘅輸贏跟返自己。朋友登入入房會自動坐入空位。有帳戶嘅座位結算時會記入佢嘅小氣簿同經驗值。</span></div>`;
   } else {
     seats = `<div class="field"><label>座位</label><div class="mlist">${[0,1,2,3].map(i=>`<div class="mrow"><span>${seatWind(i)} · ${esc(state.players[i])}</span><span class="uid">${uids[i] ? (uids[i]===ONLINE.user.uid ? "你" : "有帳戶") : "訪客"}</span></div>`).join("")}</div></div>`;
   }
   box.innerHTML = `<h3>房間 ${esc(ONLINE.room)}</h3>
     <div class="field"><label>邀請朋友</label>
-      <div class="grid2"><button class="btn" id="rmCopy">複製連結</button><button class="btn" id="rmShare">分享</button></div>
+      <div class="grid3"><button class="btn" id="rmCopy">複製連結</button><button class="btn" id="rmShare">分享</button><button class="btn${ONLINE.showQr?" on":""}" id="rmQrBtn">QR code</button></div>
+      ${ONLINE.showQr ? qrBoxHTML(link, `朋友用相機掃呢個 QR code，登入之後就會自動入房 ${esc(ONLINE.room)}。`) : ""}
       <span class="hint">朋友打開連結登入就會入房；或者喺大廳輸入房間號碼 <b>${esc(ONLINE.room)}</b>。</span></div>
     <div class="field"><label>房間成員（${members.length}）</label><div class="mlist">
-      ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span><span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span></div>`).join("")}
+      ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span>${ONLINE.isHost && u!==d.host ? `<button class="iconbtn rm-kick" data-kick="${esc(u)}">移除</button>` : `<span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span>`}</div>`).join("")}
     </div></div>
     ${seats}
     <button class="btn danger" style="width:100%" id="rmLeave">離開房間</button>`;
   $("rmCopy").onclick = async () => { try{ await navigator.clipboard.writeText(link); toast("已複製連結。"); }catch(e){ prompt("複製呢條連結：", link); } };
   $("rmShare").onclick = async () => { try{ await navigator.share({title:"番鼠房間 "+ONLINE.room, text:`入嚟番鼠房間 ${ONLINE.room} 一齊計番`, url:link}); }catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(link); toast("已複製連結。"); }catch(_){} } } };
   $("rmLeave").onclick = () => { hideSheet(); leaveRoom(); };
+  $("rmQrBtn").onclick = () => { ONLINE.showQr = !ONLINE.showQr; renderRoomSheet(); };
+  box.querySelectorAll("[data-kick]").forEach(b=>b.onclick = () => {
+    const u = b.dataset.kick, n = (d.members || {})[u] || "呢位玩家";
+    askConfirm(`移除 ${n}？`, `${n} 會即刻被移出房間，之後唔可以再用房號入返嚟。佢坐緊嘅位會變返訪客位，之前嘅輸贏會留喺個位度，但唔會記入佢嘅小氣簿。`, "移除", async ()=>{
+      const i = (state.uids || []).indexOf(u);
+      if(i>=0){ state.uids = state.uids.slice(); state.uids[i] = null; render(); save(); }
+      try{ await ONLINE.backend.kick(ONLINE.room, u); toast(`已移除 ${n}。`); }
+      catch(e){ toast("移除唔到：" + errText(e)); }
+    });
+  });
   box.querySelectorAll("select[data-seat]").forEach(sel=>sel.onchange = () => {
-    const i = +sel.dataset.seat, u = sel.value;
-    state.uids = (state.uids || [null,null,null,null]).slice();
-    if(u){
-      const prev = state.uids.indexOf(u);
-      if(prev>=0 && prev!==i){ state.uids[prev] = null; state.players[prev] = `玩家${prev+1}`; }
-      state.uids[i] = u; state.players[i] = d.members[u];
-    } else { state.uids[i] = null; if(uids[i]) state.players[i] = `玩家${i+1}`; }
-    render(); save(); renderRoomSheet();
+    const i = +sel.dataset.seat, v = sel.value;
+    if(!v) return;
+    if(v.startsWith("sw:")){ swapSeats(i, +v.slice(3)); renderRoomSheet(); return; }
+    const go = () => {
+      state.uids = (state.uids || [null,null,null,null]).slice();
+      if(v==="guest"){ state.uids[i] = null; state.players[i] = `玩家${i+1}`; }
+      else { state.uids[i] = v; state.players[i] = d.members[v]; }
+      render(); save(); renderRoomSheet();
+    };
+    if(state.hands.length && !state.ended) askConfirm("未結算就換人？", `${state.players[i]} 呢個位之前嘅輸贏會計落新嚟嘅人度。想分開計，可以先「結束遊戲 · 睇結算」再重新開局。`, "照樣換人", go);
+    else go();
+    renderRoomSheet();
   });
 }
 
@@ -2651,7 +3016,7 @@ async function confirmYue(){
 function openYueShare(y){
   ONLINE.yueCur = y;
   $("yueSum").innerHTML = `<b>${(upDates(y).length ? upDates(y) : y.dates).map(dayTxt).join("、")}</b> · ${esc(y.time)}<br>朋友撳連結就可以報名，唔使註冊都得。`;
-  $("yueImgWrap").hidden = true;
+  $("yueImgWrap").hidden = true; $("yueQr").hidden = true;
   showSheet($("yueShareSheet"));
 }
 async function shareYue(kind){
@@ -2665,6 +3030,7 @@ async function shareYue(kind){
     return;
   }
   if(kind==="ig") return makeInviteImage(y);
+  if(kind==="qr"){ const b = $("yueQr"); b.hidden = !b.hidden; if(!b.hidden) b.innerHTML = qrBoxHTML(url, "朋友用相機掃呢個 QR code 就可以報名。"); }
 }
 // IG 限時動態邀請函（9:16）
 function inviteCardHTML(y){
@@ -2856,13 +3222,14 @@ function frameFieldHTML(){
   return `<label>外框</label><div class="framepick">
     <button class="fopt${cur?"":" on"}" data-fr=""><span class="fthumb none"></span><span>無</span></button>
     ${own.map(([id,n])=>`<button class="fopt${cur===id?" on":""}" data-fr="${id}">${frameThumb(id)}<span>${esc(n)}</span></button>`).join("")}
-  </div><span class="hint">外框會圍住你個名，房間入面其他人都見到。</span>`;
+  </div><span class="hint">撳外框揀用，再撳一次就移除。外框會套喺你嘅座位，房間入面其他人都見到。</span>`;
 }
 function bindFrameField(el, rerender){
   if(!el) return;
   el.innerHTML = frameFieldHTML(); el.hidden = !el.innerHTML;
   el.querySelectorAll("[data-fr]").forEach(b=>b.onclick = async () => {
-    const fr = b.dataset.fr;
+    let fr = b.dataset.fr;
+    if(fr && ONLINE.me && ONLINE.me.frame===fr) fr = "";   // 再撳一次已揀嘅外框 = 移除
     try{
       await ONLINE.backend.setFrame(ONLINE.user.uid, fr); ONLINE.me.frame = fr; ONLINE.profiles[ONLINE.user.uid] = ONLINE.me; rerender(); renderLobby(); render();
       notifyProfile();
@@ -2955,11 +3322,15 @@ async function sendRecords(){
   }catch(e){ toast("記錄唔到小氣簿：" + errText(e)); }
 }
 {
-  const origEnd = $("endBtn").onclick;
-  $("endBtn").onclick = () => { origEnd(); if(ONLINE.room && ONLINE.isHost && state.ended){ onlinePush(); sendRecords(); } };
+  window.__afterEnd = () => { if(ONLINE.room && ONLINE.isHost && state.ended){ onlinePush(); sendRecords(); } };
+  // 房間入面：結算後「返回大廳」（所有人都見到）；之後返入房間會見返結算，直至房主重新開局
+  const backBtn = $("backBtn"), origBack = backBtn.onclick;
+  backBtn.onclick = () => { if(ONLINE.room){ leaveRoom(); return; } origBack(); };
   const origSettle = renderSettle;
   renderSettle = function(){
     origSettle();
+    const bb = $("backBtn");
+    if(bb){ bb.textContent = ONLINE.room ? "返回大廳" : "返回牌局"; bb.classList.toggle("edit-only", !ONLINE.room); }
     if(!ONLINE.room || !state.ended) return;
     const G = xpForGame();
     const rows = $("settleCard").querySelectorAll(".pl");
@@ -3031,9 +3402,18 @@ function renderLedger(){
     <div class="card"><h3>牌局記錄</h3>
       ${st.games.length ? st.games.slice(0,60).map(g=>`<div class="gamerow"><span>${fmtD(g.endedAt)} · ${MODE_NAME(g.mode)} · 第 ${g.rank} 名</span>
         <span class="num ${cls(g.money)}" style="font-weight:700">${money(g.money)}</span>
-        <small>房間 ${esc(g.room)} · ${g.hands||0} 鋪${g.xp?` · +${g.xp} 經驗`:""}${g.special?` · ${esc(g.special.name)}`:""}${g.gold?" · 根本不是一個Level":""}</small></div>`).join("") : `<p class="lg-empty">未有記錄。</p>`}
+        <small>房間 ${esc(g.room)} · ${g.hands||0} 鋪${g.xp?` · +${g.xp} 經驗`:""}${g.special?` · ${esc(g.special.name)}`:""}${g.gold?" · 根本不是一個Level":""}
+          <button class="linkbtn gdel" data-gdel="${esc(g.gameId)}">刪除</button></small></div>`).join("") : `<p class="lg-empty">未有記錄。</p>`}
     </div>`}`;
   box.querySelectorAll("[data-sc]").forEach(b=>b.onclick = () => { ONLINE.ledgerScope = b.dataset.sc; renderLedger(); });
+  box.querySelectorAll("[data-gdel]").forEach(b=>b.onclick = () => {
+    const g = (ONLINE.games || []).find(x=>x.gameId===b.dataset.gdel); if(!g) return;
+    const d = new Date(g.endedAt);
+    askConfirm("刪除呢場記錄？", `${d.getMonth()+1}/${d.getDate()} ${MODE_NAME(g.mode)}（${money(g.money)}${g.xp?`，${g.xp} 經驗`:""}）會喺你嘅小氣簿消失，輸贏同經驗值都會扣返。其他玩家嘅記錄唔受影響。刪除咗就冇得還原。`, "刪除", async ()=>{
+      try{ await ONLINE.backend.deleteGame(ONLINE.user.uid, g.gameId); toast("已刪除記錄。"); await loadGames(); }
+      catch(e){ toast("刪除唔到：" + errText(e)); }
+    });
+  });
 }
 
 /* ---------- start ---------- */
@@ -3050,6 +3430,7 @@ async function onlineStart(){
   watchInvite();
   const wanted = (new URLSearchParams(location.search).get("room") || (()=>{ try{ return sessionStorage.getItem("fansyu-room"); }catch(e){ return null; } })() || "").toUpperCase();
   let tried = false;
+  ONLINE.wantRoom = wanted || null; renderLobby();
   ONLINE.backend.onUser(async u=>{
     const prev = ONLINE.user;
     ONLINE.user = u; ONLINE.games = null;
@@ -3067,7 +3448,8 @@ async function onlineStart(){
     renderLobby(); loadGames();
     if(wanted && !tried){
       tried = true;
-      try{ await joinRoom(wanted); }catch(e){ toast(e.message && !e.code ? e.message : errText(e)); }
+      try{ if(ONLINE.room!==wanted) await joinRoom(wanted); }catch(e){ toast(e.message && !e.code ? e.message : errText(e)); }
+      ONLINE.wantRoom = null;
     }
     renderRoomBar();
   });
