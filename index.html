@@ -3054,7 +3054,7 @@ function decorateVip(){
   render = function(){ baseRender(); try{ decorateVip(); }catch(e){} };
 }
 
-/* ---------- 約局：存喺資料庫 yue/{id}；約局者管理、帳戶報名、訪客報名、按報名開房 ---------- */
+/* ---------- 約局：存喺資料庫 yue/{id}；約局者管理、登入報名、按報名開房 ---------- */
 const WD = "日一二三四五六";
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 const parseYmd = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
@@ -3092,7 +3092,7 @@ const inviteText = y => [
   `📅 日期：*${(upDates(y).length ? upDates(y) : y.dates).map(dayTxt).join("、")}*`,
   `⏰ 時間：*${y.time}* 開枱`,
   `👑 約局人：${y.hostName}`, "",
-  "👉 撳連結報名（唔使註冊都得）：", inviteURL(y)].join("\n");
+  "👉 撳連結登入報名：", inviteURL(y)].join("\n");
 const newGuestKey = () => "g_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
 const isGuestKey = k => /^g_/.test(k);
 const meUid = () => ONLINE.user ? ONLINE.user.uid : null;
@@ -3347,7 +3347,7 @@ async function confirmYue(){
 /* 分享 */
 function openYueShare(y){
   ONLINE.yueCur = y;
-  $("yueSum").innerHTML = `<b>${(upDates(y).length ? upDates(y) : y.dates).map(dayTxt).join("、")}</b> · ${esc(y.time)}<br>朋友撳連結就可以報名，唔使註冊都得。`;
+  $("yueSum").innerHTML = `<b>${(upDates(y).length ? upDates(y) : y.dates).map(dayTxt).join("、")}</b> · ${esc(y.time)}<br>朋友撳連結，登入或註冊之後就可以報名。`;
   $("yueImgWrap").hidden = true; $("yueQr").hidden = true;
   showSheet($("yueShareSheet"));
 }
@@ -3489,10 +3489,8 @@ function renderInvite(){
       else h += `${mine && mine.st==="no" ? `<p class="hint" style="margin:0">你回覆咗唔得閒，可以改返接受。</p>` : ""}
         <div class="grid2"><button class="btn" id="yinNo">拒絕</button><button class="btn primary" id="yinYes">接受</button></div>`;
     } else if(g) h += `<p class="hint yin-ok" style="margin:0">你已用「${esc(g.name)}」報名。想改或者取消，請搵 ${esc(y.hostName)}。</p>`;
-    else if(up.length) h += `<div class="field" style="margin:0"><label for="yinName">你嘅名（唔使註冊）</label><input type="text" id="yinName" maxlength="10" placeholder="例如：阿明"></div>
-        <button class="btn pop" id="yinGuest">報名</button>
-        <button class="btn" id="yinLogin">已有帳戶？登入或註冊再報名</button>
-        <p class="hint" style="margin:0">用帳戶報名，約局會自動入你嘅日曆，開房時亦會自動入房同記錄戰績。</p>`;
+    else if(up.length) h += `<button class="btn pop" id="yinLogin">登入／註冊後報名</button>
+        <p class="hint" style="margin:0">報名要有番鼠帳戶（暱稱＋4 位數 PIN，十秒就註冊好）。報名後約局會自動入你嘅日曆，開房時亦會自動入房同記錄戰績。</p>`;
     if(up.length) h += `<button class="btn" id="yinApple">加入 iPhone 行事曆</button>`;
   }
   h += `<button class="btn" id="yinClose">${u ? "關閉" : "開始用番鼠"}</button>`;
