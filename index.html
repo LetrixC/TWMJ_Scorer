@@ -2935,7 +2935,9 @@ const dayTxt = s => { const d = parseYmd(s); return `${d.getMonth()+1}/${d.getDa
 const todayYmd = () => ymd(new Date());
 const b64u = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const unb64u = t => JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,"+").replace(/_/g,"/")))));
-const SITE = "https://letrixc.github.io/TWMJ_Scorer/";
+// 網址跟住而家開緊嘅網站（www.fansyu.com 或者 github.io 都得）；本機測試先用預設
+const SITE = /^https?:$/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname) ? location.origin + location.pathname.replace(/[^/]*$/, "") : "https://letrixc.github.io/TWMJ_Scorer/";
+const SITE_TXT = SITE.replace(/^https?:\/\//, "").replace(/\/$/, "");
 const YUE_ID = /^[A-Za-z0-9]{15,40}$/;
 const inviteURL = y => SITE + "?yue=" + y.id;
 const upDates = y => (y.dates || []).filter(d=>d >= todayYmd());
@@ -3231,7 +3233,7 @@ function inviteCardHTML(y){
     <div class="iv-dates">${ds.slice(0,8).map(d=>`<span>${dayTxt(d)}</span>`).join("")}${ds.length>8?`<span>⋯</span>`:""}</div>
     <div class="iv-time">${esc(y.time)} 開枱</div>
     ${qr ? `<img src="${qr}" alt="" style="display:block;width:132px;height:132px;border-radius:10px;border:2px solid #7A4A22;background:#FFFFFF">` : ""}
-    <div class="iv-foot">相機掃 QR code 就可以報名<br><small>番鼠麻吉 FanSyu &amp; Maji · letrixc.github.io/TWMJ_Scorer</small></div>
+    <div class="iv-foot">相機掃 QR code 就可以報名<br><small>番鼠麻吉 FanSyu &amp; Maji · ${esc(SITE_TXT)}</small></div>
   </div></div>`;
 }
 // 房間 IG 限時動態邀請圖（9:16，有房號同 QR code）
@@ -3247,7 +3249,7 @@ async function makeRoomImage(link, host){
     <div class="iv-host">${esc(host)} 等緊你 · ${esc(MODE_NAME(state.mode))} · 一齊贏 ok？</div>
     ${qr ? `<img src="${qr}" alt="" style="display:block;width:168px;height:168px;border-radius:10px;border:2px solid #7A4A22;background:#FFFFFF">` : ""}
     <div class="iv-time" style="letter-spacing:.18em">房號 ${esc(code)}</div>
-    <div class="iv-foot">相機掃 QR code，登入就入房<br><small>番鼠麻吉 FanSyu &amp; Maji · letrixc.github.io/TWMJ_Scorer</small></div>
+    <div class="iv-foot">相機掃 QR code，登入就入房<br><small>番鼠麻吉 FanSyu &amp; Maji · ${esc(SITE_TXT)}</small></div>
   </div></div>`;
   document.body.appendChild(holder);
   try{
