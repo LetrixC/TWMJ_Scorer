@@ -2999,12 +2999,9 @@ function renderRoomSheet(){
   $("rmCopy").onclick = async () => { try{ await navigator.clipboard.writeText(inviteTxt); toast("已複製邀請文字同連結。"); }catch(e){ prompt("複製呢段：", inviteTxt); } };
   box.querySelectorAll("[data-rsh]").forEach(b=>b.onclick = async () => {
     const k = b.dataset.rsh;
-    if(k==="wa") return shareWithPic(inviteTxt, link, () => window.open("https://wa.me/?text=" + encodeURIComponent(inviteTxt), "_blank"));
+    if(k==="wa") return openWhatsApp(inviteTxt);
     if(k==="tg") return window.open("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(plainTxt(inviteTxt).replace(link,"").trim()), "_blank");
-    const pt = plainTxt(inviteTxt);
-    return shareWithPic(pt, link, async () => {
-      try{ await navigator.share({title:"番鼠麻吉 · 房間 " + ONLINE.room, text:pt}); }
-      catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(pt); toast("呢部機唔支援直接分享，已複製邀請。"); }catch(_){ prompt("複製呢段：", pt); } } } });
+    return shareText(plainTxt(inviteTxt), "番鼠麻吉 · 房間 " + ONLINE.room);
   });
   if($("rmTake")) $("rmTake").onclick = takeOver;
   box.querySelectorAll("[data-give]").forEach(b=>b.onclick = () => giveHost(b.dataset.give));
@@ -3018,7 +3015,8 @@ function renderRoomSheet(){
     });
   };
   $("rmQrBtn").onclick = () => { ONLINE.showQr = !ONLINE.showQr; renderRoomSheet(); };
-  $("rmIg").onclick = () => makeRoomImage(link, d.hostName || ONLINE.user.name);
+  const igP = roomIgFile(link, d.hostName || ONLINE.user.name);   // 打開房間就預先整定 IG 圖，撳掣即刻分享
+  $("rmIg").onclick = () => igShare(igP, link, "番鼠麻吉房間", url=>{ ONLINE.rmImg = {url, hint:"長按圖片儲存，再喺 Instagram 限時動態揀呢張相，加「連結」貼紙貼上邀請連結（已複製）。"}; renderRoomSheet(); });
   if($("rmImgLink")) $("rmImgLink").onclick = async () => { try{ await navigator.clipboard.writeText(link); toast("已複製連結，喺 IG 加「連結」貼紙貼上。"); }catch(e){ prompt("複製呢條連結：", link); } };
   if($("rmImgShare")) $("rmImgShare").onclick = () => shareStory(ONLINE.rmImg.file, link, "番鼠麻吉房間");
   box.querySelectorAll("[data-kick]").forEach(b=>b.onclick = () => {
@@ -3413,19 +3411,16 @@ function openYueShare(y){
   $("yueSum").innerHTML = `<b>${(upDates(y).length ? upDates(y) : y.dates).map(dayTxt).join("、")}</b> · ${esc(y.time)}<br>朋友撳連結，登入或註冊之後就可以報名。`;
   $("yueImgWrap").hidden = true; $("yueQr").hidden = true;
   showSheet($("yueShareSheet"));
+  yueIgFile(y);   // 預先整定 IG 圖
 }
 async function shareYue(kind){
   const y = ONLINE.yueCur; if(!y) return;
   const url = inviteURL(y), text = inviteText(y);
-  if(kind==="wa") return shareWithPic(text, url, () => window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank"));
+  if(kind==="wa") return openWhatsApp(text);
   if(kind==="tg"){ window.open("https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(plainTxt(text).replace(url,"").trim()), "_blank"); return; }
   if(kind==="copy"){ try{ await navigator.clipboard.writeText(text); toast("已複製邀請。"); }catch(e){ prompt("複製呢段：", text); } return; }
-  if(kind==="sys"){ // Signal 同其他 app 用系統分享（連插圖）
-    const pt = plainTxt(text);
-    return shareWithPic(pt, url, async () => {
-      try{ await navigator.share({title:"番鼠麻吉約局", text:pt}); }catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(pt); toast("呢部機唔支援直接分享，已複製邀請，可以貼去 Signal。"); }catch(_){ prompt("複製呢段：", pt); } } } });
-  }
-  if(kind==="ig") return makeInviteImage(y);
+  if(kind==="sys") return shareText(plainTxt(text), "番鼠麻吉約局");
+  if(kind==="ig") return igShare(yueIgFile(y), url, "番鼠麻吉約局", u=>{ $("yueImgWrap").hidden = false; $("yueImg").src = u; $("yueImg").hidden = false; $("yueImgShare").hidden = true; $("yueImgHint").textContent = "長按圖片儲存，再喺 Instagram 限時動態揀呢張相，加「連結」貼紙貼上邀請連結（已複製）。"; });
   if(kind==="qr"){ const b = $("yueQr"); b.hidden = !b.hidden; if(!b.hidden) b.innerHTML = qrBoxHTML(url, "朋友用相機掃呢個 QR code 就可以報名。"); }
 }
 // IG 限時動態邀請函（9:16）
@@ -3469,14 +3464,10 @@ async function ivMouse(){
   try{ return await tintedMouse(m, bd); }catch(e){ return OG_MOUSE; }
 }
 // 房間 IG 限時動態邀請圖（9:16，有房號同 QR code）
-async function makeRoomImage(link, host){
+function roomCardHTML(link, host, mouse){
   const code = ONLINE.room;
-  ONLINE.rmImg = {hint:"製作邀請圖中…"}; renderRoomSheet();
   let qr = ""; try{ qr = qrPng(link, qrInk(), "#FFFFFF", 2); }catch(e){}
-  const mouse = await ivMouse();
-  const holder = document.createElement("div");
-  holder.style.cssText = "position:fixed;left:-10000px;top:0;width:360px;height:640px";
-  holder.innerHTML = `<div class="invite"><div class="iv-in">${ivDeco()}
+  return `<div class="invite"><div class="iv-in">${ivDeco()}
     <div class="iv-brand">番鼠<b>FanSyu</b></div>
     <img class="iv-mouse" src="${mouse || OG_MOUSE}" alt="">
     <div class="iv-title">誠邀天下豪傑到桌前一坐</div>
@@ -3485,24 +3476,12 @@ async function makeRoomImage(link, host){
     <div class="iv-slot"></div>
     <div class="iv-win">一齊贏 ok？</div>
   </div></div>`;
-  document.body.appendChild(holder);
-  try{
-    await loadH2C();
-    if(document.fonts && document.fonts.ready) await document.fonts.ready;
-    await Promise.all([...holder.querySelectorAll("img")].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
-    const canvas = await window.html2canvas(holder.firstElementChild, {scale:3, width:360, height:640, backgroundColor:null, logging:false});
-    const blob = await new Promise(r=>canvas.toBlob(r, "image/png"));
-    const file = new File([blob], `番鼠房間-${code}.png`, {type:"image/png"});
-    let can = false; try{ can = !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){}
-    ONLINE.rmImg = {url:URL.createObjectURL(blob), file, can, hint: can ? "撳「分享到 IG」揀 Instagram 限時動態，會自動複製邀請連結，喺 IG 加「連結」貼紙貼上，朋友撳就可以直接加入。" : "長按圖片儲存，再喺 Instagram 限時動態揀呢張相，加「連結」貼紙貼上邀請連結（下面可以複製）。"};
-  }catch(e){ ONLINE.rmImg = {hint:"暫時整唔到圖片，請再試一次。"}; }
-  finally{ holder.remove(); renderRoomSheet(); }
 }
-async function makeInviteImage(y){
-  $("yueImgWrap").hidden = false; $("yueImgHint").textContent = "製作邀請函中…"; $("yueImg").hidden = true; $("yueImgShare").hidden = true;
+// 將一張 9:16 卡片整成 PNG 檔
+async function cardFile(htmlFn, name){
   const holder = document.createElement("div");
   holder.style.cssText = "position:fixed;left:-10000px;top:0;width:360px;height:640px";
-  holder.innerHTML = inviteCardHTML(y, await ivMouse());
+  holder.innerHTML = htmlFn(await ivMouse());
   document.body.appendChild(holder);
   try{
     await loadH2C();
@@ -3510,13 +3489,42 @@ async function makeInviteImage(y){
     await Promise.all([...holder.querySelectorAll("img")].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
     const canvas = await window.html2canvas(holder.firstElementChild, {scale:3, width:360, height:640, backgroundColor:null, logging:false});
     const blob = await new Promise(r=>canvas.toBlob(r, "image/png"));
-    ONLINE.yueFile = new File([blob], "番鼠約局邀請函.png", {type:"image/png"});
-    $("yueImg").src = URL.createObjectURL(blob); $("yueImg").hidden = false;
-    let can = false; try{ can = !!(navigator.canShare && navigator.canShare({files:[ONLINE.yueFile]})); }catch(e){}
-    $("yueImgShare").hidden = !can;
-    $("yueImgHint").textContent = can ? "撳「分享到 IG」揀 Instagram 限時動態，會自動複製邀請連結，喺 IG 加「連結」貼紙貼上，朋友撳就可以直接加入。" : "長按圖片儲存，再喺 Instagram 限時動態揀呢張相，加「連結」貼紙貼上邀請連結（下面可以複製）。";
-  }catch(e){ $("yueImgHint").textContent = "暫時整唔到圖片，請再試一次。"; }
-  finally{ holder.remove(); }
+    return new File([blob], name, {type:"image/png"});
+  }finally{ holder.remove(); }
+}
+// 預先整好嘅 IG 圖（同一張卡、同一個主題就重用）
+const igCache = {};
+function igCached(key, make){
+  if(igCache[key]) return igCache[key];
+  const p = make(); p.then(f=>{ p.value = f; }, ()=>{ p.failed = true; });
+  Object.keys(igCache).forEach(k=>{ if(k.split("|")[0]===key.split("|")[0]) delete igCache[k]; });
+  return igCache[key] = p;
+}
+const ivKey = () => ivSkin();
+function roomIgFile(link, host){
+  return igCached(`room|${ONLINE.room}|${ivKey()}|${state.mode}|${host}`, () => cardFile(m=>roomCardHTML(link, host, m), `番鼠房間-${ONLINE.room}.png`));
+}
+function yueIgFile(y){
+  return igCached(`yue|${y.id}|${ivKey()}|${(y.dates||[]).join()}|${y.time}`, () => cardFile(m=>inviteCardHTML(y, m), "番鼠約局邀請函.png"));
+}
+// 撳 IG：即刻開分享面板（揀 Instagram）；連結同時複製，方便加「連結」貼紙
+async function igShare(p, link, title, showFallback){
+  try{ navigator.clipboard.writeText(link).catch(()=>{}); }catch(e){}
+  let file = p.value;
+  if(!file){ toast("整緊邀請圖…"); try{ file = await p; }catch(e){ toast("暫時整唔到圖片，請再試一次。"); return; } }
+  let can = false; try{ can = !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){}
+  if(can){
+    try{ await navigator.share({files:[file], title}); toast("揀 Instagram → 限時動態。連結已複製：撳貼紙 →「連結」→ 貼上。"); return; }
+    catch(e){ if(e && e.name==="AbortError") return; }
+  }
+  showFallback(URL.createObjectURL(file));
+}
+// WhatsApp：直接打開 WhatsApp 揀聯絡人（連結預覽會顯示番鼠縮圖）
+function openWhatsApp(text){ location.href = "https://wa.me/?text=" + encodeURIComponent(text); }
+// Signal 等：直接開系統分享面板
+async function shareText(text, title){
+  try{ await navigator.share({title, text}); }
+  catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(text); toast("呢部機唔支援直接分享，已複製邀請，貼去 Signal 就得。"); }catch(_){ prompt("複製呢段：", text); } } }
 }
 
 /* 收到邀請：網址 ?yue=<約局 id>（舊版連結係 base64，只可以加入行事曆） */
