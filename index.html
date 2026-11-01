@@ -28,8 +28,9 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 
 /* Layout: a square mahjong table — four seats round a felt centre showing the round wind; actions and the hand log below. */
 :root{
+  --head:#5B2E12; --hl:#163A70; --tint-a:#E3F0E7; --tint-b:#F4EBDD; --tint-c:#E6ECF6;
   --pop:#C8562E; --pop-ink:#FFFFFF;
-  --bg:#EDF2EE; --surface:#FFFFFF; --surface2:#F2F6F3; --fg:#14261D; --muted:#56685F; --line:#D5E0D9;
+  --bg:#EDF2EE; --surface:#FFFFFF; --surface2:#F2F6F3; --fg:#1A1A17; --muted:#56685F; --line:#D5E0D9;
   --jade:#1E7A52; --jade-ink:#FFFFFF; --jade-soft:#DCEEE3;
   --red:#C0282D; --red-soft:#F8E1E1;
   --navy:#1D4D38; --navy-ink:#FFFFFF;
@@ -40,7 +41,8 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
   --r:14px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0E1713; --surface:#16221C; --surface2:#1C2A23; --fg:#E4EEE8; --muted:#93A89C; --line:#29392F;
+  --head:#F4A9B8; --hl:#9CC4FF; --tint-a:#173027; --tint-b:#2A2318; --tint-c:#1A2236;
+  --bg:#0E1713; --surface:#16221C; --surface2:#1C2A23; --fg:#EFE6D2; --muted:#93A89C; --line:#29392F;
   --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
   --red:#F0766D; --red-soft:#3A1F1C;
   --navy:#7CCBA3; --navy-ink:#0B1A13; --pop:#F08A5D; --pop-ink:#1A0B05;
@@ -49,7 +51,8 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#0E1713; --surface:#16221C; --surface2:#1C2A23; --fg:#E4EEE8; --muted:#93A89C; --line:#29392F;
+  --head:#F4A9B8; --hl:#9CC4FF; --tint-a:#173027; --tint-b:#2A2318; --tint-c:#1A2236;
+  --bg:#0E1713; --surface:#16221C; --surface2:#1C2A23; --fg:#EFE6D2; --muted:#93A89C; --line:#29392F;
   --jade:#5FBF97; --jade-ink:#0B1A13; --jade-soft:#1F3A2F;
   --red:#F0766D; --red-soft:#3A1F1C;
   --navy:#7CCBA3; --navy-ink:#0B1A13; --pop:#F08A5D; --pop-ink:#1A0B05;
@@ -59,8 +62,9 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 }
 /* Skins chosen in settings (預設／米色／萬聖節); placed after the dark blocks so they win in both modes */
 :root[data-skin="beige"]{
+  --head:#8A2C52; --hl:#1F3F75; --tint-a:#F7E6DC; --tint-b:#EEF0E2; --tint-c:#EDE5F3;
   --pop:#2F6B4F; --pop-ink:#FFFFFF;
-  --bg:#F8F5EE; --surface:#FFFEFB; --surface2:#F4F0E7; --fg:#33291F; --muted:#7D7262; --line:#E8E1D3;
+  --bg:#F8F5EE; --surface:#FFFEFB; --surface2:#F4F0E7; --fg:#2E1E12; --muted:#7D7262; --line:#E8E1D3;
   --jade:#4E7A41; --jade-ink:#FFFFFF; --jade-soft:#ECE6D6;
   --navy:#9A6B3C; --navy-ink:#FFFFFF;
   --red:#B4412F; --red-soft:#F6DED7;
@@ -69,6 +73,7 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
   color-scheme:light;
 }
 :root[data-skin="halloween"]{
+  --head:#FFB088; --hl:#C9A8FF; --tint-a:#2E1F3E; --tint-b:#33221A; --tint-c:#1F2533;
   --pop:#9B6BE0; --pop-ink:#FFFFFF;
   --bg:#140F1C; --surface:#221A2E; --surface2:#2B2139; --fg:#F3E9DC; --muted:#A897B5; --line:#3A2E4A;
   --jade:#FF8A1F; --jade-ink:#1A0F00; --jade-soft:#3D2614;
@@ -80,8 +85,9 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 }
 /* 薄霧: soft pink-lilac */
 :root[data-skin="mist"]{
+  --head:#9C2B5E; --hl:#5A3510; --tint-a:#F8E3EE; --tint-b:#EAE3F7; --tint-c:#F7EEDF;
   --pop:#D2921A; --pop-ink:#FFFFFF;
-  --bg:#F3EDF7; --surface:#FFFFFF; --surface2:#F7F1FA; --fg:#33223F; --muted:#7A6A8A; --line:#E4D8EE;
+  --bg:#F3EDF7; --surface:#FFFFFF; --surface2:#F7F1FA; --fg:#2A1638; --muted:#7A6A8A; --line:#E4D8EE;
   --jade:#2F8A68; --jade-ink:#FFFFFF; --jade-soft:#EBE2F5;
   --red:#C2416E; --red-soft:#FBE3EC;
   --navy:#6A3D9A; --navy-ink:#FFFFFF;
@@ -94,8 +100,9 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 :root[data-skin="beige"] .center,:root[data-skin="beige"] .settle-card{background-image:radial-gradient(circle at 50% 0%,rgba(255,240,210,.22),transparent 60%)}
 /* 便利店: white shop floor, green counter, orange + red signage */
 :root[data-skin="store"]{
+  --head:#B4410B; --hl:#00703A; --tint-a:#E1F2E7; --tint-b:#FFF0E0; --tint-c:#FDE6E6;
   --pop:#00843D; --pop-ink:#FFFFFF;
-  --bg:#F2F4F1; --surface:#FFFFFF; --surface2:#F6F7F5; --fg:#1D2A22; --muted:#5D6A62; --line:#DCE2DC;
+  --bg:#F2F4F1; --surface:#FFFFFF; --surface2:#F6F7F5; --fg:#0F2140; --muted:#5D6A62; --line:#DCE2DC;
   --jade:#00843D; --jade-ink:#FFFFFF; --jade-soft:#E1F2E7;
   --red:#DE2027; --red-soft:#FDE2E1;
   --navy:#D9590B; --navy-ink:#FFFFFF;
@@ -401,7 +408,18 @@ button.modechip::after{content:" ⇄";font-size:11px}
 .pu-head{display:flex;justify-content:space-between;align-items:baseline}.pu-head b{font-family:var(--f-display);font-size:18px}.pu-head span{font-size:12px;color:var(--muted)}
 .pu-row{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center;font-size:15px;padding:6px 2px;border-bottom:1px solid var(--line)}
 .pu-row i{font-style:normal;color:var(--muted)}.pu-row b{color:var(--navy)}
-body.hk #multiField,body.hk #revengeBox,body.hk .side .grid3,body.hk .side .flowerrow,body.hk .side .dingrow,body.hk [data-side="zhading"]{display:none!important}
+/* 每個主題嘅色彩層次：標題 --head、重點數字 --hl、三種卡片底色 --tint-a/b/c */
+header h1,.lobby-brand h1,.sheet h3,.card h3,.help-card h3,.confirm-card h3,.seat .wind{color:var(--head)!important}
+.me-card:not(.lvmax){background:var(--tint-a)!important}.cal-card{background:var(--tint-b)!important}.stat-card{background:var(--tint-c)!important}
+#ledgerBody .card:nth-of-type(3n+1){background:var(--tint-a)}#ledgerBody .card:nth-of-type(3n+2){background:var(--tint-b)}#ledgerBody .card:nth-of-type(3n){background:var(--tint-c)}
+.ycard:nth-of-type(odd){background:var(--tint-a)}.ycard:nth-of-type(even){background:var(--tint-c)}
+.statrow b,.me-lv b,.yc-time,.help-item b,.chip b{color:var(--hl)!important}
+.btn.accent{background:var(--hl);border-color:var(--hl);color:var(--bg)}
+.payup{background:var(--tint-c)}.pu-row b{color:var(--hl)}
+body.hk #multiField,body.hk #revengeBox,.side .pmgang{display:none}
+body.pm .side .pmgang{display:grid;grid-template-columns:1fr 1fr!important}
+.side [data-side][hidden]{display:none!important}
+body.hk .side .grid3,body.hk .side .flowerrow,body.hk .side .dingrow,body.hk [data-side="zhading"]{display:none!important}
 body.hk .side .grid2{grid-template-columns:1fr}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.splash-logo{animation:none}
   .tag.gold::after,.tag.legend::after,.tag .spk,.pl.golden,.pl .tag.gold,.pl .tag.legend{animation:none!important}.tag .spk{opacity:1}}
@@ -458,6 +476,10 @@ const SHELL = `<div class="splash" id="splash" hidden>
       <button class="btn" data-side="angang" disabled>暗槓<small>收三家</small></button>
       <button class="btn" data-side="wai" disabled>圍骰<small>收三家</small></button>
       <button class="btn" data-side="shun" disabled>順骰<small>比三家</small></button>
+    </div>
+    <div class="grid2 pmgang">
+      <button class="btn" data-side="pmming" disabled>明槓<small>收三家</small></button>
+      <button class="btn" data-side="pman" disabled>暗槓<small>收三家</small></button>
     </div>
     <div class="grid2 flowerrow">
       <button class="btn" data-side="hua" disabled>一台花<small>收三家各 1 底</small></button>
@@ -565,6 +587,11 @@ const SHELL = `<div class="splash" id="splash" hidden>
     <div class="field"><label for="pmUnit">每底</label><div class="prefix"><span>HK$</span><input type="number" id="pmUnit" inputmode="decimal" min="0" step="0.5"></div></div>
     <div class="field"><label>封頂</label><div class="grid2" id="pmCapSeg"></div></div>
     <div class="field"><label>莊家連莊加注（跑馬）</label><div class="grid2" id="pmDealerSeg"></div></div>
+    <div class="grid2">
+      <div class="field"><label for="pmMing">明槓收三家各（底）</label><input type="number" id="pmMing" inputmode="decimal" min="0" step="0.5"></div>
+      <div class="field"><label for="pmAn">暗槓收三家各（底）</label><input type="number" id="pmAn" inputmode="decimal" min="0" step="0.5"></div>
+    </div>
+    <span class="hint" style="margin-top:-8px;display:block">設做 0 就唔收，計分畫面唔會顯示個掣。</span>
     <p class="hint" id="pmTable"></p>
   </div>
   <div id="vnFields">
@@ -819,7 +846,7 @@ function closeSplash(){
 const DEFAULT_STATE = () => ({
   v:1, players:["阿明","阿強","阿芬","阿珍"], rate:1, base:5, dealerFan:1, streakFan:2,
   startDealer:0, dealer:0, streak:0, round:0, hands:[], updatedAt:0,
-  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}, pm:{unit:1, cap:3, dealer:true}, vn:{unit:0.5, extra:6, bonus:0}
+  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}, pm:{unit:1, cap:3, dealer:true, ming:1, an:2}, vn:{unit:0.5, extra:6, bonus:0}
 });
 let state = DEFAULT_STATE();
 const KEY = "hktw-mj-standalone";
@@ -945,6 +972,8 @@ const SIDE = {
   angang:{name:"暗槓", collect:true,  desc:"收三家各 1 底"},
   wai:   {name:"圍骰", collect:true,  desc:"收三家各 1 底"},
   hua:   {name:"一台花", collect:true, mult:1,   desc:"收三家各 1 底"},
+  pmming:{name:"明槓", collect:true, pm:"ming", desc:"收三家"},
+  pman:  {name:"暗槓", collect:true, pm:"an",   desc:"收三家"},
   cao:   {name:"一台草", collect:true, mult:0.5, desc:"收三家各半底"},
   shun:  {name:"順骰", collect:false, desc:"比三家各 1 底"},
   zhahu: {name:"詐糊", collect:false, fan:30, ding:true},
@@ -964,8 +993,9 @@ function zhahuDealerExtra(p, q){
 function recordSide(type, p){
   const fanEach = sideFan(type);
   const cz = isCant() && type==="zhahu";
-  const amt = cz ? cantZhahuEach() : Math.round(fanEach * state.rate * 100)/100;
   const S = SIDE[type];
+  const pmAmt = S.pm ? Math.round((state.pm[S.pm] || 0) * state.pm.unit * 100)/100 : null;
+  const amt = cz ? cantZhahuEach() : pmAmt!==null ? pmAmt : Math.round(fanEach * state.rate * 100)/100;
   const sign = S.collect ? 1 : -1;
   const deltas = [0,0,0,0];
   let extra = 0;
@@ -977,7 +1007,7 @@ function recordSide(type, p){
     deltas[q] -= sign*a; deltas[p] += sign*a;
   }
   const dTxt = extra ? (isPM() ? `；同莊家之間加 ${1+state.streak} 底` : `；同莊家之間加莊 ${state.dealerFan} 番${state.streak?`＋連${state.streak}拉${state.streak}`:""}`) : "";
-  const desc = cz ? `賠三家各 $${amt}（按封頂自摸計）${dTxt}` : S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}${dTxt}` : S.mult ? `收三家各 ${fanEach} 番（${S.mult===1?"1":"半"}底）` : S.desc;
+  const desc = cz ? `賠三家各 $${amt}（按封頂自摸計）${dTxt}` : S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}${dTxt}` : S.mult ? `收三家各 ${fanEach} 番（${S.mult===1?"1":"半"}底）` : S.pm ? `收三家各 ${state.pm[S.pm]} 底（$${amt}）` : S.desc;
   const prev = snap();
   const isHand = type==="zhahu";   // 詐糊當完一鋪：閒家詐糊莊家連莊；莊家詐糊過莊
   state.hands.push({kind:"side", type, player:p, desc, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, prev, hand:isHand||undefined});
@@ -1050,6 +1080,7 @@ function render(){
   $("table").querySelectorAll(".seat").forEach(b=>b.onclick=()=>openWin(+b.dataset.seat));
 
   document.body.classList.toggle("hk", isCant());
+  document.body.classList.toggle("pm", isPM());
   $("modeChip").textContent = MODE_NAME(state.mode);
   $("rulesLine").innerHTML = isPM()
     ? `<span>每底 <b>HK$${state.pm.unit}</b></span><span><b>雞糊</b>起糊</span><span><b>${state.pm.cap}</b> 番封頂（×${Math.pow(2,state.pm.cap)}）</span><span>自摸三家各俾</span>${state.pm.dealer?`<span>莊家<b>跑馬</b>加注</span>`:""}`
@@ -1110,7 +1141,14 @@ function renderSide(){
   const amt = Math.round(state.base * state.rate * 100)/100;
   $("dingSeg").innerHTML = DING.map((d,i)=>`<button class="opt${i===dingIdx?" on":""}" data-d="${i}">${d[0]}${d[1]?" "+d[1]:""}</button>`).join("");
   $("dingSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ dingIdx=+b.dataset.d; renderSide(); });
-  $("sideLbl").textContent = isCant() ? "詐糊" : "暗槓／圍骰／順骰／花／詐糊／詐叮";
+  $("sideLbl").textContent = isPM() ? "明槓／暗槓／詐糊" : isCant() ? "詐糊" : "暗槓／圍骰／順骰／花／詐糊／詐叮";
+  if(isPM()){
+    const pa = state.pm;
+    document.querySelector('[data-side="pmming"] small').textContent = `收三家各 ${pa.ming||0} 底`;
+    document.querySelector('[data-side="pman"] small').textContent = `收三家各 ${pa.an||0} 底`;
+    document.querySelector('[data-side="pmming"]').hidden = !(pa.ming>0);
+    document.querySelector('[data-side="pman"]').hidden = !(pa.an>0);
+  }
   const bAmt = Math.round(state.base * state.rate * 100)/100;
   document.querySelector('[data-side="hua"] small').textContent = `收三家各 1 底（$${bAmt}）`;
   document.querySelector('[data-side="cao"] small').textContent = `收三家各半底（$${Math.round(bAmt*50)/100}）`;
@@ -1692,6 +1730,8 @@ function fillSetup(){
   $("modeSeg2").querySelectorAll("button").forEach(b=>b.onclick=()=>switchMode(b.dataset.m, fillSetup));
   $("twFields").hidden = isCant(); $("hkFields").hidden = !isHK(); $("pmFields").hidden = !isPM(); $("vnFields").hidden = !isVN();
   $("pmUnit").value = state.pm.unit;
+  state.pm = Object.assign({ming:1, an:2}, state.pm);
+  $("pmMing").value = state.pm.ming; $("pmAn").value = state.pm.an;
   const pseg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.pm[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
     $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.pm[key] = v==="true" ? true : v==="false" ? false : +v; render(); save(); fillSetup(); }); };
   pseg("pmCapSeg", [[2,"2 番（×4）"],[3,"3 番（×8）"],[4,"4 番（×16）"],[5,"5 番（×32）"]], "cap");
@@ -1718,6 +1758,7 @@ for(let i=0;i<4;i++) $("p"+i).addEventListener("change", e=>{ state.players[i] =
 [["vnUnit","unit"],["vnExtra","extra"],["vnBonus","bonus"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.vn[k] = k==="unit" ? v : Math.round(v); render(); save(); fillSetup(); } else e.target.value = state.vn[k]; }));
 [["hkUnit","unit"],["hkMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v); if(!isNaN(v) && v>=0 && (k!=="min" || v<=state.hk.cap)){ state.hk[k]=v; render(); save(); fillSetup(); } else e.target.value = state.hk[k]; }));
 [["rate",0.1],["base",0],["dealerFan",0],["streakFan",0]].forEach(([k])=>$(k).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state[k]=v; render(); save(); } else e.target.value = state[k]; }));
+[["pmMing","ming"],["pmAn","an"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.pm[k] = v; render(); save(); fillSetup(); } else e.target.value = state.pm[k]; }));
 $("pmUnit").addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.pm.unit = v; render(); save(); fillSetup(); } else e.target.value = state.pm.unit; });
 $("resetBtn").onclick = ()=>{
   if(!resetArmed){ resetArmed=true; $("resetBtn").textContent = "再按一次確認清除"; return; }
@@ -2128,8 +2169,9 @@ const ONLINE_CSS = `
 .seat.framed .badge{top:-24px}
 .vipb{font-size:10px;font-weight:900;letter-spacing:.06em;color:#5A3A00;background:linear-gradient(135deg,#F7E08A,#E2B53E);border:1px solid #B8860B;border-radius:999px;padding:0 6px;vertical-align:middle}
 :root[data-skin="royal"]{
+  --head:#1F3A6B; --hl:#7A1F45; --tint-a:#F6EBD3; --tint-b:#E8EEF7; --tint-c:#F3E6EC;
   --pop:#2F6B4F; --pop-ink:#FFFDF7;
-  --bg:#FAF6EC; --surface:#FFFDF7; --surface2:#F5EFE0; --fg:#2E2A22; --muted:#7D7462; --line:#E7DCC4;
+  --bg:#FAF6EC; --surface:#FFFDF7; --surface2:#F5EFE0; --fg:#33240F; --muted:#7D7462; --line:#E7DCC4;
   --jade:#2F6B4F; --jade-ink:#FFFDF7; --jade-soft:#E7EEE3;
   --red:#A33A2C; --red-soft:#F6E3DC;
   --navy:#A8842C; --navy-ink:#FFFDF7;
@@ -2156,6 +2198,9 @@ const ONLINE_CSS = `
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .btn.on{border-color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy)}
 .lg-pend{margin:0;background:var(--jade-soft);border-radius:10px;padding:8px 10px;color:var(--fg)!important}
+#yueTime{font-size:22px!important;font-weight:700;padding:12px 14px!important;min-height:52px}
+#lgPin{font-size:24px!important;letter-spacing:.35em;padding:10px 14px!important}
+#lgPin::placeholder{letter-spacing:.35em}
 .ferr{color:var(--red);font-size:13px;font-weight:700}
 input.bad{border-color:var(--red)!important;box-shadow:0 0 0 2px var(--red-soft)}
 .rm-kick{padding:4px 10px!important;font-size:12px!important;color:var(--red);border-color:var(--red)}
@@ -2310,7 +2355,7 @@ function buildOnlineUI(){
     <button class="btn sh-wa" data-sh="wa">WhatsApp</button><button class="btn sh-tg" data-sh="tg">Telegram</button>
     <button class="btn sh-sg" data-sh="sys">Signal／其他</button><button class="btn sh-ig" data-sh="ig">IG 限時動態</button>
   </div>
-  <div class="grid2" style="margin-top:8px"><button class="btn" data-sh="copy">複製邀請文字</button><button class="btn" data-sh="qr">QR code</button></div>
+  <div class="grid2" style="margin-top:8px"><button class="btn accent" data-sh="copy">複製邀請文字</button><button class="btn accent" data-sh="qr">QR code</button></div>
   <div id="yueQr" hidden></div>
   <div id="yueImgWrap" hidden><p class="hint" id="yueImgHint"></p><img id="yueImg" alt="番鼠約局邀請函" hidden><button class="btn primary" id="yueImgShare" hidden style="width:100%">分享到 IG</button></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeYueShare">完成</button></div>
@@ -2450,16 +2495,16 @@ function renderLobby(){
       <div class="xpbar"><i style="width:${L.max?100:Math.round(L.into/L.need*100)}%"></i></div>` : `<p class="hint" style="margin:0">讀緊等級…</p>`}
     </div>
     ${calendarCardHTML()}
-    <div class="card">
+    <div class="card stat-card">
       <h3>今個月戰績</h3>
       ${ONLINE.games===null ? `<p class="hint" style="margin:0">${ONLINE.gamesErr?"暫時讀唔到記錄。":"讀緊記錄…"}</p>` : `
       <div class="bigmoney num ${cls(st.net)}">${money(st.net)}</div>
       <div class="statrow"><span>打咗 <b>${st.n}</b> 場</span><span>第一名 <b>${st.firsts}</b> 次</span><span>特別稱號 <b>${[...st.specials.values()].reduce((a,o)=>a+o.n,0)}</b> 個</span></div>
       ${spBadges ? `<div class="badges">${spBadges}</div>` : ""}`}
-      <button class="btn" id="lgLedger">打開小氣簿</button>
+      <button class="btn accent" id="lgLedger">打開小氣簿</button>
     </div>
     <div class="grid2 lobby-acts"><button class="btn primary big" id="lgCreate">創建房間</button><button class="btn pop big" id="lgJoin">加入房間</button></div>
-    ${last ? `<button class="btn" id="rejoinBtn">返回上次房間 ${esc(last)}</button>` : ""}
+    ${last ? `<button class="btn pop" id="rejoinBtn">返回上次房間 ${esc(last)}</button>` : ""}
     <button class="btn" id="lgOffline">單機模式（唔會記入小氣簿）</button>`;
   bindCalendarCard();
   $("lgLedger").onclick = openLedger;
@@ -2474,7 +2519,10 @@ async function joinByCode(code, btn){
   code = (code || "").trim().toUpperCase();
   if(!/^[A-Z0-9]{6}$/.test(code)){ e.textContent = "房間號碼係 6 個英文字母或數字。"; e.hidden = false; if(openSheet!==$("joinSheet")) toast(e.textContent); return; }
   if(btn) btn.disabled = true;
-  try{ await joinRoom(code); if(openSheet===$("joinSheet")){ hideSheet(); liftReset(); } }
+  try{
+    await joinRoom(code); if(openSheet===$("joinSheet")){ hideSheet(); liftReset(); }
+    if(ONLINE.isHost && !state.ended && [0,1,2,3].some(k=>!(state.uids || [])[k])){ ONLINE.showQr = true; renderRoomSheet(); showSheet($("roomSheet")); }
+  }
   catch(err){ const t = err.message && !err.code ? err.message : errText(err); e.textContent = t; e.hidden = false; if(openSheet!==$("joinSheet")) toast(t); }
   finally{ if(btn) btn.disabled = false; }
 }
@@ -2502,6 +2550,7 @@ async function createRoom(mode, btn){
     if(!code) throw new Error("開唔到房間，請再試。");
     if(yy) ONLINE.backend.yueSetRoom(yy.id, yf.d, {code, at:Date.now()}).catch(()=>{});
     await enterRoom(code);
+    ONLINE.showQr = true;
     showSheet($("roomSheet")); renderRoomSheet();
   }catch(e){ toast(e.message && !e.code ? e.message : errText(e)); }
   finally{ if(btn) btn.disabled = false; }
@@ -2574,7 +2623,7 @@ function hostProcess(d){
   // 新入房嘅朋友：自動坐入第一個空位（未改名嘅「玩家n」位）
   if(!state.ended) for(const [u,n] of Object.entries(d.members || {})){
     if((state.uids || []).includes(u)) continue;
-    const i = [0,1,2,3].find(k=>!(state.uids || [])[k] && state.players[k]===`玩家${k+1}`);
+    const i = [0,1,2,3].find(k=>!(state.uids || [])[k]);    // 按次序換走虛擬玩家；坐滿真人就唔換
     if(i===undefined) break;
     state.uids = (state.uids || [null,null,null,null]).slice(); state.uids[i] = u; state.players[i] = n; changed = true;
     toast(`${n} 已經坐入${seatWind(i)}位。`);
@@ -2667,8 +2716,12 @@ function renderRoomSheet(){
   }
   box.innerHTML = `<h3>房間 ${esc(ONLINE.room)}</h3>
     <div class="field"><label>邀請朋友</label>
-      <div class="grid3"><button class="btn" id="rmCopy">複製連結</button><button class="btn" id="rmShare">分享</button><button class="btn${ONLINE.showQr?" on":""}" id="rmQrBtn">QR code</button></div>
-      ${ONLINE.showQr ? qrBoxHTML(link, `朋友用相機掃呢個 QR code，登入之後就會自動入房 ${esc(ONLINE.room)}。`) : ""}
+      <div class="share-grid">
+        <button class="btn sh-wa" data-rsh="wa">WhatsApp</button><button class="btn sh-tg" data-rsh="tg">Telegram</button>
+        <button class="btn sh-sg" data-rsh="sys">Signal／其他</button><button class="btn" id="rmCopy">複製連結</button>
+      </div>
+      <button class="btn accent${ONLINE.showQr?" on":""}" id="rmQrBtn" style="width:100%;margin-top:8px">${ONLINE.showQr?"收埋 QR code":"顯示 QR code"}</button>
+      ${ONLINE.showQr ? qrBoxHTML(link, `朋友用相機掃呢個 QR code，登入之後就會自動入房 ${esc(ONLINE.room)}，順序換走虛擬玩家。`) : ""}
       <span class="hint">朋友打開連結登入就會入房；或者喺大廳輸入房間號碼 <b>${esc(ONLINE.room)}</b>。</span></div>
     <div class="field"><label>房間成員（${members.length}）</label><div class="mlist">
       ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span>${ONLINE.isHost && u!==d.host ? `<button class="iconbtn rm-kick" data-kick="${esc(u)}">移除</button>` : `<span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span>`}</div>`).join("")}
@@ -2676,7 +2729,14 @@ function renderRoomSheet(){
     ${seats}
     <button class="btn danger" style="width:100%" id="rmLeave">離開房間</button>`;
   $("rmCopy").onclick = async () => { try{ await navigator.clipboard.writeText(link); toast("已複製連結。"); }catch(e){ prompt("複製呢條連結：", link); } };
-  $("rmShare").onclick = async () => { try{ await navigator.share({title:"番鼠房間 "+ONLINE.room, text:`入嚟番鼠房間 ${ONLINE.room} 一齊計番`, url:link}); }catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(link); toast("已複製連結。"); }catch(_){} } } };
+  const inviteTxt = `🀄 ${d.hostName || ONLINE.user.name} 邀請你入番鼠房間 ${ONLINE.room}（${MODE_NAME(state.mode)}）\n撳連結登入就會自動入房：\n${link}`;
+  box.querySelectorAll("[data-rsh]").forEach(b=>b.onclick = async () => {
+    const k = b.dataset.rsh;
+    if(k==="wa") return window.open("https://wa.me/?text=" + encodeURIComponent(inviteTxt), "_blank");
+    if(k==="tg") return window.open("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(inviteTxt.replace(link,"").trim()), "_blank");
+    try{ await navigator.share({title:"番鼠房間 " + ONLINE.room, text:inviteTxt, url:link}); }
+    catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(inviteTxt); toast("呢部機唔支援直接分享，已複製邀請。"); }catch(_){ prompt("複製呢段：", inviteTxt); } } }
+  });
   $("rmLeave").onclick = () => { hideSheet(); leaveRoom(); };
   $("rmQrBtn").onclick = () => { ONLINE.showQr = !ONLINE.showQr; renderRoomSheet(); };
   box.querySelectorAll("[data-kick]").forEach(b=>b.onclick = () => {
@@ -2892,9 +2952,9 @@ function renderYueDay(){
       ${no.length ? `<p class="hint" style="margin:0">唔得閒：${no.map(esc).join("、")}</p>` : ""}
       <div class="yc-acts">
         ${host ? `${r ? "" : `<button class="btn primary" data-yroom="${esc(y.id)}">按報名創建房間</button>`}
-          <button class="btn" data-yshare="${esc(y.id)}">分享邀請</button>
+          <button class="btn pop" data-yshare="${esc(y.id)}">分享邀請</button>
           <div class="grid2"><button class="btn" data-yedit="${esc(y.id)}">改日期／時間</button><button class="btn danger" data-ydel="${esc(y.id)}">刪除約局</button></div>`
-        : `<div class="grid2"><button class="btn" data-yshare="${esc(y.id)}">分享邀請</button><button class="btn danger" data-ycancel="${esc(y.id)}">取消報名</button></div>`}
+        : `<div class="grid2"><button class="btn pop" data-yshare="${esc(y.id)}">分享邀請</button><button class="btn danger" data-ycancel="${esc(y.id)}">取消報名</button></div>`}
         <div class="grid2"><button class="btn" data-yics="${esc(y.id)}">iPhone 行事曆</button><a class="btn" target="_blank" rel="noopener" href="${googleURL(y,d)}">Google 日曆</a></div>
       </div></div>`;
   }).join("") : `<p class="hint">呢日冇約局。</p>`);
@@ -3410,8 +3470,11 @@ function renderLedger(){
     const g = (ONLINE.games || []).find(x=>x.gameId===b.dataset.gdel); if(!g) return;
     const d = new Date(g.endedAt);
     askConfirm("刪除呢場記錄？", `${d.getMonth()+1}/${d.getDate()} ${MODE_NAME(g.mode)}（${money(g.money)}${g.xp?`，${g.xp} 經驗`:""}）會喺你嘅小氣簿消失，輸贏同經驗值都會扣返。其他玩家嘅記錄唔受影響。刪除咗就冇得還原。`, "刪除", async ()=>{
-      try{ await ONLINE.backend.deleteGame(ONLINE.user.uid, g.gameId); toast("已刪除記錄。"); await loadGames(); }
-      catch(e){ toast("刪除唔到：" + errText(e)); }
+      const keep = ONLINE.games;
+      ONLINE.games = (ONLINE.games || []).filter(x=>x.gameId!==g.gameId);   // 即刻喺畫面消失
+      renderLedger(); if(!$("lobby").hidden) renderLobby();
+      try{ await ONLINE.backend.deleteGame(ONLINE.user.uid, g.gameId); toast("已刪除記錄。"); loadGames(); }
+      catch(e){ ONLINE.games = keep; renderLedger(); if(!$("lobby").hidden) renderLobby(); toast("刪除唔到：" + errText(e)); }
     });
   });
 }
