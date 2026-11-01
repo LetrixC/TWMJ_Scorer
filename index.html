@@ -1076,12 +1076,16 @@ const SKINS = [["maji","麻吉"],["default","墨綠"],["ice","冰雪"],["mist","
 const SKIN_LIMIT = {halloween: new Date("2026-11-01T00:00:00+08:00").getTime()};
 const skinName = k => (SKINS.find(x=>x[0]===k) || [k,k])[1];
 const skinVip = () => !!(window.__isVip && window.__isVip());
-const skinExpired = k => !!SKIN_LIMIT[k] && Date.now() >= SKIN_LIMIT[k];
+// 管理員可以喺 Admin 改：off = 下架（只有用緊嘅人保留），until = 限時到期（之後只有 VIP 揀到）
+const skinCfg = k => ((window.__skinCfg || {})[k]) || {};
+const skinLimit = k => ("until" in skinCfg(k)) ? skinCfg(k).until : SKIN_LIMIT[k];
+const skinOff = k => !!skinCfg(k).off;
+const skinExpired = k => !!skinLimit(k) && Date.now() >= skinLimit(k);
 const curSkin = () => (window.__getSkin ? window.__getSkin() : state.skin) || "maji";
 function skinButtonsHTML(){
   const cur = curSkin();
-  return SKINS.filter(([k])=>!skinExpired(k) || skinVip() || k===cur).map(([k,n])=>{
-    const lim = SKIN_LIMIT[k] ? new Date(SKIN_LIMIT[k] - 1) : null;
+  return SKINS.filter(([k])=>k===cur || (!skinOff(k) && (!skinExpired(k) || skinVip()))).map(([k,n])=>{
+    const lim = skinLimit(k) ? new Date(skinLimit(k) - 1) : null;
     return `<button class="opt skinopt${k===cur?" on":""}" data-k="${k}">${n}${lim ? `<small class="ltd">${skinExpired(k) ? "限時 · 已下架" : `限時 · 至 ${lim.getMonth()+1}/${lim.getDate()}`}</small>` : ""}</button>`;
   }).join("");
 }
@@ -1089,7 +1093,7 @@ function chooseSkin(k, done){
   const cur = curSkin();
   if(k===cur){ if(done) done(); return; }
   const go = () => { if(window.__setSkin) window.__setSkin(k); else { state.skin = k; save(); } applySkin(); if(done) done(); };
-  if(skinExpired(cur) && !skinVip()){
+  if((skinOff(cur) || skinExpired(cur)) && !skinVip()){
     askConfirm(`${skinName(cur)}為限時主題`, `修改為其他主題後，將無法再次選擇${skinName(cur)}。`, "確認修改", go);
     return;
   }
@@ -2154,6 +2158,8 @@ async function firebaseBackend(cfg){
     yueGuest(id, key, entry){ return db.collection("yue").doc(id).update({["people." + key]:entry, lastGuest:key, updatedAt:Date.now()}); },
     yueSetRoom(id, date, r){ return db.collection("yue").doc(id).update({["rooms." + date]:r, updatedAt:Date.now()}); },
     yueDelete(id){ return db.collection("yue").doc(id).delete(); },
+    // 全站設定（公告、主題上架）：管理員寫，人人讀
+    watchConfig(cb){ return db.collection("config").doc("site").onSnapshot(s=>cb(s.exists ? s.data() : {}), ()=>cb({})); },
   };
 }
 function mockBackend(){
@@ -2210,6 +2216,7 @@ function mockBackend(){
     async yueSelf(id, uid, entry, join){ const d = L("yue:"+id); if(!d) throw fail("not-found"); if(!me() || me().uid!==uid) throw fail("permission-denied"); d.people = d.people || {}; d.people[uid] = entry; d.members = (d.members||[]).filter(x=>x!==uid).concat(join ? [uid] : []); d.updatedAt = Date.now(); W("yue:"+id, d); },
     async yueGuest(id, key, entry){ const d = L("yue:"+id); if(!d) throw fail("not-found"); if(!/^g_/.test(key) || (d.people||{})[key]) throw fail("permission-denied"); d.people = d.people || {}; d.people[key] = entry; d.updatedAt = Date.now(); W("yue:"+id, d); },
     async yueSetRoom(id, date, r){ const d = L("yue:"+id); if(!d || !me() || d.host!==me().uid) throw fail("permission-denied"); d.rooms = d.rooms || {}; d.rooms[date] = r; W("yue:"+id, d); },
+    watchConfig(cb){ return watchKeys(k=>k==="config", ()=>cb(L("config") || {})); },
     async yueDelete(id){ const d = L("yue:"+id); if(!d || !me() || d.host!==me().uid) throw fail("permission-denied"); localStorage.removeItem("mock:yue:"+id); window.dispatchEvent(new CustomEvent("mockchange", {detail:"yue:"+id})); },
   };
 }
@@ -2218,11 +2225,15 @@ function mockBackend(){
 const ONLINE_CSS = `
 .lobby{position:fixed;inset:0;z-index:45;background:var(--bg);overflow:auto;background-image:radial-gradient(circle at 50% 0%,var(--jade-soft),transparent 60%)}
 .lobby[hidden]{display:none!important}
+.notice{display:flex;gap:10px;align-items:flex-start;background:var(--hl);color:var(--bg);border-radius:14px;padding:12px 12px 12px 14px;box-shadow:var(--shadow)}
+.notice p{margin:0;flex:1;font-size:15px;font-weight:700;line-height:1.55;white-space:pre-wrap}
+.notice small{display:block;font-size:12px;font-weight:500;opacity:.85;margin-bottom:2px}
+.notice button{flex:none;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);color:inherit;font-size:15px;font-weight:900;line-height:1}
 .lobby-in{max-width:440px;margin:0 auto;padding:28px 16px 40px;display:flex;flex-direction:column;gap:14px}
 #lobbyBody{display:flex;flex-direction:column;gap:14px}
 .nf{display:inline-flex;align-items:center;justify-content:center;border-style:solid;border-width:15px 16px;border-image-slice:32% fill;border-image-repeat:stretch;margin:-7px -2px;max-width:100%;box-sizing:border-box;vertical-align:middle}
 .nf-in{display:block;flex:0 0 auto;max-width:7.5em;padding:0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 3px var(--surface),0 0 3px var(--surface)}
-#bannerBox:empty,#revengeBox:empty,#surrBox:empty{display:none}
+#noticeBox:empty,#bannerBox:empty,#revengeBox:empty,#surrBox:empty{display:none}
 .seat .name.has-nf{overflow:visible;max-width:100%}
 .pname b.has-nf{overflow:visible}
 .mrow .nf{margin:-8px 0}
@@ -2413,6 +2424,7 @@ function buildOnlineUI(){
 <div class="lobby" id="lobby" hidden><div class="lobby-in">
   <div class="lobby-top"><button class="iconbtn menubtn" id="lbMenu" type="button" aria-label="選項" aria-haspopup="menu">${MENU_ICON}<i class="mdot" hidden></i></button></div>
   <div class="lobby-brand"><span class="lb-logo">${LOGO}</span><h1>番鼠</h1></div>
+  <div id="noticeBox"></div>
   <div id="lobbyBody"></div>
 </div></div>
 <div class="sheet" id="roomSheet" hidden role="dialog" aria-label="房間"><div class="grab"></div><div id="roomBody"></div>
@@ -3655,6 +3667,16 @@ function renderLedger(){
   });
 }
 
+/* ---------- 全站公告 ---------- */
+function renderNotice(){
+  const box = $("noticeBox"); if(!box) return;
+  const n = (ONLINE.config || {}).notice;
+  let gone = null; try{ gone = localStorage.getItem("fansyu-notice-off"); }catch(e){}
+  if(!n || !n.on || !n.text || gone===n.id){ box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="notice" role="status"><p><small>📢 番鼠公告</small>${esc(n.text)}</p><button type="button" id="noticeX" aria-label="收埋公告">✕</button></div>`;
+  $("noticeX").onclick = () => { try{ localStorage.setItem("fansyu-notice-off", n.id); }catch(e){} box.innerHTML = ""; };
+}
+
 /* ---------- start ---------- */
 async function onlineStart(){
   if(!ONLINE.enabled) return;
@@ -3666,6 +3688,7 @@ async function onlineStart(){
     ONLINE.enabled = false; hideLobby(); renderRoomBar();
     toast("連唔到伺服器，暫時用單機模式。"); return;
   }
+  try{ ONLINE.backend.watchConfig(c=>{ ONLINE.config = c || {}; window.__skinCfg = ONLINE.config.skins || {}; renderNotice(); }); }catch(e){}
   watchInvite();
   const wanted = (new URLSearchParams(location.search).get("room") || (()=>{ try{ return sessionStorage.getItem("fansyu-room"); }catch(e){ return null; } })() || "").toUpperCase();
   let tried = false;

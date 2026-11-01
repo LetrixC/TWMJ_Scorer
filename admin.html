@@ -37,7 +37,7 @@ input[type=text],input[type=password],input[type=search]{font:inherit;font-size:
 .btn{padding:11px 14px;border-radius:12px;font-weight:700;background:var(--surface);border:1px solid var(--line);text-align:center}
 .btn.gold{background:linear-gradient(135deg,#B8923A,#9C7726);color:#FFFDF7;border-color:#8A6A22}
 .btn.danger{color:var(--red);border-color:var(--red)}
-.btn.sm{padding:6px 10px;font-size:13px;border-radius:9px}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:9px;white-space:nowrap}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .err{margin:0;padding:8px 12px;border-radius:10px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700}
 .hint{font-size:12px;color:var(--muted);margin:0}
@@ -81,6 +81,28 @@ textarea{font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;max-width:calc(100% - 32px);text-align:center}
 a.back{color:var(--gold);font-weight:700;font-size:13px}
 details summary{cursor:pointer;font-weight:700;font-size:14px}
+.stats4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:520px){.stats4{grid-template-columns:repeat(2,1fr)}}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:64px 1fr 44px;gap:8px;align-items:center;font-size:13px}
+.bar i{display:block;height:12px;border-radius:6px;background:var(--gold);min-width:2px}
+.bar b{text-align:right;font-variant-numeric:tabular-nums}
+.weeks{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:90px}
+.weeks div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%;font-size:11px;color:var(--muted)}
+.weeks i{display:block;width:100%;border-radius:5px 5px 0 0;background:var(--jade);min-height:2px}
+.weeks b{font-size:12px;color:var(--fg)}
+.sub{font-size:13px;font-weight:700;color:var(--muted);margin:4px 0 0}
+.skinrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.skinrow:last-child{border-bottom:0}
+.skinrow label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;white-space:nowrap}
+.skinrow input[type=checkbox]{width:20px;height:20px;accent-color:#A8842C}
+input[type=date]{font:inherit;font-size:14px;padding:6px 8px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--fg)}
+.pill{font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;border:1px solid currentColor;white-space:nowrap}
+.pill.old{color:var(--red)}.pill.ok{color:var(--jade)}
+.preview{background:#1F6FB2;color:#fff;border-radius:12px;padding:10px 12px;font-weight:700;white-space:pre-wrap;font-size:14px}
+.preview small{display:block;font-weight:500;opacity:.85;font-size:12px}
+.modal-card.wide{max-width:560px;max-height:86vh;overflow:auto}
+.money.pos{color:var(--jade)}.money.neg{color:var(--red)}
 </style>
 </head>
 <body>
@@ -89,14 +111,51 @@ details summary{cursor:pointer;font-weight:700;font-size:14px}
 
   <div class="card" id="waitCard"><p class="hint">檢查登入中…</p></div>
   <div id="adminView" hidden>
+    <div class="card" id="dashCard">
+      <h2>數據總覽</h2>
+      <div class="stats stats4">
+        <div class="stat"><b id="dA7">–</b><span>7 日上線</span></div><div class="stat"><b id="dA30">–</b><span>30 日上線</span></div>
+        <div class="stat"><b id="dG7">–</b><span>7 日對局</span></div><div class="stat"><b id="dG30">–</b><span>30 日對局</span></div>
+      </div>
+      <p class="sub">邊種牌最多人玩（全部對局 <span id="dGAll">0</span> 場）</p>
+      <div class="bars" id="dModes"></div>
+      <p class="sub">每週新註冊（最近 8 週）</p>
+      <div class="weeks" id="dWeeks"></div>
+      <p class="hint">對局只計有帳戶玩家記入小氣簿嘅場數（同一場只計一次）；上線以「上次登入時間」計。</p>
+    </div>
     <div class="card">
       <div class="stats"><div class="stat"><b id="sTotal">0</b><span>註冊用戶</span></div><div class="stat"><b id="sVip">0</b><span>VIP</span></div><div class="stat"><b id="sStale">0</b><span>一年未上線</span></div></div>
       <div class="tools"><input type="search" id="q" placeholder="搵暱稱"><button class="btn danger sm" id="bulkBtn">移除一年內冇上線嘅玩家</button></div>
       <div class="tablewrap"><table>
-        <thead><tr><th>用戶暱稱</th><th class="num">等級</th><th class="num">VIP</th><th>上次登入時間</th><th class="num">移除</th></tr></thead>
-        <tbody id="rows"><tr><td colspan="5" class="empty">讀緊用戶…</td></tr></tbody>
+        <thead><tr><th>用戶暱稱</th><th class="num">等級</th><th class="num">VIP</th><th>上次登入時間</th><th class="num">小氣簿</th><th class="num">移除</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="6" class="empty">讀緊用戶…</td></tr></tbody>
       </table></div>
       <p class="hint">剔 VIP 會自動送出「榮耀晉升」通知同【金光閃閃】外框，佢嘅主題會多咗「尊爵不凡」；取消 VIP 會收回金光閃閃外框。上次登入時間由今次更新之後開始記錄；未有記錄嘅就顯示註冊時間。</p>
+    </div>
+    <div class="card" id="noticeCard">
+      <h2>全站公告</h2>
+      <div class="field"><label for="nText">公告內容（大廳頂部顯示，所有人見到）</label><textarea id="nText" rows="3" maxlength="300" placeholder="例如：今晚 12 點系統維護約 10 分鐘"></textarea></div>
+      <div class="preview" id="nPrev" hidden></div>
+      <div class="grid2"><button class="btn" id="nOff">收起公告</button><button class="btn gold" id="nPub">發佈公告</button></div>
+      <p class="hint" id="nState">而家冇公告。</p>
+    </div>
+    <div class="card" id="skinCard">
+      <h2>主題上架／下架</h2>
+      <div id="skinRows"></div>
+      <button class="btn gold" id="skinSave">儲存主題設定</button>
+      <p class="hint">取消「開放」= 下架，所有人（包括 VIP）都揀唔到，用緊嘅人可以繼續用到自己換走。「最後一日」= 限時主題，過咗之後只有 VIP 揀到；留空即冇限期。新主題要改程式先會出現喺度。</p>
+    </div>
+    <div class="card" id="roomCard">
+      <h2>房間清理</h2>
+      <div class="tools"><span class="hint" id="rmSum" style="flex:1">讀緊…</span><button class="btn danger sm" id="roomBulk">刪除 30 日冇郁過嘅房間</button></div>
+      <details><summary>全部房間（<span id="roomCount">0</span>）</summary><div class="tablewrap" style="margin-top:8px"><table>
+        <thead><tr><th>房號</th><th>房主</th><th class="num">人數</th><th>最後更新</th><th class="num">刪除</th></tr></thead><tbody id="roomRows"></tbody></table></div></details>
+    </div>
+    <div class="card" id="yueCard">
+      <h2>約局清理</h2>
+      <div class="tools"><span class="hint" id="yueSum" style="flex:1">讀緊…</span><button class="btn danger sm" id="yueBulk">刪除已過期嘅約局</button></div>
+      <details><summary>全部約局（<span id="yueCount">0</span>）</summary><div class="tablewrap" style="margin-top:8px"><table>
+        <thead><tr><th>約局者</th><th>日期</th><th class="num">報名</th><th class="num">刪除</th></tr></thead><tbody id="yueRows"></tbody></table></div></details>
     </div>
     <div class="card" id="composeCard">
       <h2>發送通知</h2>
@@ -118,6 +177,11 @@ details summary{cursor:pointer;font-weight:700;font-size:14px}
 <div class="modal" id="modal" hidden role="alertdialog" aria-labelledby="mTitle"><div class="modal-card">
   <h3 id="mTitle"></h3><p id="mText"></p><div class="modal-list" id="mList" hidden></div>
   <div class="grid2"><button class="btn" id="mNo">取消</button><button class="btn danger" id="mYes">確認刪除</button></div>
+</div></div>
+<div class="modal" id="gModal" hidden role="dialog" aria-labelledby="gTitle"><div class="modal-card wide">
+  <h3 id="gTitle"></h3><p class="hint" id="gSum"></p>
+  <div class="tablewrap"><table><thead><tr><th>日期</th><th>房間</th><th class="num">牌種</th><th class="num">輸贏</th><th class="num">刪除</th></tr></thead><tbody id="gRows"></tbody></table></div>
+  <button class="btn" id="gClose">關閉</button>
 </div></div>
 <div class="toast" id="toast" hidden role="status"></div>
 
@@ -175,6 +239,14 @@ async function firebaseBackend(cfg){
     async send(uids, msg){
       for(let i=0;i<uids.length;i+=400){ const b = db.batch(); uids.slice(i,i+400).forEach(u=>b.set(db.collection("users").doc(u).collection("inbox").doc(), Object.assign({read:false, claimed:false}, msg))); await b.commit(); }
     },
+    async games(uid){ const q = await db.collection("users").doc(uid).collection("games").get(); return q.docs.map(d=>Object.assign({id:d.id}, d.data())); },
+    deleteGame(uid, id){ return db.collection("users").doc(uid).collection("games").doc(id).delete(); },
+    async rooms(){ const q = await db.collection("rooms").get(); return q.docs.map(d=>{ const x = d.data(); let ended = false; try{ ended = !!JSON.parse(x.state || "{}").ended; }catch(e){} return {code:d.id, host:x.host, hostName:x.hostName, members:x.members || {}, createdAt:x.createdAt, updatedAt:x.updatedAt, ended}; }); },
+    deleteRoom(code){ return db.collection("rooms").doc(code).delete(); },
+    async yues(){ const q = await db.collection("yue").get(); return q.docs.map(d=>Object.assign({id:d.id}, d.data())); },
+    deleteYue(id){ return db.collection("yue").doc(id).delete(); },
+    async config(){ const s = await db.collection("config").doc("site").get(); return s.exists ? s.data() : {}; },
+    setConfig(data){ return db.collection("config").doc("site").set(data, {merge:true}); },
   };
 }
 function mockBackend(){
@@ -196,6 +268,14 @@ function mockBackend(){
     async remove(u){ const R = L("removed") || {}; R[u.uid] = {name:u.name, at:Date.now(), lastLogin:u.lastLogin || null}; W("removed", R);
       const P = L("profiles") || {}; delete P[u.uid]; W("profiles", P); localStorage.removeItem("mock:games:"+u.uid); },
     async restore(uid){ const R = L("removed") || {}; delete R[uid]; W("removed", R); },
+    async games(uid){ return Object.entries(L("games:"+uid) || {}).map(([id,g])=>Object.assign({id}, g)); },
+    async deleteGame(uid, id){ const g = L("games:"+uid) || {}; delete g[id]; W("games:"+uid, g); },
+    async rooms(){ const out = []; for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(k && k.startsWith("mock:room:")){ const x = L(k.slice(5)); let ended = false; try{ ended = !!JSON.parse(x.state || "{}").ended; }catch(e){} out.push({code:k.slice(10), host:x.host, hostName:x.hostName, members:x.members || {}, createdAt:x.createdAt, updatedAt:x.updatedAt, ended}); } } return out; },
+    async deleteRoom(code){ localStorage.removeItem("mock:room:"+code); },
+    async yues(){ const out = []; for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(k && k.startsWith("mock:yue:")) out.push(Object.assign({id:k.slice(9)}, L(k.slice(5)))); } return out; },
+    async deleteYue(id){ localStorage.removeItem("mock:yue:"+id); },
+    async config(){ return L("config") || {}; },
+    async setConfig(data){ const c = L("config") || {}; Object.keys(data).forEach(k=>c[k] = data[k]); W("config", c); },
   };
 }
 
@@ -239,6 +319,162 @@ $("sendBtn").onclick = async () => {
   finally{ $("sendBtn").disabled = false; }
 };
 
+/* ---------- 數據總覽 ---------- */
+const DAY = 24*3600*1000;
+const MODES = [["tw","台牌"],["hk","廣東牌"],["vn","越南牌"],["pm","跑馬仔"]];
+let GAMES = {};   // uid -> [game]
+async function loadGames(){
+  GAMES = {};
+  await Promise.all(USERS.map(async u=>{ try{ GAMES[u.uid] = await B.games(u.uid); }catch(e){ GAMES[u.uid] = []; } }));
+}
+function renderDash(){
+  const now = Date.now();
+  const act = d => USERS.filter(u=>lastSeen(u) >= now - d*DAY).length;
+  $("dA7").textContent = act(7); $("dA30").textContent = act(30);
+  const uniq = new Map();
+  Object.values(GAMES).forEach(list=>list.forEach(g=>{ const k = g.gameId || g.id; if(!uniq.has(k)) uniq.set(k, g); }));
+  const all = [...uniq.values()];
+  $("dG7").textContent = all.filter(g=>(g.endedAt||0) >= now - 7*DAY).length;
+  $("dG30").textContent = all.filter(g=>(g.endedAt||0) >= now - 30*DAY).length;
+  $("dGAll").textContent = all.length;
+  const cnt = MODES.map(([k,n])=>[n, all.filter(g=>(g.mode||"tw")===k).length]);
+  const mx = Math.max(1, ...cnt.map(c=>c[1]));
+  $("dModes").innerHTML = cnt.map(([n,c])=>`<div class="bar"><span>${n}</span><span><i style="width:${Math.round(c/mx*100)}%"></i></span><b>${c}</b></div>`).join("");
+  const wk = []; const start = new Date(); start.setHours(0,0,0,0); start.setDate(start.getDate() - start.getDay());   // 今個星期日
+  for(let i=7;i>=0;i--){ const a = start.getTime() - i*7*DAY, b = a + 7*DAY; wk.push({a, n:USERS.filter(u=>u.createdAt>=a && u.createdAt<b).length}); }
+  const wm = Math.max(1, ...wk.map(w=>w.n));
+  $("dWeeks").innerHTML = wk.map(w=>{ const d = new Date(w.a); return `<div><b>${w.n}</b><i style="height:${Math.round(w.n/wm*60)}px"></i>${d.getMonth()+1}/${d.getDate()}</div>`; }).join("");
+}
+
+/* ---------- 小氣簿糾錯 ---------- */
+const money = v => (v>0?"+":v<0?"−":"") + "$" + Math.abs(Math.round(v*100)/100);
+function openGames(uid){
+  const u = USERS.find(x=>x.uid===uid); if(!u) return;
+  const list = (GAMES[uid] || []).slice().sort((a,b)=>(b.endedAt||0)-(a.endedAt||0));
+  $("gTitle").textContent = `${u.name || "（未有名）"} 嘅小氣簿`;
+  const tot = list.reduce((a,g)=>a+(g.money||0), 0);
+  $("gSum").textContent = list.length ? `共 ${list.length} 場，總輸贏 ${money(tot)}。刪除錯咗嘅記錄後，佢嘅小氣簿會即時更新。` : "未有記錄。";
+  $("gRows").innerHTML = list.length ? list.map(g=>`<tr><td>${fmtCell(g.endedAt)}</td><td>${esc(g.room || "—")}</td><td class="num">${esc((MODES.find(m=>m[0]===(g.mode||"tw"))||["",""])[1])}</td>
+    <td class="num money ${g.money>0?"pos":g.money<0?"neg":""}">${money(g.money||0)}</td><td class="num"><button class="btn danger sm" data-gdel="${esc(g.id)}">刪除</button></td></tr>`).join("") : `<tr><td colspan="5" class="empty">未有記錄</td></tr>`;
+  $("gRows").querySelectorAll("[data-gdel]").forEach(b=>b.onclick = async () => {
+    const g = list.find(x=>x.id===b.dataset.gdel);
+    $("gModal").hidden = true;
+    const ok = await confirmBox(`刪除呢場記錄？`, `${u.name} · ${fmtTime(g.endedAt)} · 房間 ${g.room || "—"} · ${money(g.money||0)}。只會刪除佢自己小氣簿入面呢一場，其他玩家嘅記錄唔受影響。刪除咗冇得還原。`, null, "確認刪除");
+    if(ok){ try{ await B.deleteGame(uid, g.id); GAMES[uid] = (GAMES[uid]||[]).filter(x=>x.id!==g.id); toast("已刪除記錄。"); renderDash(); }catch(e){ toast("刪除唔到：可能未更新 Firebase 規則。"); } }
+    openGames(uid); $("gModal").hidden = false;
+  });
+  $("gModal").hidden = false;
+}
+$("gClose").onclick = () => { $("gModal").hidden = true; };
+
+/* ---------- 全站公告 ---------- */
+let CONFIG = {};
+function renderNoticeAdmin(){
+  const n = CONFIG.notice;
+  $("nState").textContent = n && n.on && n.text ? `公告顯示緊（${fmtTime(n.at)} 發佈）。用戶撳 ✕ 收埋之後唔會再見到同一則；發佈新公告會再顯示。` : "而家冇公告。";
+  if(!$("nText").value && n && n.on) $("nText").value = n.text || "";
+  $("nOff").disabled = !(n && n.on);
+  nPrev();
+}
+function nPrev(){ const t = $("nText").value.trim(); $("nPrev").hidden = !t; $("nPrev").innerHTML = `<small>📢 番鼠公告（預覽）</small>${esc(t)}`; }
+$("nText").addEventListener("input", nPrev);
+$("nPub").onclick = async () => {
+  const text = $("nText").value.trim(); if(!text){ toast("請輸入公告內容。"); return; }
+  if(!await confirmBox("發佈全站公告？", "所有用戶打開大廳都會見到呢則公告，直至你收起。", [text], "確認發佈")) return;
+  const notice = {on:true, text, id:"n"+Date.now().toString(36), at:Date.now()};
+  try{ await B.setConfig({notice}); CONFIG.notice = notice; toast("已發佈公告。"); renderNoticeAdmin(); }catch(e){ toast("發佈唔到：可能未更新 Firebase 規則。"); }
+};
+$("nOff").onclick = async () => {
+  if(!await confirmBox("收起公告？", "所有用戶都唔會再見到而家嘅公告。", null, "確認收起")) return;
+  const notice = Object.assign({}, CONFIG.notice || {}, {on:false});
+  try{ await B.setConfig({notice}); CONFIG.notice = notice; $("nText").value = ""; toast("已收起公告。"); renderNoticeAdmin(); }catch(e){ toast("改唔到：可能未更新 Firebase 規則。"); }
+};
+
+/* ---------- 主題上架 ---------- */
+const SKINS = [["maji","麻吉（新用戶預設）"],["default","墨綠"],["ice","冰雪"],["mist","紫薯"],["store","便利店"],["halloween","萬聖節"]];
+const SKIN_DEFAULT_UNTIL = {halloween: new Date("2026-11-01T00:00:00+08:00").getTime()};   // 同主程式一樣
+const ymdHK = t => { const d = new Date(t + 8*3600*1000); return d.toISOString().slice(0,10); };
+function renderSkins(){
+  const c = CONFIG.skins || {};
+  $("skinRows").innerHTML = SKINS.map(([k,n])=>{
+    const x = c[k] || {}, until = ("until" in x) ? x.until : SKIN_DEFAULT_UNTIL[k];
+    const last = until ? ymdHK(until - 1) : "";
+    const st = x.off ? `<span class="pill old">已下架</span>` : until && Date.now() >= until ? `<span class="pill old">已過期（VIP 照用）</span>` : until ? `<span class="pill ok">限時</span>` : `<span class="pill ok">開放</span>`;
+    return `<div class="skinrow"><div><b>${n}</b> ${st}</div>
+      <label>最後一日 <input type="date" data-su="${k}" value="${last}" ${k==="maji"?"disabled":""}></label>
+      <label><input type="checkbox" data-son="${k}" ${x.off?"":"checked"} ${k==="maji"?"disabled":""}>開放</label></div>`;
+  }).join("");
+}
+$("skinSave").onclick = async () => {
+  const skins = {};
+  SKINS.forEach(([k])=>{ if(k==="maji") return;
+    const d = document.querySelector(`[data-su="${k}"]`).value, on = document.querySelector(`[data-son="${k}"]`).checked;
+    skins[k] = {off:!on, until: d ? new Date(d + "T00:00:00+08:00").getTime() + DAY : null};
+  });
+  try{ await B.setConfig({skins}); CONFIG.skins = skins; toast("已儲存主題設定，用戶下次開設定就會見到。"); renderSkins(); }catch(e){ toast("儲存唔到：可能未更新 Firebase 規則。"); }
+};
+
+/* ---------- 房間／約局清理 ---------- */
+let ROOMS = [], YUES = [];
+const roomTime = r => r.updatedAt || r.createdAt || 0;
+const roomOld = r => roomTime(r) < Date.now() - 30*DAY;
+const todayHK = () => ymdHK(Date.now());
+const yueOld = y => !(y.dates || []).some(d=>d >= todayHK());
+function renderRooms(){
+  const old = ROOMS.filter(roomOld);
+  $("roomCount").textContent = ROOMS.length;
+  $("rmSum").textContent = `共 ${ROOMS.length} 間房，其中 ${old.length} 間超過 30 日冇郁過。`;
+  $("roomBulk").disabled = !old.length;
+  $("roomRows").innerHTML = ROOMS.length ? ROOMS.slice().sort((a,b)=>roomTime(b)-roomTime(a)).map(r=>`<tr><td><b>${esc(r.code)}</b>${r.ended?` <span class="pill ok">已結算</span>`:""}</td><td>${esc(r.hostName || "—")}</td><td class="num">${Object.keys(r.members).length}</td>
+    <td class="when${roomOld(r)?" stale":""}">${fmtCell(roomTime(r))}</td><td class="num"><button class="btn danger sm" data-rdel="${esc(r.code)}">刪除</button></td></tr>`).join("") : `<tr><td colspan="5" class="empty">冇房間</td></tr>`;
+  $("roomRows").querySelectorAll("[data-rdel]").forEach(b=>b.onclick = async () => {
+    const r = ROOMS.find(x=>x.code===b.dataset.rdel);
+    if(!await confirmBox(`刪除房間 ${r.code}？`, "房入面嘅人會即刻被請返大廳。已經記入小氣簿嘅記錄唔受影響。", null, "確認刪除")) return;
+    await delRooms([r]);
+  });
+}
+async function delRooms(list){
+  let ok = 0; for(const r of list){ try{ await B.deleteRoom(r.code); ok++; }catch(e){} }
+  ROOMS = ROOMS.filter(r=>!list.some(x=>x.code===r.code)); renderRooms();
+  toast(ok===list.length ? `已刪除 ${ok} 間房。` : `刪除咗 ${ok} 間，${list.length-ok} 間失敗。`);
+}
+$("roomBulk").onclick = async () => {
+  const old = ROOMS.filter(roomOld); if(!old.length) return;
+  if(!await confirmBox(`刪除 ${old.length} 間 30 日冇郁過嘅房間？`, "已經記入小氣簿嘅記錄唔受影響。", old.map(r=>r.code + "（" + (r.hostName||"") + "）"), `確認刪除 ${old.length} 間`)) return;
+  await delRooms(old);
+};
+function renderYues(){
+  const old = YUES.filter(yueOld);
+  $("yueCount").textContent = YUES.length;
+  $("yueSum").textContent = `共 ${YUES.length} 個約局，其中 ${old.length} 個所有日子都已經過咗。`;
+  $("yueBulk").disabled = !old.length;
+  const dtxt = y => (y.dates || []).slice().sort().map(d=>d.slice(5).replace("-","/")).join("、");
+  $("yueRows").innerHTML = YUES.length ? YUES.slice().sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0)).map(y=>`<tr><td><b>${esc(y.hostName || "—")}</b><small>${esc(y.time || "")}</small></td>
+    <td class="${yueOld(y)?"stale":""}">${esc(dtxt(y)) || "—"}</td><td class="num">${Object.keys(y.people || {}).length}</td><td class="num"><button class="btn danger sm" data-ydel="${esc(y.id)}">刪除</button></td></tr>`).join("") : `<tr><td colspan="4" class="empty">冇約局</td></tr>`;
+  $("yueRows").querySelectorAll("[data-ydel]").forEach(b=>b.onclick = async () => {
+    const y = YUES.find(x=>x.id===b.dataset.ydel);
+    if(!await confirmBox(`刪除 ${y.hostName || ""} 嘅約局？`, "約局會喺所有人嘅日曆消失，邀請連結都會失效。", null, "確認刪除")) return;
+    await delYues([y]);
+  });
+}
+async function delYues(list){
+  let ok = 0; for(const y of list){ try{ await B.deleteYue(y.id); ok++; }catch(e){} }
+  YUES = YUES.filter(y=>!list.some(x=>x.id===y.id)); renderYues();
+  toast(ok===list.length ? `已刪除 ${ok} 個約局。` : `刪除咗 ${ok} 個，${list.length-ok} 個失敗。`);
+}
+$("yueBulk").onclick = async () => {
+  const old = YUES.filter(yueOld); if(!old.length) return;
+  if(!await confirmBox(`刪除 ${old.length} 個已過期嘅約局？`, "呢啲約局所有日子都已經過咗。", old.map(y=>(y.hostName||"") + " " + (y.dates||[]).join("、")), `確認刪除 ${old.length} 個`)) return;
+  await delYues(old);
+};
+async function refreshExtra(){
+  try{ CONFIG = await B.config(); }catch(e){ CONFIG = {}; }
+  renderNoticeAdmin(); renderSkins();
+  try{ ROOMS = await B.rooms(); }catch(e){ ROOMS = []; $("rmSum").textContent = "讀唔到房間。"; } renderRooms();
+  try{ YUES = await B.yues(); }catch(e){ YUES = []; $("yueSum").textContent = "讀唔到約局。"; } renderYues();
+  await loadGames(); renderDash();
+}
+
 /* ---------- admin UI ---------- */
 let B = null, ME = null, USERS = [], REMOVED = [];
 const lastSeen = u => u.lastLogin || u.createdAt || 0;
@@ -247,10 +483,11 @@ function show(view){ ["waitCard","adminView"].forEach(id=>$(id).hidden = id!==vi
 const toApp = () => location.replace("./" + (/[?&]mock=1/.test(location.search) ? "index.html?mock=1" : ""));
 async function refresh(){
   try{ [USERS, REMOVED] = await Promise.all([B.users(), B.removed()]); }
-  catch(e){ $("rows").innerHTML = `<tr><td colspan="5" class="empty">讀唔到用戶：可能未更新 Firebase 規則。</td></tr>`; return; }
+  catch(e){ $("rows").innerHTML = `<tr><td colspan="6" class="empty">讀唔到用戶：可能未更新 Firebase 規則。</td></tr>`; return; }
   const rm = new Set(REMOVED.map(r=>r.uid));
   USERS = USERS.filter(u=>!rm.has(u.uid)).sort((a,b)=>lastSeen(b)-lastSeen(a));
   renderTable(); renderRecipients();
+  await refreshExtra(); renderTable();
 }
 function renderTable(){
   const q = $("q").value.trim().toLowerCase();
@@ -265,8 +502,14 @@ function renderTable(){
       <td class="num"><span class="lv">Lv ${u.lv || 1}</span></td>
       <td class="num"><input type="checkbox" class="vipbox" data-vip="${esc(u.uid)}" ${u.vip?"checked":""} aria-label="${esc(u.name)} VIP"></td>
       <td class="when${isStale(u)?" stale":""}">${u.lastLogin ? fmtCell(u.lastLogin) : (u.createdAt ? fmtCell(u.createdAt, " · 註冊") : "—")}</td>
+      <td class="num"><button class="btn sm" data-games="${esc(u.uid)}">${GAMES[u.uid] ? GAMES[u.uid].length + " 場" : "記錄"}</button></td>
       <td class="num">${self ? "—" : `<button class="btn danger sm" data-rm="${esc(u.uid)}">移除</button>`}</td></tr>`;
-  }).join("") : `<tr><td colspan="5" class="empty">${q ? "搵唔到" : "未有用戶"}</td></tr>`;
+  }).join("") : `<tr><td colspan="6" class="empty">${q ? "搵唔到" : "未有用戶"}</td></tr>`;
+  document.querySelectorAll("[data-games]").forEach(b=>b.onclick = async () => {
+    const uid = b.dataset.games;
+    if(!GAMES[uid]){ try{ GAMES[uid] = await B.games(uid); }catch(e){ toast("讀唔到記錄。"); return; } }
+    openGames(uid);
+  });
   document.querySelectorAll("[data-vip]").forEach(c=>c.onchange = async () => {
     const u = USERS.find(x=>x.uid===c.dataset.vip); c.disabled = true;
     try{
