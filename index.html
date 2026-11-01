@@ -2041,8 +2041,27 @@ const QR = (() => {
 
 function qrBoxHTML(url, note){
   let svg = ""; try{ svg = QR.svg(url, {px:5}); }catch(e){ return `<p class="hint">條連結太長，整唔到 QR code。</p>`; }
-  return `<div class="qrbox">${svg}<p class="hint" style="margin:0;text-align:center">${note}</p></div>`;
+  return `<div class="qrbox"><a href="${esc(url)}" target="_blank" rel="noopener" aria-label="打開邀請連結">${svg}</a><p class="hint" style="margin:0;text-align:center">${note}</p></div>`;
 }
+// QR 畫成 PNG（IG 圖用；SVG 喺 html2canvas 會走位）
+function qrPng(text, fg, bg, quiet){
+  const G = QR.make(text), N = G.length, q = quiet==null ? 2 : quiet, cell = 12, S = (N + q*2) * cell;
+  const c = document.createElement("canvas"); c.width = c.height = S;
+  const x = c.getContext("2d"); x.fillStyle = bg || "#FFFFFF"; x.fillRect(0,0,S,S); x.fillStyle = fg || "#000000";
+  G.forEach((row,r)=>row.forEach((v,k)=>{ if(v) x.fillRect((k+q)*cell, (r+q)*cell, cell, cell); }));
+  return c.toDataURL("image/png");
+}
+// IG 唔俾網頁直接加連結：分享圖片前先複製連結，喺 IG 加「連結」貼紙貼上
+async function shareStory(file, link, title){
+  let copied = false; try{ await navigator.clipboard.writeText(link); copied = true; }catch(e){}
+  try{ await navigator.share({files:[file], title}); }catch(e){ if(e && e.name==="AbortError") return; }
+  toast(copied ? "連結已複製：喺 IG 撳貼紙 →「連結」→ 貼上，朋友撳就入到。" : "喺 IG 撳貼紙 →「連結」加入邀請連結。");
+}
+// 有錯就喺畫面顯示，方便截圖回報
+window.addEventListener("error", e=>{ try{ if(e && e.message && !/Script error|ResizeObserver/i.test(e.message)) toast("程式出錯：" + String(e.message).slice(0,80)); }catch(_){} });
+window.addEventListener("unhandledrejection", e=>{ try{ const r = e && e.reason; if(r && r.name!=="AbortError") toast("出錯：" + String((r && (r.code || r.message)) || r).slice(0,80)); }catch(_){} });
+// 等太耐就當失敗，唔好令掣冇反應
+const withTimeout = (p, ms, msg) => Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error(msg)), ms))]);
 
 /* ---------- helpers ---------- */
 const nickKey = n => n.trim().toLowerCase();
@@ -2074,6 +2093,7 @@ async function firebaseBackend(cfg){
   await Promise.all([loadScript(base + "firebase-auth-compat.js"), loadScript(base + "firebase-firestore-compat.js")]);
   firebase.initializeApp(cfg);
   const auth = firebase.auth(), db = firebase.firestore();
+  try{ db.settings({experimentalAutoDetectLongPolling:true, merge:true}); }catch(e){}
   const rooms = db.collection("rooms");
   return {
     onUser(cb){ auth.onAuthStateChanged(u=>cb(u ? {uid:u.uid, name:u.displayName || "", email:u.email || ""} : null)); },
@@ -2089,7 +2109,7 @@ async function firebaseBackend(cfg){
     async getRoom(code){ const s = await rooms.doc(code).get(); return s.exists ? s.data() : null; },
     joinRoom(code, uid, name){ return rooms.doc(code).update({["members." + uid]: name}); },
     kick(code, uid){ return rooms.doc(code).update({["members." + uid]: firebase.firestore.FieldValue.delete(), ["kicked." + uid]: true}); },
-    watchRoom(code, cb){ return rooms.doc(code).onSnapshot(s=>cb(s.exists ? s.data() : null), ()=>cb(undefined)); },
+    watchRoom(code, cb){ return rooms.doc(code).onSnapshot(s=>cb(s.exists ? s.data() : null), e=>{ console.error("watchRoom", e); if(auth.currentUser) auth.currentUser.getIdToken(true).catch(()=>{}); cb(undefined); }); },
     request(code, uid, r){ return rooms.doc(code).update({["req." + uid]: r}); },
     clearReq(code, uid){ return rooms.doc(code).update({["req." + uid]: firebase.firestore.FieldValue.delete()}); },
     pushState(code, json){ return rooms.doc(code).update({state:json, updatedAt:Date.now()}); },
@@ -2402,7 +2422,7 @@ function buildOnlineUI(){
   </div>
   <div class="grid2" style="margin-top:8px"><button class="btn accent" data-sh="copy">複製邀請文字</button><button class="btn accent" data-sh="qr">QR code</button></div>
   <div id="yueQr" hidden></div>
-  <div id="yueImgWrap" hidden><p class="hint" id="yueImgHint"></p><img id="yueImg" alt="番鼠約局邀請函" hidden><button class="btn primary" id="yueImgShare" hidden style="width:100%">分享到 IG</button></div>
+  <div id="yueImgWrap" hidden><p class="hint" id="yueImgHint"></p><img id="yueImg" alt="番鼠約局邀請函" hidden><button class="btn primary" id="yueImgShare" hidden style="width:100%">分享到 IG</button><button class="btn" id="yueImgLink" style="width:100%">複製連結（IG 連結貼紙用）</button></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeYueShare">完成</button></div>
 <div class="yinbox" id="yinBox" hidden role="dialog" aria-label="約局邀請"><div class="yin-card" id="yinCard"></div></div>
 <div class="sheet" id="yueDaySheet" hidden role="dialog" aria-label="約局"><div class="grab"></div><div id="yueDayBody"></div>
@@ -2428,7 +2448,8 @@ function buildOnlineUI(){
   $("closeCreate").onclick = $("closeJoin").onclick = $("closeYue").onclick = $("closeYueShare").onclick = $("closeYueDay").onclick = () => { hideSheet(); liftReset(); };
   $("yueOk").onclick = confirmYue;
   document.querySelectorAll("[data-sh]").forEach(b=>b.onclick = () => shareYue(b.dataset.sh));
-  $("yueImgShare").onclick = async () => { try{ await navigator.share({files:[ONLINE.yueFile], title:"番鼠約局"}); }catch(e){} };
+  $("yueImgLink").onclick = async () => { const u = ONLINE.yueCur && inviteURL(ONLINE.yueCur); if(!u) return; try{ await navigator.clipboard.writeText(u); toast("已複製連結，喺 IG 加「連結」貼紙貼上。"); }catch(e){ prompt("複製呢條連結：", u); } };
+  $("yueImgShare").onclick = () => ONLINE.yueCur && shareStory(ONLINE.yueFile, inviteURL(ONLINE.yueCur), "番鼠麻吉約局");
   document.querySelectorAll("#createSheet [data-new]").forEach(b=>b.onclick = async () => { hideSheet(); liftReset(); await createRoom(b.dataset.new, b); });
   $("joinBtn").onclick = () => joinByCode($("joinCode").value, $("joinBtn"));
   $("joinCode").addEventListener("keydown", ev=>{ if(ev.key==="Enter") joinByCode($("joinCode").value, $("joinBtn")); });
@@ -2555,7 +2576,7 @@ function renderLobby(){
   bindCalendarCard();
   $("lgLedger").onclick = openLedger;
   $("lgInbox").onclick = openInbox;
-  $("lgCreate").onclick = () => { ONLINE.yueRoomFor = null; $("createHint").textContent = "揀牌種。你會做房主，只有房主可以記錄同改資料。"; showSheet($("createSheet")); };
+  $("lgCreate").onclick = () => { ONLINE.yueRoomFor = null; document.querySelectorAll("#createSheet [data-new]").forEach(b=>b.disabled = false); $("createHint").textContent = "揀牌種。你會做房主，只有房主可以記錄同改資料。"; showSheet($("createSheet")); };
   $("lgJoin").onclick = () => { $("joinErr").hidden = true; $("joinCode").value = ""; showSheet($("joinSheet")); setTimeout(()=>$("joinCode").focus(), 50); };
   if($("rejoinBtn")) $("rejoinBtn").onclick = () => joinByCode(last, $("rejoinBtn"));
   $("lgOffline").onclick = () => { leaveRoom(true); hideLobby(); };
@@ -2575,6 +2596,8 @@ async function joinByCode(code, btn){
 
 /* ---------- rooms ---------- */
 async function createRoom(mode, btn){
+  if(ONLINE.creating && Date.now() - ONLINE.creating < 20000){ toast("開緊房間，請等等…"); return; }
+  ONLINE.creating = Date.now(); toast("開緊房間…");
   if(btn) btn.disabled = true;
   try{
     let code = null;
@@ -2589,24 +2612,24 @@ async function createRoom(mode, btn){
     }
     for(let i=0;i<5 && !code;i++){
       const c = newRoomCode();
-      const ok = await ONLINE.backend.createRoom(c, {host:ONLINE.user.uid, hostName:ONLINE.user.name, members:{[ONLINE.user.uid]:ONLINE.user.name},
-        state:JSON.stringify(fresh), createdAt:Date.now(), updatedAt:Date.now()});
+      const ok = await withTimeout(ONLINE.backend.createRoom(c, {host:ONLINE.user.uid, hostName:ONLINE.user.name, members:{[ONLINE.user.uid]:ONLINE.user.name},
+        state:JSON.stringify(fresh), createdAt:Date.now(), updatedAt:Date.now()}), 15000, "網絡太慢，開唔到房間。請檢查網絡再試。");
       if(ok) code = c;
     }
     if(!code) throw new Error("開唔到房間，請再試。");
     if(yy) ONLINE.backend.yueSetRoom(yy.id, yf.d, {code, at:Date.now()}).catch(()=>{});
-    await enterRoom(code);
+    await withTimeout(enterRoom(code), 15000, "房間開咗但連唔到，請喺大廳撳「返回上次房間」。");
     ONLINE.showQr = true;
     showSheet($("roomSheet")); renderRoomSheet();
-  }catch(e){ toast(e.message && !e.code ? e.message : errText(e)); }
-  finally{ if(btn) btn.disabled = false; }
+  }catch(e){ console.error("createRoom", e); toast(e.message && !e.code ? e.message : errText(e)); }
+  finally{ ONLINE.creating = 0; document.querySelectorAll("#createSheet [data-new]").forEach(b=>b.disabled = false); }
 }
 async function joinRoom(code){
-  const d = await ONLINE.backend.getRoom(code);
+  const d = await withTimeout(ONLINE.backend.getRoom(code), 15000, "網絡太慢，入唔到房間。請檢查網絡再試。");
   if(!d) throw new Error("搵唔到呢個房間，請檢查號碼。");
   if(d.kicked && d.kicked[ONLINE.user.uid]) throw new Error("房主已經將你移出呢個房間。");
-  if(!(ONLINE.user.uid in (d.members||{}))) await ONLINE.backend.joinRoom(code, ONLINE.user.uid, ONLINE.user.name);
-  await enterRoom(code);
+  if(!(ONLINE.user.uid in (d.members||{}))) await withTimeout(ONLINE.backend.joinRoom(code, ONLINE.user.uid, ONLINE.user.name), 15000, "網絡太慢，入唔到房間。請再試。");
+  await withTimeout(enterRoom(code), 15000, "連唔到房間，請再試。");
 }
 function enterRoom(code){
   leaveRoom(true);
@@ -2767,7 +2790,7 @@ function renderRoomSheet(){
         <button class="btn sh-sg" data-rsh="sys">Signal／其他</button><button class="btn" id="rmCopy">複製邀請</button>
       </div>
       <button class="btn sh-ig" id="rmIg" style="width:100%;margin-top:8px">IG 限時動態</button>
-      <div id="rmImgWrap"${ONLINE.rmImg ? "" : " hidden"}><p class="hint" id="rmImgHint">${ONLINE.rmImg ? ONLINE.rmImg.hint : ""}</p>${ONLINE.rmImg && ONLINE.rmImg.url ? `<img id="rmImg" src="${ONLINE.rmImg.url}" alt="番鼠房間邀請圖" style="display:block;max-width:100%;max-height:56vh;margin:0 auto;border-radius:14px;border:1px solid var(--line)">` : ""}${ONLINE.rmImg && ONLINE.rmImg.can ? `<button class="btn primary" id="rmImgShare" style="width:100%;margin-top:8px">分享到 IG</button>` : ""}</div>
+      <div id="rmImgWrap"${ONLINE.rmImg ? "" : " hidden"}><p class="hint" id="rmImgHint">${ONLINE.rmImg ? ONLINE.rmImg.hint : ""}</p>${ONLINE.rmImg && ONLINE.rmImg.url ? `<img id="rmImg" src="${ONLINE.rmImg.url}" alt="番鼠房間邀請圖" style="display:block;max-width:100%;max-height:56vh;margin:0 auto;border-radius:14px;border:1px solid var(--line)">` : ""}${ONLINE.rmImg && ONLINE.rmImg.can ? `<button class="btn primary" id="rmImgShare" style="width:100%;margin-top:8px">分享到 IG</button>` : ""}${ONLINE.rmImg && ONLINE.rmImg.url ? `<button class="btn" id="rmImgLink" style="width:100%;margin-top:8px">複製連結（IG 連結貼紙用）</button>` : ""}</div>
       <button class="btn accent${ONLINE.showQr?" on":""}" id="rmQrBtn" style="width:100%;margin-top:8px">${ONLINE.showQr?"收埋 QR code":"顯示 QR code"}</button>
       ${ONLINE.showQr ? qrBoxHTML(link, `朋友用相機掃呢個 QR code，登入之後就會自動入房 ${esc(ONLINE.room)}，順序換走虛擬玩家。`) : ""}
       <span class="hint">朋友打開連結登入就會入房；或者喺大廳輸入房間號碼 <b>${esc(ONLINE.room)}</b>。</span></div>
@@ -2798,7 +2821,8 @@ function renderRoomSheet(){
   $("rmLeave").onclick = () => { hideSheet(); leaveRoom(); };
   $("rmQrBtn").onclick = () => { ONLINE.showQr = !ONLINE.showQr; renderRoomSheet(); };
   $("rmIg").onclick = () => makeRoomImage(link, d.hostName || ONLINE.user.name);
-  if($("rmImgShare")) $("rmImgShare").onclick = async () => { try{ await navigator.share({files:[ONLINE.rmImg.file], title:"番鼠房間"}); }catch(e){} };
+  if($("rmImgLink")) $("rmImgLink").onclick = async () => { try{ await navigator.clipboard.writeText(link); toast("已複製連結，喺 IG 加「連結」貼紙貼上。"); }catch(e){ prompt("複製呢條連結：", link); } };
+  if($("rmImgShare")) $("rmImgShare").onclick = () => shareStory(ONLINE.rmImg.file, link, "番鼠麻吉房間");
   box.querySelectorAll("[data-kick]").forEach(b=>b.onclick = () => {
     const u = b.dataset.kick, n = (d.members || {})[u] || "呢位玩家";
     askConfirm(`移除 ${n}？`, `${n} 會即刻被移出房間，之後唔可以再用房號入返嚟。佢坐緊嘅位會變返訪客位，之前嘅輸贏會留喺個位度，但唔會記入佢嘅小氣簿。`, "移除", async ()=>{
@@ -3199,28 +3223,29 @@ async function shareYue(kind){
 // IG 限時動態邀請函（9:16）
 function inviteCardHTML(y){
   const ds = upDates(y).length ? upDates(y) : y.dates;
+  let qr = ""; try{ qr = qrPng(inviteURL(y), "#3A2414", "#FFFFFF", 2); }catch(e){}
   return `<div class="invite"><div class="iv-in">
     <img class="iv-pic" src="${MAJI_IMG}" alt="">
-    <div class="iv-top">番鼠麻吉 · 雀局邀請函</div>
-    <div class="iv-title">誠邀眾好漢<br>到桌前一坐</div>
+    <div class="iv-title" style="font-size:24px">誠邀眾好漢到桌前一坐</div>
     <div class="iv-host">${esc(y.hostName)} 恭候大駕 · 一齊贏 ok？</div>
     <div class="iv-dates">${ds.slice(0,8).map(d=>`<span>${dayTxt(d)}</span>`).join("")}${ds.length>8?`<span>⋯</span>`:""}</div>
     <div class="iv-time">${esc(y.time)} 開枱</div>
-    <div class="iv-foot">麻雀雖小，番數很大<br><small>番鼠麻吉 FanSyu &amp; Maji · letrixc.github.io/TWMJ_Scorer</small></div>
+    ${qr ? `<img src="${qr}" alt="" style="display:block;width:132px;height:132px;border-radius:10px;border:2px solid #7A4A22;background:#FFFFFF">` : ""}
+    <div class="iv-foot">相機掃 QR code 就可以報名<br><small>番鼠麻吉 FanSyu &amp; Maji · letrixc.github.io/TWMJ_Scorer</small></div>
   </div></div>`;
 }
 // 房間 IG 限時動態邀請圖（9:16，有房號同 QR code）
 async function makeRoomImage(link, host){
   const code = ONLINE.room;
   ONLINE.rmImg = {hint:"製作邀請圖中…"}; renderRoomSheet();
-  let qr = ""; try{ qr = "data:image/svg+xml;base64," + btoa(QR.svg(link, {px:6, fg:"#3A2414", bg:"#FFFCF5", quiet:2})); }catch(e){}
+  let qr = ""; try{ qr = qrPng(link, "#3A2414", "#FFFFFF", 2); }catch(e){}
   const holder = document.createElement("div");
   holder.style.cssText = "position:fixed;left:-10000px;top:0;width:360px;height:640px";
   holder.innerHTML = `<div class="invite"><div class="iv-in">
     <img class="iv-pic" src="${MAJI_IMG}" alt="">
     <div class="iv-title" style="font-size:26px">三缺一！<br>誠邀好漢到桌前一坐</div>
     <div class="iv-host">${esc(host)} 等緊你 · ${esc(MODE_NAME(state.mode))} · 一齊贏 ok？</div>
-    ${qr ? `<img src="${qr}" alt="" style="width:168px;height:168px;border-radius:10px;border:2px solid #7A4A22">` : ""}
+    ${qr ? `<img src="${qr}" alt="" style="display:block;width:168px;height:168px;border-radius:10px;border:2px solid #7A4A22;background:#FFFFFF">` : ""}
     <div class="iv-time" style="letter-spacing:.18em">房號 ${esc(code)}</div>
     <div class="iv-foot">相機掃 QR code，登入就入房<br><small>番鼠麻吉 FanSyu &amp; Maji · letrixc.github.io/TWMJ_Scorer</small></div>
   </div></div>`;
@@ -3233,7 +3258,7 @@ async function makeRoomImage(link, host){
     const blob = await new Promise(r=>canvas.toBlob(r, "image/png"));
     const file = new File([blob], `番鼠房間-${code}.png`, {type:"image/png"});
     let can = false; try{ can = !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){}
-    ONLINE.rmImg = {url:URL.createObjectURL(blob), file, can, hint: can ? "撳「分享到 IG」揀 Instagram 限時動態，或者長按圖片儲存。" : "長按圖片儲存，再喺 Instagram 限時動態揀呢張相。"};
+    ONLINE.rmImg = {url:URL.createObjectURL(blob), file, can, hint: can ? "撳「分享到 IG」揀 Instagram 限時動態，會自動複製邀請連結，喺 IG 加「連結」貼紙貼上，朋友撳就可以直接加入。" : "長按圖片儲存，再喺 Instagram 限時動態揀呢張相，加「連結」貼紙貼上邀請連結（下面可以複製）。"};
   }catch(e){ ONLINE.rmImg = {hint:"暫時整唔到圖片，請再試一次。"}; }
   finally{ holder.remove(); renderRoomSheet(); }
 }
@@ -3253,7 +3278,7 @@ async function makeInviteImage(y){
     $("yueImg").src = URL.createObjectURL(blob); $("yueImg").hidden = false;
     let can = false; try{ can = !!(navigator.canShare && navigator.canShare({files:[ONLINE.yueFile]})); }catch(e){}
     $("yueImgShare").hidden = !can;
-    $("yueImgHint").textContent = can ? "撳「分享到 IG」揀 Instagram 限時動態，或者長按圖片儲存。" : "長按圖片儲存，再喺 Instagram 限時動態揀呢張相。";
+    $("yueImgHint").textContent = can ? "撳「分享到 IG」揀 Instagram 限時動態，會自動複製邀請連結，喺 IG 加「連結」貼紙貼上，朋友撳就可以直接加入。" : "長按圖片儲存，再喺 Instagram 限時動態揀呢張相，加「連結」貼紙貼上邀請連結（下面可以複製）。";
   }catch(e){ $("yueImgHint").textContent = "暫時整唔到圖片，請再試一次。"; }
   finally{ holder.remove(); }
 }
