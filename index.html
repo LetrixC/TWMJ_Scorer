@@ -2131,7 +2131,9 @@ async function firebaseBackend(cfg){
   await Promise.all([loadScript(base + "firebase-auth-compat.js"), loadScript(base + "firebase-firestore-compat.js")]);
   firebase.initializeApp(cfg);
   const auth = firebase.auth(), db = firebase.firestore();
-  try{ db.settings({experimentalAutoDetectLongPolling:true, merge:true}); }catch(e){}
+  const standalone = (window.navigator && navigator.standalone) || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  try{ db.settings(standalone ? {experimentalForceLongPolling:true, merge:true} : {experimentalAutoDetectLongPolling:true, merge:true}); }catch(e){}
+  try{ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{}); }catch(e){}
   const rooms = db.collection("rooms");
   return {
     onUser(cb){ auth.onAuthStateChanged(u=>cb(u ? {uid:u.uid, name:u.displayName || "", email:u.email || ""} : null)); },
@@ -2167,7 +2169,11 @@ async function firebaseBackend(cfg){
       await b.commit();
     },
     setFrame(uid, frame){ return db.collection("users").doc(uid).update({frame}); },
-    watchProfile(uid, cb){ return db.collection("users").doc(uid).onSnapshot(s=>cb(s.exists ? s.data() : {}), ()=>cb(null)); },
+    watchProfile(uid, cb){
+      const ref = db.collection("users").doc(uid);
+      ref.get().then(s=>cb(s.exists ? s.data() : {})).catch(()=>{});   // 即刻讀一次，唔使等即時監聽
+      return ref.onSnapshot(s=>cb(s.exists ? s.data() : {}), ()=>{ ref.get().then(s=>cb(s.exists ? s.data() : {})).catch(()=>cb(null)); });
+    },
     async getProfiles(uids){ const out = {}; await Promise.all(uids.map(async u=>{ try{ const s = await db.collection("users").doc(u).get(); if(s.exists) out[u] = s.data(); }catch(e){} })); return out; },
     deleteGame(uid, gameId){ return db.collection("users").doc(uid).collection("games").doc(gameId).delete(); },
     // 約局
@@ -2328,6 +2334,7 @@ const ONLINE_CSS = `
 #yueTime{font-size:22px!important;font-weight:700;padding:12px 14px!important;min-height:52px}
 #lgNick,#lgPin{font-size:18px!important;padding:12px 14px!important;font-family:var(--f-body)}
 #lgPin{letter-spacing:.25em}
+.lg-keep{display:flex;align-items:center;gap:8px;font-size:14px;margin:2px 0 4px;cursor:pointer}.lg-keep input{width:18px;height:18px;accent-color:var(--head)}
 #lgPin::placeholder{letter-spacing:.25em}
 .ferr{color:var(--red);font-size:13px;font-weight:700}
 input.bad{border-color:var(--red)!important;box-shadow:0 0 0 2px var(--red-soft)}
@@ -2594,7 +2601,7 @@ function buildOnlineUI(){
     const out = [];
     if(ONLINE.user) out.push({label:"通知", badge:unreadCount() || 0, fn:openInbox});
     if(!isStandalone()) out.push({label:"加到主畫面", fn:addToHome});
-    if(ONLINE.user) out.push({sep:true}, {label:"登出", fn:async()=>{ leaveRoom(true); await ONLINE.backend.logout(); }});
+    if(ONLINE.user) out.push({sep:true}, {label:"登出", fn:async()=>{ autoSave(null); leaveRoom(true); await ONLINE.backend.logout(); }});
     return out;
   };
   $("openSetup").classList.remove("edit-only");
@@ -2660,6 +2667,7 @@ function renderLobby(){
       <div class="field" style="margin:0"><label for="lgNick">暱稱</label><input type="text" id="lgNick" maxlength="10" autocomplete="username" placeholder="例如：阿明" aria-describedby="lgNickErr"><span class="ferr" id="lgNickErr" hidden>請輸入暱稱</span></div>
       <div class="field" style="margin:0"><label for="lgPin">4 位數 PIN</label><input type="password" id="lgPin" inputmode="numeric" maxlength="4" autocomplete="current-password" placeholder="••••" aria-describedby="lgPinErr"><span class="ferr" id="lgPinErr" hidden>請輸入 4 位數 PIN</span></div>
       ${ONLINE.wantRoom ? `<p class="hint lg-pend">要登入先可以加入對局。登入或者註冊之後，會自動入房間 <b>${esc(ONLINE.wantRoom)}</b>。</p>` : ""}
+      <label class="lg-keep"><input type="checkbox" id="lgKeep" checked> 記住我（下次打開自動登入）</label>
       <p class="err" id="lgErr" hidden role="alert"></p>
       <div class="grid2"><button class="btn primary" id="lgLogin">登入</button><button class="btn" id="lgReg">新用戶註冊</button></div>
       <p class="hint" style="margin:0">第一次用請撳「新用戶註冊」。暱稱就係你嘅用戶 ID，朋友會見到。PIN 唔記得就要開過新帳戶。</p>
@@ -2674,8 +2682,10 @@ function renderLobby(){
       $("lgPinErr").textContent = pErr; $("lgPinErr").hidden = !pErr; $("lgPin").classList.toggle("bad", !!pErr);
       if(nErr || pErr){ (nErr ? $("lgNick") : $("lgPin")).focus(); return; }
       $("lgLogin").disabled = $("lgReg").disabled = true;
-      try{ await ONLINE.backend[fn](nick, pin); }
-      catch(err){ e.textContent = errText(err); e.hidden = false; $("lgLogin").disabled = $("lgReg").disabled = false; }
+      ONLINE.autoTried = true;
+      const keep = $("lgKeep").checked; if(keep) autoSave({nick, pin});
+      try{ await ONLINE.backend[fn](nick, pin); if(!keep) autoSave(null); }
+      catch(err){ autoSave(null); if(!$("lgLogin")) return; e.textContent = errText(err); e.hidden = false; $("lgLogin").disabled = $("lgReg").disabled = false; }
     };
     $("lgLogin").onclick = () => go("login");
     $("lgReg").onclick = () => go("register");
@@ -3064,6 +3074,9 @@ function ensureProfiles(uids){
   }).catch(()=>{ missing.forEach(u=>ONLINE.profFetching.delete(u)); });
 }
 const ROYAL = ["royal","尊爵不凡"];
+// 「記住我」：部機自己記住暱稱同 PIN，主畫面捷徑（同 Safari 分開儲存）都會自動登入；登出就清走
+function autoGet(){ try{ return JSON.parse(localStorage.getItem("fansyu-auto") || "null"); }catch(e){ return null; } }
+function autoSave(v){ try{ v ? localStorage.setItem("fansyu-auto", JSON.stringify(v)) : localStorage.removeItem("fansyu-auto"); }catch(e){} }
 // 自己嘅帳戶資料（VIP、外框）：即時監聽；讀唔到就保留上次（部機記住）嘅資料再重試，唔會當咗冇 VIP
 function startMeWatch(uid){
   stopMeWatch();
@@ -3520,7 +3533,14 @@ async function igShare(p, link, title, showFallback){
   showFallback(URL.createObjectURL(file));
 }
 // WhatsApp：直接打開 WhatsApp 揀聯絡人（連結預覽會顯示番鼠縮圖）
-function openWhatsApp(text){ location.href = "https://wa.me/?text=" + encodeURIComponent(text); }
+function openWhatsApp(text){
+  const t = encodeURIComponent(text), mobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+  if(!mobile){ window.open("https://wa.me/?text=" + t, "_blank"); return; }
+  // 手機：直接開 WhatsApp app；開唔到（未裝）就轉去 wa.me
+  const t0 = Date.now();
+  location.href = "whatsapp://send?text=" + t;
+  setTimeout(()=>{ if(document.visibilityState==="visible" && Date.now()-t0 < 2500) location.href = "https://wa.me/?text=" + t; }, 1500);
+}
 // Signal 等：直接開系統分享面板
 async function shareText(text, title){
   try{ await navigator.share({title, text}); }
@@ -3936,9 +3956,14 @@ async function onlineStart(){
   ONLINE.backend.onUser(async u=>{
     const prev = ONLINE.user;
     ONLINE.user = u; ONLINE.games = null;
+    if(!u && !ONLINE.autoTried){
+      ONLINE.autoTried = true;
+      const a = autoGet();
+      if(a){ try{ await ONLINE.backend.login(a.nick, a.pin); return; }catch(e){ if(e && e.code && e.code!=="auth/network-request-failed") autoSave(null); } }
+    }
     if(!u){ ONLINE.me = null; stopMeWatch(); stopYueWatch(); applyVipPerks(); if(prev) leaveRoom(true); showLobby(); renderInvite(); return; }
     if(isAdminUser()){ location.replace("admin.html" + (ONLINE.mock ? "?mock=1" : "")); return; }
-    if(await ONLINE.backend.isRemoved(u.uid)){ toast("呢個帳戶已經被管理員移除。"); await ONLINE.backend.logout(); return; }
+    if(await ONLINE.backend.isRemoved(u.uid)){ toast("呢個帳戶已經被管理員移除。"); autoSave(null); await ONLINE.backend.logout(); return; }
     ONLINE.backend.saveProfile(u.uid, {name:u.name, lastLogin:Date.now()}).catch(()=>{});
     startMeWatch(u.uid);
     loadInbox();
