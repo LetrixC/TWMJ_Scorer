@@ -554,7 +554,8 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <div class="confirm-card">
     <h3 id="cfTitle"></h3>
     <p id="cfText"></p>
-    <div class="grid2"><button class="btn" id="cfNo">取消</button><button class="btn danger" id="cfYes">確認</button></div>
+    <div class="grid2" id="cfChoice" hidden style="margin-bottom:10px"><button class="btn primary" id="cfA"></button><button class="btn primary" id="cfB"></button></div>
+    <div class="grid2" id="cfRow"><button class="btn" id="cfNo">取消</button><button class="btn danger" id="cfYes">確認</button></div>
   </div>
 </div>
 <div class="savebar" id="savingBar" hidden role="status"></div>
@@ -867,8 +868,20 @@ function hkPoints(fan){
 function askConfirm(title, text, okText, onOk){
   $("cfTitle").textContent = title; $("cfText").textContent = text; $("cfYes").textContent = okText;
   const box = $("confirmBox"); box.hidden = false;
+  $("cfChoice").hidden = true; $("cfYes").hidden = false; $("cfRow").classList.add("grid2"); $("cfNo").style.width = "";
   $("cfNo").onclick = ()=>{ box.hidden = true; };
   $("cfYes").onclick = ()=>{ box.hidden = true; onOk(); };
+}
+// 兩個選項＋取消（例如廣東牌流局：連莊／過莊）
+function askChoice(title, text, a, b){
+  $("cfTitle").textContent = title; $("cfText").textContent = text;
+  const box = $("confirmBox"); box.hidden = false;
+  $("cfChoice").hidden = false; $("cfYes").hidden = true; $("cfRow").classList.remove("grid2");
+  $("cfA").textContent = a.label; $("cfB").textContent = b.label;
+  $("cfNo").style.width = "100%";
+  $("cfA").onclick = ()=>{ box.hidden = true; a.fn(); };
+  $("cfB").onclick = ()=>{ box.hidden = true; b.fn(); };
+  $("cfNo").onclick = ()=>{ box.hidden = true; };
 }
 const MODE_NAME = m => m==="hk" ? "廣東牌" : m==="vn" ? "越南牌" : m==="pm" ? "跑馬仔" : "台牌";
 const MODES = [["tw","台牌"],["hk","廣東牌"],["vn","越南牌"],["pm","跑馬仔"]];
@@ -1011,10 +1024,10 @@ function recordWins(list, discarder){
   render(); save();
 }
 function recordWin(winner, discarder, fan, items){ recordWins([{winner, fan, items}], discarder); }
-function recordDraw(){
+function recordDraw(pass){
   const prev = snap();
-  state.hands.push({kind:"draw", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas:[0,0,0,0], prev});
-  state.streak++;
+  state.hands.push({kind:"draw", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas:[0,0,0,0], prev, pass: !!pass});
+  if(pass) advanceDealer(); else state.streak++;
   render(); save();
 }
 const SIDE = {
@@ -1113,6 +1126,7 @@ function applySkin(){
 }
 const isHandStart = h => (h.kind!=="side" || !!h.hand) && !(h.group && !h.groupFirst);
 function render(){
+  if($("drawBtn")) $("drawBtn").textContent = isHK() ? "流局" : "流局（莊家連莊）";
   applySkin(); keepAwake();
   renderSettle();
   const t = totals();
@@ -1178,7 +1192,7 @@ function render(){
       return `<div class="hand"><span class="tag">${tag}</span><span class="what">${what}</span><span class="sub">${esc(h.desc || SIDE[h.type].desc)}</span><div class="deltas">${d}</div></div>`;
     }
     const dealerTxt = `${esc(state.players[h.dealer])}莊${h.streak?" 連"+h.streak:""}`;
-    if(h.kind==="draw") return `<div class="hand"><span class="tag">${tag}</span><span class="what">流局</span><span class="sub">${dealerTxt} · 莊家連莊</span></div>`;
+    if(h.kind==="draw") return `<div class="hand"><span class="tag">${tag}</span><span class="what">流局</span><span class="sub">${dealerTxt} · ${h.pass ? "過莊" : "莊家連莊"}</span></div>`;
     const how = (h.discarder===null ? "自摸" : `食 ${esc(state.players[h.discarder])} 出銃`) + (h.multi ? `（一炮${MULTI[h.multi].name}）` : "");
     const revTxt = h.revenge ? ` · 反雪收 ${h.revenge.targets.map(t=>esc(state.players[t])).join("、")} 各 ${h.revenge.fan} 番` : "";
     const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
@@ -1847,7 +1861,12 @@ $("resetBtn").onclick = ()=>{
 };
 
 /* draw / undo */
-$("drawBtn").onclick = ()=>{ if(canWrite && !saving) recordDraw(); };
+$("drawBtn").onclick = ()=>{
+  if(!canWrite || saving) return;
+  if(!isHK()) return recordDraw(false);
+  askChoice("流局", `${state.players[state.dealer]} 坐莊。流局之後要唔要過莊？`,
+    {label:"連莊", fn:()=>recordDraw(false)}, {label:"過莊", fn:()=>recordDraw(true)});
+};
 $("undoBtn").onclick = ()=>{ if(canWrite && !saving) undo(); };
 
 /* win sheet */
@@ -2735,7 +2754,6 @@ async function joinByCode(code, btn){
   if(btn) btn.disabled = true;
   try{
     await joinRoom(code); if(openSheet===$("joinSheet")){ hideSheet(); liftReset(); }
-    if(ONLINE.isHost && !state.ended && [0,1,2,3].some(k=>!(state.uids || [])[k])){ ONLINE.showQr = true; renderRoomSheet(); showSheet($("roomSheet")); }
   }
   catch(err){ const t = err.message && !err.code ? err.message : errText(err); e.textContent = t; e.hidden = false; if(openSheet!==$("joinSheet")) toast(t); }
   finally{ if(btn) btn.disabled = false; }
@@ -2874,7 +2892,7 @@ function liveHandToast(before){
   if(h.kind==="win"){
     const wins = state.hands.slice(before.n).filter(x=>x.kind==="win");
     t = wins.map(w=>`${P[w.winner]} ${w.discarder==null ? "自摸" : "食 " + P[w.discarder]} ${w.fan} ${PT_UNIT()}，${fmt(w.deltas[w.winner])}`).join("；");
-  } else if(h.kind==="draw") t = "流局，莊家連莊。";
+  } else if(h.kind==="draw") t = h.pass ? "流局，過莊。" : "流局，莊家連莊。";
   else if(h.kind==="side") t = `${P[h.player] || ""}：${h.desc || ""}`;
   if(t) toast("🀄 " + t);
 }
@@ -2995,6 +3013,7 @@ function renderRoomSheet(){
     <div class="field"><label>房間成員（${members.length}）</label><div class="mlist">
       ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span>${ONLINE.isHost && u!==d.host ? `<span class="rm-acts"><button class="iconbtn" data-give="${esc(u)}">交房主</button><button class="iconbtn rm-kick" data-kick="${esc(u)}">移除</button></span>` : `<span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span>`}</div>`).join("")}
     </div></div>
+    ${ONLINE.isHost ? (()=>{ const others = members.filter(([u])=>u!==d.host); return `<div class="field"><label>轉讓房主</label>${others.length ? `<div style="display:flex;gap:8px"><select id="rmGiveSel" style="flex:1">${others.map(([u,n])=>`<option value="${esc(u)}">${esc(n)}</option>`).join("")}</select><button class="btn primary" id="rmGive" style="flex:0 0 auto">交房主</button></div>` : `<span class="hint">房間入面暫時得你一個。朋友入咗房之後，就可以喺度將房主交俾佢。</span>`}</div>`; })() : ""}
     ${seats}
     <button class="btn danger" style="width:100%" id="rmLeave">離開房間</button>`;
   const inviteTxt = [
@@ -3015,6 +3034,7 @@ function renderRoomSheet(){
   });
   if($("rmTake")) $("rmTake").onclick = takeOver;
   box.querySelectorAll("[data-give]").forEach(b=>b.onclick = () => giveHost(b.dataset.give));
+  if($("rmGive")) $("rmGive").onclick = () => giveHost($("rmGiveSel").value);
   $("rmLeave").onclick = () => {
     const others = members.filter(([u])=>u!==ONLINE.user.uid);
     if(!ONLINE.isHost || !others.length){ hideSheet(); leaveRoom(); return; }
