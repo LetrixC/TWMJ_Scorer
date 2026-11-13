@@ -469,6 +469,20 @@ body.hk .side .grid3,body.hk .side .flowerrow,body.hk .side .dingrow,body.hk [da
 body.hk .side .grid2{grid-template-columns:1fr}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.splash-logo{animation:none}
   .tag.gold::after,.tag.legend::after,.tag .spk,.pl.golden,.pl .tag.gold,.pl .tag.legend{animation:none!important}.tag .spk{opacity:1}}
+.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sh-wa{background:#25D366;color:#fff;border-color:#25D366}.sh-tg{background:#2AABEE;color:#fff;border-color:#2AABEE}
+.sh-sg{background:#3A76F0;color:#fff;border-color:#3A76F0}.sh-ig{background:linear-gradient(45deg,#F58529,#DD2A7B,#8134AF);color:#fff;border:0}
+.sh-ig:disabled{opacity:.5}
+#rulesLine .jp-chip{background:linear-gradient(135deg,#f7d774,#e2a93b);color:#4a2d00!important;border-radius:999px;padding:1px 9px;font-weight:700}
+#rulesLine .jp-chip b{color:#4a2d00!important}
+.hand.jp .what{color:var(--head)}.hand.jp-win{background:linear-gradient(135deg,rgba(247,215,116,.35),rgba(226,169,59,.18));border-radius:12px}
+.st-jp{margin:8px 0 2px;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,#f7d774,#e2a93b);color:#4a2d00;font-weight:600;text-align:center}
+.sh-quote{margin:4px 0 12px;padding:12px 14px;border-radius:14px;background:var(--card,#fff);border:1px solid var(--line);font-size:15px;line-height:1.5;position:relative;padding-right:48px}
+.sh-quote .iconbtn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;padding:0}
+.sh-quote.t-big,.sh-quote.t-win{border-color:#d9a93c;background:linear-gradient(135deg,rgba(247,215,116,.28),transparent)}
+.sh-quote.t-big_l,.sh-quote.t-lose{border-color:var(--line)}
+#shareSheet #shareHint{margin-top:10px}
+.jp-note{margin-top:8px;padding:8px 10px;border-radius:10px;background:linear-gradient(135deg,#f7d774,#e2a93b);color:#4a2d00;font-weight:700}
 </style>
 </head>
 <body>
@@ -570,10 +584,16 @@ const SHELL = `<div class="splash" id="splash" hidden>
 <div class="sheet" id="shareSheet" hidden role="dialog" aria-label="分享戰績">
   <div class="grab"></div>
   <h3>分享戰績</h3>
+  <div class="field" id="shWhoWrap"><label>以邊個身份分享</label><div class="grid4" id="shWho"></div></div>
+  <div class="sh-quote" id="shQuote"></div>
+  <div class="share-grid">
+    <button class="btn sh-wa" data-ssh="wa">WhatsApp</button><button class="btn sh-tg" data-ssh="tg">Telegram</button>
+    <button class="btn sh-sg" data-ssh="sys">Signal／其他</button><button class="btn" data-ssh="copy">複製文字</button>
+  </div>
+  <button class="btn sh-ig" id="nativeShareBtn" style="width:100%;margin-top:8px" disabled>IG 限時動態（圖片）</button>
   <p class="hint" id="shareHint">製作圖片中…</p>
   <img id="shareImg" alt="結算戰績圖（IG 限時動態 9:16）" hidden>
   <div class="settle-actions" style="margin-top:12px">
-    <button class="btn primary full" id="nativeShareBtn" hidden>分享</button>
     <button class="btn" id="saveImgBtn" hidden>儲存圖片</button>
     <button class="btn" id="closeShare">關閉</button>
   </div>
@@ -658,6 +678,17 @@ const SHELL = `<div class="splash" id="splash" hidden>
     <div class="field"><label>計法</label><div class="grid2" id="hkScaleSeg"></div></div>
     <div class="field"><label>出銃</label><div class="grid2" id="hkShootSeg"></div></div>
     <p class="hint" id="hkTable"></p>
+    <div class="field jp-set"><label>🎰 Jackpot</label><div class="grid2" id="jpOnSeg"></div>
+      <div id="jpMore">
+        <div class="grid2" style="margin-top:8px">
+          <div class="field"><label for="jpAmt">每次供款（每人）</label><div class="prefix"><span>HK$</span><input type="number" id="jpAmt" inputmode="decimal" min="0" step="1"></div></div>
+          <div class="field"><label for="jpMin">中獎番數（或以上）</label><input type="number" id="jpMin" inputmode="numeric" min="1" max="13" step="1"></div>
+        </div>
+        <div class="field"><label>幾時供款</label><div class="grid2" id="jpWhenSeg"></div></div>
+        <div class="field"><label>中獎條件</label><div class="grid2" id="jpSelfSeg"></div></div>
+        <p class="hint" id="jpHint"></p>
+      </div>
+    </div>
   </div>
   <div class="field">
     <label>開局莊家（東風位）</label>
@@ -888,7 +919,7 @@ function askChoice(title, text, a, b){
   $("cfNo").onclick = ()=>{ box.hidden = true; };
 }
 const MODE_NAME = m => m==="hk" ? "廣東牌" : m==="vn" ? "越南牌" : m==="pm" ? "跑馬仔" : "台牌";
-const MODES = [["tw","台牌"],["hk","廣東牌"],["vn","越南牌"],["pm","跑馬仔"]];
+const MODES = [["tw","台牌"],["hk","廣東牌"],["pm","跑馬仔"]];   // 越南牌已移除（舊記錄自動轉做廣東牌）
 function switchMode(m, after){
   if(!canWrite || saving || m===state.mode){ if(after) after(); return; }
   const n = state.hands.length;
@@ -912,11 +943,12 @@ function closeSplash(){
 const DEFAULT_STATE = () => ({
   v:1, players:["阿明","阿強","阿芬","阿珍"], rate:1, base:5, dealerFan:1, streakFan:2,
   startDealer:0, dealer:0, streak:0, round:0, hands:[], updatedAt:0,
-  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full"}, pm:{unit:1, cap:3, dealer:true, ming:1, an:2}, vn:{unit:0.5, extra:6, bonus:0}
+  mode:"tw", hk:{unit:1, min:3, cap:10, scale:"half", shoot:"full", jp:{on:false, amt:5, when:"hand", min:10, self:false}}, pm:{unit:1, cap:3, dealer:true, ming:1, an:2}, vn:{unit:0.5, extra:6, bonus:0}
 });
 let state = DEFAULT_STATE();
 const KEY = "hktw-mj-standalone";
 try{ const o = JSON.parse(localStorage.getItem(KEY) || "null"); if(o && o.v===1) state = Object.assign(DEFAULT_STATE(), o); }catch(e){}
+if(state.mode==="vn") state.mode = "hk";
 let canWrite = true, saving = false;
 function save(){
   state.updatedAt = Date.now();
@@ -1026,13 +1058,48 @@ function recordWins(list, discarder, bao){
   if(usedRevenge) state.revenge = null;
   if(M) state.revenge = {from:discarder, targets:list.map(w=>w.winner), fan:M.revenge};
   if(list.some(w=>w.winner===state.dealer)) state.streak++; else advanceDealer();
+  const top = list.reduce((a,w)=>w.fan>a.fan?w:a, list[0]);
+  jpAfter({prev, winner:top.winner, fan:top.fan, self:discarder===null, discarder});
   render(); save();
 }
+/* ===== 廣東牌 Jackpot：按約定時機供款入池，食到指定番數（可限自摸）就一次過攞晒成個池 ===== */
+const jpCfg = () => Object.assign({on:false, amt:5, when:"hand", min:10, self:false}, (state.hk && state.hk.jp) || {});
+const jpOn = () => isHK() && jpCfg().on;
+// 池 = 上局帶落嚟 + 今局每次供款 − 派彩（由記錄計，撤銷自動準）
+const jpPool = () => Math.round(((state.jpCarry || 0) + state.hands.reduce((a,h)=>a + (h.kind==="jp" ? h.jp : 0), 0)) * 100) / 100;
+const JP_WHEN = [["hand","每鋪"],["draw","流局"],["shoot","出銃（出銃者供）"],["round","每個圈"]];
+function jpHit(fan, self){ const c = jpCfg(); return jpOn() && fan >= c.min && (!c.self || self); }
+function jpPush(deltas, jp, desc, prev){ state.hands.push({kind:"jp", auto:true, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, jp, desc, prev}); }
+// 每記完一鋪之後：先派彩（如有），再按設定供款
+function jpAfter(ev){
+  if(!jpOn()) return;
+  const c = jpCfg(), amt = Math.round(c.amt*100)/100, prev = ev.prev;
+  if(ev.winner!=null && jpHit(ev.fan, ev.self)){
+    const pool = jpPool();
+    if(pool > 0){
+      const d = [0,0,0,0]; d[ev.winner] = pool;
+      jpPush(d, -pool, `🎰 ${state.players[ev.winner]} 中 Jackpot！${ev.fan} 番${ev.self?"自摸":""}，攞晒成個池 $${pool}`, prev);
+      ONLINE_JP_TOAST(`🎰 ${state.players[ev.winner]} 中 Jackpot！攞晒 $${pool}`);
+    }
+  }
+  if(!(amt > 0)) return;
+  let who = [];
+  if(c.when==="hand") who = [0,1,2,3];
+  else if(c.when==="draw" && ev.draw) who = [0,1,2,3];
+  else if(c.when==="shoot" && ev.discarder!=null) who = [ev.discarder];
+  else if(c.when==="round" && state.round > ev.prev.round) who = [0,1,2,3];
+  if(!who.length) return;
+  const d = [0,0,0,0]; who.forEach(p=>d[p] = -amt);
+  const why = c.when==="hand" ? "每鋪" : c.when==="draw" ? "流局" : c.when==="shoot" ? `${state.players[ev.discarder]} 出銃` : "過圈";
+  jpPush(d, amt*who.length, `${why}供款：${who.length===4 ? "每人" : state.players[who[0]]} $${amt}`, prev);
+}
+function ONLINE_JP_TOAST(t){ try{ toast(t); }catch(e){} }
 function recordWin(winner, discarder, fan, items){ recordWins([{winner, fan, items}], discarder); }
 function recordDraw(pass){
   const prev = snap();
   state.hands.push({kind:"draw", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas:[0,0,0,0], prev, pass: !!pass});
   if(pass) advanceDealer(); else state.streak++;
+  jpAfter({prev, draw:true});
   render(); save();
 }
 const SIDE = {
@@ -1084,6 +1151,7 @@ function recordSide(type, p){
 }
 function undo(){
   let h = state.hands.pop(); if(!h) return;
+  while(h && h.auto) h = state.hands.pop();                        // Jackpot 供款／派彩跟返嗰鋪一齊撤銷
   while(h && h.group && !h.groupFirst) h = state.hands.pop();   // 雙響／三響 undo together
   if(!h) return;
   Object.assign(state, h.prev);
@@ -1129,7 +1197,7 @@ function applySkin(){
   k = k || state.skin || "maji"; if(k==="beige") k = "ice"; if(window.__setAppIcon) window.__setAppIcon(k);
   if(k==="default") delete document.documentElement.dataset.skin; else document.documentElement.dataset.skin = k;
 }
-const isHandStart = h => (h.kind!=="side" || !!h.hand) && !(h.group && !h.groupFirst);
+const isHandStart = h => h.kind!=="jp" && (h.kind!=="side" || !!h.hand) && !(h.group && !h.groupFirst);
 function render(){
   if($("drawBtn")) $("drawBtn").textContent = isHK() ? "流局" : "流局（莊家連莊）";
   applySkin(); keepAwake();
@@ -1160,7 +1228,7 @@ function render(){
     : isVN()
     ? `<span>每分 <b>HK$${state.vn.unit}</b></span><span><b>6 番 = 1 滿</b></span><span>1 滿 = 雙 64／單 32 分</span><span>多出每番 <b>${state.vn.extra}</b> 分</span><span>自摸三家俾雙</span>`
     : isHK()
-    ? `<span>每點 <b>HK$${state.hk.unit}</b></span><span><b>${state.hk.min}</b> 番起糊</span><span><b>${state.hk.cap}</b> 番爆棚</span><span><b>${state.hk.scale==="full"?"全辣上":"半辣上"}</b></span><span><b>${state.hk.shoot==="half"?"半銃":"全銃"}</b></span>`
+    ? `<span>每點 <b>HK$${state.hk.unit}</b></span><span><b>${state.hk.min}</b> 番起糊</span><span><b>${state.hk.cap}</b> 番爆棚</span><span><b>${state.hk.scale==="full"?"全辣上":"半辣上"}</b></span><span><b>${state.hk.shoot==="half"?"半銃":"全銃"}</b></span>${jpOn() ? `<span class="jp-chip">🎰 Jackpot <b>$${jpPool()}</b></span>` : ""}`
     : `<span>每番 <b>HK$${state.rate}</b></span><span>底 <b>${state.base}</b> 番</span><span>莊 <b>${state.dealerFan}</b> 番</span><span>每連莊 <b>${state.streakFan}</b> 番</span>`;
 
   const just = state.hands.length && state.round>0 && state.round%4===0 && state.hands[state.hands.length-1].prev.round !== state.round;
@@ -1195,6 +1263,10 @@ function render(){
       const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
       const what = `${esc(state.players[h.player])} ${SIDE[h.type].name}${h.hand ? `<small class="hsub"> · ${h.player===h.dealer ? "莊家詐糊，過莊" : "莊家連莊"}</small>` : ""}`;
       return `<div class="hand"><span class="tag">${tag}</span><span class="what">${what}</span><span class="sub">${esc(h.desc || SIDE[h.type].desc)}</span><div class="deltas">${d}</div></div>`;
+    }
+    if(h.kind==="jp"){
+      const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
+      return `<div class="hand jp${h.jp<0?" jp-win":""}"><span class="tag">🎰</span><span class="what">${h.jp<0 ? "Jackpot 派彩" : "Jackpot 供款"}</span><span class="sub">${esc(h.desc||"")}</span><div class="deltas">${d}</div></div>`;
     }
     const dealerTxt = `${esc(state.players[h.dealer])}莊${h.streak?" 連"+h.streak:""}`;
     if(h.kind==="draw") return `<div class="hand"><span class="tag">${tag}</span><span class="what">流局</span><span class="sub">${dealerTxt} · ${h.pass ? "過莊" : "莊家連莊"}</span></div>`;
@@ -1244,7 +1316,8 @@ function renderSide(){
 
 function resetGame(){
   const keep = {mode:state.mode, hk:state.hk, pm:state.pm, vn:state.vn, skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
-  state = Object.assign(DEFAULT_STATE(), keep, {dealer:keep.startDealer});
+  const carry = isHK() && jpCfg().on ? jpPool() : 0;
+  state = Object.assign(DEFAULT_STATE(), keep, {dealer:keep.startDealer, jpCarry:carry});
   render(); save();
 }
 
@@ -1445,6 +1518,7 @@ function settleHTML(forShare){
   return `<div class="settle-card">
     <div class="st-head"><span class="st-brand">${forShare?`<span class="slogo">${LOGO_D}</span>`:""}<span class="st-title">結算</span><span class="st-mode">${MODE_NAME(state.mode)}</span></span><span class="st-meta num">${date} · ${pu} 鋪 · ${RATE_TXT()}</span></div>
     ${rows}
+    ${isHK() && jpCfg().on ? `<div class="st-jp">🎰 Jackpot 池：<b>$${jpPool()}</b>${jpPool()>0?"（帶落下一局繼續累積）":""}</div>` : ""}
     ${forShare?`<div class="st-foot"><span class="flogo">${LOGO_D}</span>番鼠 · 港台麻雀計番</div>`:""}
   </div>`;
 }
@@ -1557,6 +1631,66 @@ $("newGameBtn").onclick = ()=>{
   newArmed = false; resetGame();
 };
 
+/* 戰績分享文字：按分享者嘅輸贏比例出唔同說話 */
+const BRAG = {
+  big:  ["今晚張枱係我開嘅提款機 🏧","唔好意思，又係我 👑","食到手軟，下次記得帶多啲錢 💰","呢個叫實力，唔叫運氣 😎","雀神降臨，凡人退下 🀄🔥"],
+  win:  ["小贏當熱身，下次先係正餐 😏","贏少少都係贏，多謝各位贊助 🙏","穩陣派收工，袋袋平安 💼","低調贏錢，高調炫耀 ✌️"],
+  even: ["打和收工，大家都係贏家（扮）🤝","今晚純粹聯誼，錢只係陪跑 😌","唔輸就係贏，我好滿足 😇"],
+  lose: ["今晚只係戰略性撤退，下局反攻 💪","輸少少當交學費，老師們收貨 📚","手風一時順一時逆，等我回魂先 🌀","我讓咗你哋咋，唔好誤會 😤"],
+  big_l:["今晚我係慈善家，請大家食飯 🍜","雀神放假，我做咗散財童子 🧧","錢係身外物…但係真係好痛 😭","輸到要賣老鼠仔，下次一定翻本 🐭💸","唔緊要，番鼠記住咗，下次連本帶利追返 📒🔥"]
+};
+function resultTier(money, order){
+  const pot = order.reduce((a,s)=>a + Math.max(0, s.money), 0) || 1;
+  const pct = money / pot;
+  return {pct, tier: pct >= 0.5 ? "big" : pct > 0.001 ? "win" : pct > -0.001 ? "even" : pct > -0.5 ? "lose" : "big_l"};
+}
+let shWho = null, shLine = {};
+function settleShareText(){
+  const {order} = computeStats();
+  const s = order.find(x=>x.p===shWho) || order[0];
+  const {pct, tier} = resultTier(s.money, order);
+  const key = shWho + ":" + tier;
+  if(!shLine[key]) shLine[key] = BRAG[tier][Math.floor(Math.random()*BRAG[tier].length)];
+  const pu = state.hands.filter(isHandStart).length, d = new Date(state.endedAt || Date.now());
+  const site = /fansyu\.com$/.test(location.hostname) ? location.origin + "/" : "https://www.fansyu.com/";
+  const pctTxt = tier==="even" ? "打和" : `${s.money>0?"贏咗":"輸咗"}成枱 ${Math.round(Math.abs(pct)*100)}%`;
+  const lines = [
+    `*🀄 番鼠戰績 · ${MODE_NAME(state.mode)}*`,
+    `${d.getMonth()+1}/${d.getDate()} · ${pu} 鋪 · ${RATE_TXT()}`, "",
+    `「${shLine[key]}」`,
+    `—— ${state.players[s.p]}：*${fmt(s.money)}*（${pctTxt}）`, "",
+    ...order.map(x=>`${x.rank===1 && x.money>0 ? "👑" : x.rank + "."} ${state.players[x.p]}　${fmt(x.money)}`),
+  ];
+  if(isHK() && jpCfg().on) lines.push("", `🎰 Jackpot 池：$${jpPool()}`);
+  lines.push("", "👉 一齊用番鼠計番：", site);
+  return {text: lines.join("\n"), line: shLine[key], tier, site};
+}
+function renderShareWho(){
+  const uids = state.uids || [];
+  const meSeat = typeof ONLINE!=="undefined" && ONLINE.user ? uids.indexOf(ONLINE.user.uid) : -1;
+  if(shWho===null) shWho = meSeat>=0 ? meSeat : computeStats().order[0].p;
+  $("shWho").innerHTML = state.players.map((n,i)=>`<button class="opt${i===shWho?" on":""}" data-i="${i}">${esc(n)}${i===meSeat?"（你）":""}</button>`).join("");
+  $("shWho").querySelectorAll("button").forEach(b=>b.onclick = ()=>{ shWho = +b.dataset.i; renderShareWho(); });
+  const t = settleShareText();
+  $("shQuote").className = "sh-quote t-" + t.tier;
+  $("shQuote").innerHTML = `<b>${esc(state.players[shWho])}</b>「${esc(t.line)}」<button class="iconbtn" id="shReroll" title="換一句">🎲</button>`;
+  $("shReroll").onclick = ()=>{ Object.keys(shLine).filter(k=>k.startsWith(shWho+":")).forEach(k=>delete shLine[k]); renderShareWho(); };
+}
+document.querySelectorAll("[data-ssh]").forEach(b=>b.onclick = async ()=>{
+  const {text, site} = settleShareText(), k = b.dataset.ssh, plain = text.replace(/\*/g, "");
+  if(k==="wa"){
+    const t = encodeURIComponent(text), mobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+    if(!mobile){ window.open("https://wa.me/?text=" + t, "_blank"); return; }
+    const t0 = Date.now(); location.href = "whatsapp://send?text=" + t;
+    setTimeout(()=>{ if(document.visibilityState==="visible" && Date.now()-t0 < 2500) location.href = "https://wa.me/?text=" + t; }, 1500);
+    return;
+  }
+  if(k==="tg") return window.open("https://t.me/share/url?url=" + encodeURIComponent(site) + "&text=" + encodeURIComponent(plain.replace(site, "").trim()), "_blank");
+  if(k==="copy"){ try{ await navigator.clipboard.writeText(plain); toast("已複製戰績文字。"); }catch(e){ prompt("複製呢段：", plain); } return; }
+  try{ await navigator.share({title:"番鼠戰績", text:plain}); }
+  catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(plain); toast("已複製戰績文字，貼去 Signal 就得。"); }catch(_){ prompt("複製呢段：", plain); } } }
+});
+
 /* share image */
 let h2cPromise = null, downloadsNs = null, shareFile = null, shareURL = null;
 function loadH2C(){
@@ -1571,7 +1705,8 @@ function loadH2C(){
 }
 $("shareBtn").onclick = async ()=>{
   showSheet($("shareSheet"));
-  $("shareImg").hidden = true; $("saveImgBtn").hidden = true; $("nativeShareBtn").hidden = true; shareFile = null;
+  shWho = null; shLine = {}; renderShareWho();
+  $("shareImg").hidden = true; $("saveImgBtn").hidden = true; $("nativeShareBtn").disabled = true; shareFile = null;
   $("shareHint").textContent = "製作圖片中…";
   const holder = document.createElement("div");
   holder.style.cssText = "position:fixed;left:-10000px;top:0;width:360px;height:640px";
@@ -1592,21 +1727,21 @@ $("shareBtn").onclick = async ()=>{
     $("shareImg").src = shareURL; $("shareImg").hidden = false;
     let canShare = false;
     try{ canShare = !!(navigator.canShare && navigator.canShare({files:[shareFile]})); }catch(e){}
-    $("nativeShareBtn").hidden = !canShare;
+    $("nativeShareBtn").disabled = !canShare;
     $("saveImgBtn").hidden = false;
     $("shareHint").textContent = canShare
-      ? "圖片係 IG 限時動態比例（9:16）。撳下面掣揀 IG、WhatsApp 或 Telegram，或者長按圖片儲存。"
-      : "圖片係 IG 限時動態比例（9:16）。長按圖片或者撳「儲存圖片」，再喺 IG、WhatsApp 或 Telegram 分享。";
+      ? "WhatsApp／Telegram／Signal 會發送戰績文字同連結；IG 會分享下面呢張 9:16 戰績圖。"
+      : "WhatsApp／Telegram／Signal 會發送戰績文字。IG：長按圖片或者撳「儲存圖片」，再喺 IG 限時動態揀呢張相。";
   }catch(e){
     $("shareHint").textContent = "暫時整唔到圖片，可以直接用手機截圖分享。";
   }finally{ holder.remove(); }
 };
 $("nativeShareBtn").onclick = async ()=>{
   if(!shareFile) return;
-  try{ await navigator.share({files:[shareFile], title:"番鼠戰績"}); }
+  try{ await navigator.share({files:[shareFile], title:"番鼠戰績"}); toast("揀 Instagram → 限時動態。"); }
   catch(e){
     if(e && e.name==="AbortError") return;
-    $("nativeShareBtn").hidden = true;
+    $("nativeShareBtn").disabled = true;
     $("shareHint").textContent = "呢度唔可以直接分享。請長按圖片或者撳「儲存圖片」，再喺 IG、WhatsApp 或 Telegram 分享。";
   }
 };
@@ -1848,6 +1983,15 @@ function fillSetup(){
   seg("hkScaleSeg", [["half","半辣上"],["full","全辣上"]], "scale");
   seg("hkShootSeg", [["full","全銃（出銃包晒）"],["half","半銃（三家分）"]], "shoot");
   const ex = [state.hk.min, Math.min(state.hk.min+2,state.hk.cap), state.hk.cap].map(f=>`${f}番 ${hkPoints(f)}點（$${Math.round(hkPoints(f)*state.hk.unit*100)/100}）`).join("、");
+  const J = jpCfg(); state.hk.jp = J;
+  const jseg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${J[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
+    $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.hk.jp[key] = v==="true" ? true : v==="false" ? false : v; render(); save(); fillSetup(); }); };
+  jseg("jpOnSeg", [[true,"開"],[false,"閂"]], "on");
+  jseg("jpWhenSeg", JP_WHEN, "when");
+  jseg("jpSelfSeg", [[false,"食糊或自摸"],[true,"只限自摸"]], "self");
+  $("jpMore").hidden = !J.on;
+  $("jpAmt").value = J.amt; $("jpMin").value = J.min;
+  $("jpHint").textContent = `池入面而家有 $${jpPool()}。${JP_WHEN.find(w=>w[0]===J.when)[1]}${J.when==="shoot"?"":"每人"}供 $${J.amt}；${J.self?"自摸":"食糊"} ${J.min} 番或以上就攞晒成個池。結算／重新開局後，未開出嘅池會帶落下一局繼續累積。`;
   $("hkTable").textContent = `${state.hk.shoot==="half"?"出銃者俾一半，其餘兩家各俾四分之一":"出銃者俾全數"}；自摸三家各俾一半。例：${ex}。`;
   const cur = state.skin || "default";
   $("skinSeg").innerHTML = skinButtonsHTML();
@@ -1857,6 +2001,8 @@ $("openSetup").onclick = ()=>{ fillSetup(); showSheet($("setupSheet")); };
 $("closeSetup").onclick = hideSheet;
 for(let i=0;i<4;i++) $("p"+i).addEventListener("change", e=>{ state.players[i] = e.target.value.trim() || `玩家${i+1}`; render(); save(); fillSetup(); });
 [["vnUnit","unit"],["vnExtra","extra"],["vnBonus","bonus"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.vn[k] = k==="unit" ? v : Math.round(v); render(); save(); fillSetup(); } else e.target.value = state.vn[k]; }));
+[["jpAmt","amt"],["jpMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v);
+  if(!isNaN(v) && v>=(k==="min"?1:0)){ state.hk.jp = Object.assign(jpCfg(), {[k]:v}); render(); save(); fillSetup(); } else e.target.value = jpCfg()[k]; }));
 [["hkUnit","unit"],["hkMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v); if(!isNaN(v) && v>=0 && (k!=="min" || v<=state.hk.cap)){ state.hk[k]=v; render(); save(); fillSetup(); } else e.target.value = state.hk[k]; }));
 [["rate",0.1],["base",0],["dealerFan",0],["streakFan",0]].forEach(([k])=>$(k).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state[k]=v; render(); save(); } else e.target.value = state[k]; }));
 [["pmMing","ming"],["pmAn","an"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.pm[k] = v; render(); save(); fillSetup(); } else e.target.value = state.pm[k]; }));
@@ -1953,6 +2099,7 @@ function renderPay(){
     }
     html += `<div class="r" style="border-top:1px solid var(--line);padding-top:6px;margin:2px 0 6px"><b>${esc(state.players[x.winner])} 收</b><b class="pos">+$${Math.round(sum*100)/100}</b></div>`;
   });
+  if(jpOn() && jpPool()>0 && jpHit(Math.max(...list.map(x=>x.fan)), ws.discarder===null)) html += `<div class="jp-note">🎰 中 Jackpot！記錄後再攞晒成個池 <b>$${jpPool()}</b></div>`;
   if(M) html += `<div class="hint">記錄後：${esc(state.players[ws.discarder])} 下次食糊會反雪，收 ${list.map(x=>esc(state.players[x.winner])).join("、")} 各 ${M.revenge} 番。</div>`;
   $("payBox").innerHTML = html;
 }
@@ -2185,6 +2332,7 @@ async function firebaseBackend(cfg){
     async createRoom(code, data){ const ref = rooms.doc(code); if((await ref.get()).exists) return false; await ref.set(data); return true; },
     async getRoom(code){ const s = await rooms.doc(code).get(); return s.exists ? s.data() : null; },
     joinRoom(code, uid, name){ return rooms.doc(code).update({["members." + uid]: name}); },
+    leaveRoom(code, uid){ return rooms.doc(code).update({["members." + uid]: firebase.firestore.FieldValue.delete()}); },
     kick(code, uid){ return rooms.doc(code).update({["members." + uid]: firebase.firestore.FieldValue.delete(), ["kicked." + uid]: true}); },
     // 房主：心跳、轉讓；其他成員：房主離線夠耐就接手
     heartbeat(code){ return rooms.doc(code).update({hostSeen:Date.now()}); },
@@ -2247,6 +2395,7 @@ function mockBackend(){
     async createRoom(code, data){ if(L("room:"+code)) return false; W("room:"+code, data); return true; },
     async getRoom(code){ return L("room:"+code); },
     async joinRoom(code, uid, name){ const r = L("room:"+code); r.members[uid] = name; W("room:"+code, r); },
+    async leaveRoom(code, uid){ const r = L("room:"+code); if(r && r.members) delete r.members[uid]; W("room:"+code, r); },
     async heartbeat(code){ const r = L("room:"+code); if(!r || !me() || r.host!==me().uid) throw fail("permission-denied"); r.hostSeen = Date.now(); W("room:"+code, r); },
     async setHost(code, uid, name){ const r = L("room:"+code); if(!r || !me()) throw fail("permission-denied");
       const self = me().uid; const stale = (r.hostSeen || 0) < Date.now() - HOST_STALE;
@@ -2603,7 +2752,7 @@ function buildOnlineUI(){
   <button class="btn" style="width:100%;margin-top:14px" id="closeYueDay">關閉</button></div>
 <div class="sheet" id="createSheet" hidden role="dialog" aria-label="創建房間"><div class="grab"></div>
   <h3>創建房間</h3><p class="hint" style="margin:0 0 12px" id="createHint">揀牌種。你會做房主，只有房主可以記錄同改資料。</p>
-  <div class="mode-pick"><button class="btn primary big" data-new="hk">廣東牌</button><button class="btn primary big" data-new="tw">台灣牌</button><button class="btn primary big" data-new="vn">越南牌</button><button class="btn primary big" data-new="pm">跑馬仔</button></div>
+  <div class="mode-pick"><button class="btn primary big" data-new="hk">廣東牌</button><button class="btn primary big" data-new="tw">台灣牌</button><button class="btn primary big" data-new="pm">跑馬仔</button></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeCreate">取消</button></div>
 <div class="sheet" id="joinSheet" hidden role="dialog" aria-label="加入房間"><div class="grab"></div>
   <h3>加入房間</h3>
@@ -2721,6 +2870,7 @@ function renderLobby(){
       $("lgLogin").disabled = $("lgReg").disabled = true;
       ONLINE.autoTried = true;
       const keep = $("lgKeep").checked; if(keep) autoSave({nick, pin});
+      ONLINE.pendNick = nick;
       try{ await ONLINE.backend[fn](nick, pin); if(!keep) autoSave(null); }
       catch(err){ autoSave(null); if(!$("lgLogin")) return; e.textContent = errText(err); e.hidden = false; $("lgLogin").disabled = $("lgReg").disabled = false; }
     };
@@ -2811,7 +2961,9 @@ async function joinRoom(code){
   const d = await withTimeout(ONLINE.backend.getRoom(code), 15000, "網絡太慢，入唔到房間。請檢查網絡再試。");
   if(!d) throw new Error("搵唔到呢個房間，請檢查號碼。");
   if(d.kicked && d.kicked[ONLINE.user.uid]) throw new Error("房主已經將你移出呢個房間。");
-  if(!(ONLINE.user.uid in (d.members||{}))) await withTimeout(ONLINE.backend.joinRoom(code, ONLINE.user.uid, ONLINE.user.name), 15000, "網絡太慢，入唔到房間。請再試。");
+  const mem = d.members || {}, uid = ONLINE.user.uid;
+  if(!(uid in mem) || (!mem[uid] && ONLINE.user.name)) await withTimeout(ONLINE.backend.joinRoom(code, uid, ONLINE.user.name), 15000, "網絡太慢，入唔到房間。請再試。");
+  else ONLINE.backend.request(code, uid, {type:"here", t:Date.now()}).catch(()=>{});   // 返嚟房：通知房主取消「已離開」
   await withTimeout(enterRoom(code), 15000, "連唔到房間，請再試。");
 }
 function enterRoom(code){
@@ -2853,6 +3005,8 @@ function onRoomSnap(d){
     leaveRoom(); return;
   }
   canWrite = ONLINE.isHost; applyMode();
+  const myN = (d.members || {})[ONLINE.user.uid];
+  if(myN==="" && ONLINE.user.name && !ONLINE.nameFixing){ ONLINE.nameFixing = true; ONLINE.backend.joinRoom(ONLINE.room, ONLINE.user.uid, ONLINE.user.name).catch(()=>{}).finally(()=>{ ONLINE.nameFixing = false; }); }
   if((!ONLINE.isHost || ONLINE.firstSnap) && d.state && d.state!==ONLINE.lastSent){
     const before = ONLINE.firstSnap ? null : {n:state.hands.length, gid:state.gameId, players:state.players.slice()};
     try{ state = Object.assign(DEFAULT_STATE(), JSON.parse(d.state)); }catch(e){}
@@ -2885,6 +3039,13 @@ function hostBeat(){
 }
 const hostAway = () => { const d = ONLINE.roomDoc; if(!d || ONLINE.isHost) return 0; const t = Date.now() - (d.hostSeen || d.updatedAt || d.createdAt || 0); return t > HOST_STALE ? t : 0; };
 setInterval(()=>{ if(ONLINE.room && !ONLINE.isHost){ renderRoomBar(); if(openSheet && openSheet.id==="roomSheet") renderRoomSheet(); } }, 20000);
+// 保險：即時同步偶然斷咗（例如 iPhone 捷徑／IG 內置瀏覽器），每 15 秒主動讀一次房間，撤銷、入房、離開、改名都會跟到
+setInterval(()=>{
+  if(!ONLINE.room || ONLINE.isHost || document.visibilityState!=="visible" || ONLINE.polling) return;
+  if(Date.now() - (ONLINE.syncedAt || 0) < 15000) return;
+  const code = ONLINE.room; ONLINE.polling = true;
+  ONLINE.backend.getRoom(code).then(d=>{ if(d && ONLINE.room===code) onRoomSnap(d); }).catch(()=>{}).finally(()=>{ ONLINE.polling = false; });
+}, 15000);
 async function takeOver(){
   const d = ONLINE.roomDoc; if(!d) return;
   askConfirm("接手做房主？", `${d.hostName || "房主"} 已經 ${Math.floor(hostAway()/60000)} 分鐘冇回應。接手之後由你記錄同改設定；佢返嚟會變返普通玩家。`, "接手", async ()=>{
@@ -2905,7 +3066,9 @@ function liveHandToast(before){
   const P = state.players, n = state.hands.length;
   if(n < before.n){ toast("房主撤銷咗上一項記錄。"); return; }
   if(n === before.n) return;
-  const h = state.hands[n-1];
+  const fresh = state.hands.slice(before.n), jw = fresh.find(x=>x.kind==="jp" && x.jp<0);
+  if(jw){ toast(jw.desc); return; }
+  const h = fresh.filter(x=>!x.auto).pop(); if(!h) return;
   let t = "";
   if(h.kind==="win"){
     const wins = state.hands.slice(before.n).filter(x=>x.kind==="win");
@@ -2917,11 +3080,15 @@ function liveHandToast(before){
 // 房主：同步成員改名；處理閒家喺自己手機送嚟嘅投降
 function hostProcess(d){
   let changed = false;
+  const nowM = Object.keys(d.members || {});
+  if(ONLINE.prevMembers) ONLINE.prevMembers.filter(u=>!nowM.includes(u) && u!==ONLINE.user.uid).forEach(u=>toast(`${ONLINE.memberNames[u] || "有人"} 離開咗房間。`));
+  if(ONLINE.prevMembers) nowM.filter(u=>!ONLINE.prevMembers.includes(u) && u!==ONLINE.user.uid && d.members[u]).forEach(u=>{ if(!(state.uids||[]).includes(u)) return; toast(`${d.members[u]} 入咗房。`); });
+  ONLINE.prevMembers = nowM; ONLINE.memberNames = Object.assign({}, ONLINE.memberNames, d.members);
   const uids = state.uids || [];
   uids.forEach((u,i)=>{ if(u && d.members && d.members[u] && state.players[i]!==d.members[u]){ state.players[i] = d.members[u]; changed = true; } });
   // 新入房嘅朋友：自動坐入第一個空位（未改名嘅「玩家n」位）
   if(!state.ended) for(const [u,n] of Object.entries(d.members || {})){
-    if((state.uids || []).includes(u)) continue;
+    if((state.uids || []).includes(u) || !n) continue;
     const i = [0,1,2,3].find(k=>!(state.uids || [])[k]);    // 按次序換走虛擬玩家；坐滿真人就唔換
     if(i===undefined) break;
     state.uids = (state.uids || [null,null,null,null]).slice(); state.uids[i] = u; state.players[i] = n; changed = true;
@@ -2931,6 +3098,8 @@ function hostProcess(d){
     if(!r || ONLINE.handledReq[u]===r.t) continue;
     ONLINE.handledReq[u] = r.t;
     if(r.type==="prof"){ state.profV = Date.now(); changed = true; }
+    else if(r.type==="leave"){ state.left = Object.assign({}, state.left, {[u]:1}); changed = true; toast(`${(d.members||{})[u] || "有人"} 離開咗房間。`); }
+    else if(r.type==="here" && state.left && state.left[u]){ state.left = Object.assign({}, state.left); delete state.left[u]; changed = true; toast(`${(d.members||{})[u] || "有人"} 返咗嚟。`); }
     else if(r.type==="surr" && uids[r.p]===u && state.dealer===r.dealer && state.streak===r.streak && canSurrNow(r.p)){
       recordSurrender(r.p); changed = false;
       toast(`${state.players[r.p]} 投降咗。`);
@@ -2960,6 +3129,7 @@ function leaveRoom(quiet){
   if(was){
     state = DEFAULT_STATE();
     try{ const o = JSON.parse(localStorage.getItem(KEY) || "null"); if(o && o.v===1) state = Object.assign(DEFAULT_STATE(), o); }catch(e){}
+if(state.mode==="vn") state.mode = "hk";
     canWrite = true; applyMode(); render();
   }
   renderRoomBar();
@@ -3029,7 +3199,7 @@ function renderRoomSheet(){
       ${ONLINE.showQr ? qrBoxHTML(link, `朋友用相機掃呢個 QR code，登入之後就會自動入房 ${esc(ONLINE.room)}，順序換走虛擬玩家。`) : ""}
       <span class="hint">朋友打開連結登入就會入房；或者喺大廳輸入房間號碼 <b>${esc(ONLINE.room)}</b>。</span></div>
     <div class="field"><label>房間成員（${members.length}）</label><div class="mlist">
-      ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n)}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span>${ONLINE.isHost && u!==d.host ? `<span class="rm-acts"><button class="iconbtn" data-give="${esc(u)}">交房主</button><button class="iconbtn rm-kick" data-kick="${esc(u)}">移除</button></span>` : `<span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span>`}</div>`).join("")}
+      ${members.map(([u,n])=>`<div class="mrow"${state.left && state.left[u] ? ` style="opacity:.55"` : ""}><span>${esc(n || "（未有名）")}${state.left && state.left[u] ? `<span class="hint">（已離開）</span>` : ""}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span>${ONLINE.isHost && u!==d.host ? `<span class="rm-acts"><button class="iconbtn" data-give="${esc(u)}">交房主</button><button class="iconbtn rm-kick" data-kick="${esc(u)}">移除</button></span>` : `<span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span>`}</div>`).join("")}
     </div></div>
     ${ONLINE.isHost ? (()=>{ const others = members.filter(([u])=>u!==d.host); return `<div class="field"><label>轉讓房主</label>${others.length ? `<div style="display:flex;gap:8px"><select id="rmGiveSel" style="flex:1">${others.map(([u,n])=>`<option value="${esc(u)}">${esc(n)}</option>`).join("")}</select><button class="btn primary" id="rmGive" style="flex:0 0 auto">交房主</button></div>` : `<span class="hint">房間入面暫時得你一個。朋友入咗房之後，就可以喺度將房主交俾佢。</span>`}</div>`; })() : ""}
     ${seats}
@@ -3053,12 +3223,18 @@ function renderRoomSheet(){
   if($("rmTake")) $("rmTake").onclick = takeOver;
   box.querySelectorAll("[data-give]").forEach(b=>b.onclick = () => giveHost(b.dataset.give));
   if($("rmGive")) $("rmGive").onclick = () => giveHost($("rmGiveSel").value);
+  // 離開：未有份打緊嘅局就退出成員名單；坐咗位打緊（要結算記小氣簿）就保留成員身份，只通知房主「已離開」
+  const quit = async () => {
+    const code = ONLINE.room, me = ONLINE.user.uid;
+    const inGame = (state.uids || []).includes(me) && !state.ended && state.hands.length;
+    try{ if(inGame) await ONLINE.backend.request(code, me, {type:"leave", t:Date.now()}); else await ONLINE.backend.leaveRoom(code, me); }catch(e){}
+  };
   $("rmLeave").onclick = () => {
     const others = members.filter(([u])=>u!==ONLINE.user.uid);
-    if(!ONLINE.isHost || !others.length){ hideSheet(); leaveRoom(); return; }
+    if(!ONLINE.isHost || !others.length){ hideSheet(); if(!ONLINE.isHost) quit(); leaveRoom(); return; }
     const seated = others.find(([u])=>uids.includes(u)) || others[0];
     askConfirm("離開房間？", `你係房主。離開之後房主會自動交俾 ${seated[1]}，佢可以繼續記錄。`, "交俾佢並離開", async ()=>{
-      try{ onlinePushNow(); await ONLINE.backend.setHost(ONLINE.room, seated[0], seated[1]); }catch(e){}
+      try{ onlinePushNow(); await ONLINE.backend.setHost(ONLINE.room, seated[0], seated[1]); await quit(); }catch(e){}
       hideSheet(); leaveRoom();
     });
   };
@@ -3993,6 +4169,8 @@ async function onlineStart(){
   ONLINE.wantRoom = wanted || null; renderLobby();
   ONLINE.backend.onUser(async u=>{
     const prev = ONLINE.user;
+    // 啱啱註冊：Firebase 未寫好 displayName 就已經通知登入，用返登入表格／記住我嘅暱稱
+    if(u && !u.name){ const a = autoGet(); u.name = ONLINE.pendNick || (a && a.nick) || ""; }
     ONLINE.user = u; ONLINE.games = null;
     if(!u && !ONLINE.autoTried){
       ONLINE.autoTried = true;
@@ -4002,7 +4180,7 @@ async function onlineStart(){
     if(!u){ ONLINE.me = null; stopMeWatch(); stopYueWatch(); applyVipPerks(); if(prev) leaveRoom(true); showLobby(); renderInvite(); return; }
     if(isAdminUser()){ location.replace("admin.html" + (ONLINE.mock ? "?mock=1" : "")); return; }
     if(await ONLINE.backend.isRemoved(u.uid)){ toast("呢個帳戶已經被管理員移除。"); autoSave(null); await ONLINE.backend.logout(); return; }
-    ONLINE.backend.saveProfile(u.uid, {name:u.name, lastLogin:Date.now()}).catch(()=>{});
+    ONLINE.backend.saveProfile(u.uid, u.name ? {name:u.name, lastLogin:Date.now()} : {lastLogin:Date.now()}).catch(()=>{});
     startMeWatch(u.uid);
     loadInbox();
     startYueWatch();
