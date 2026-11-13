@@ -687,6 +687,10 @@ const SHELL = `<div class="splash" id="splash" hidden>
     <span class="lbl">點樣食</span>
     <div class="seg" id="modeSeg"></div>
   </div>
+  <div class="field" id="baoField" hidden>
+    <div class="seg" id="baoToggle"></div>
+    <div class="seg" id="baoSeg" style="margin-top:8px"></div>
+  </div>
   <div class="field" id="discarderField">
     <span class="lbl">邊個出銃</span>
     <div class="seg" id="discarderSeg"></div>
@@ -925,7 +929,7 @@ const seatWind = (p, dealer=state.dealer) => WINDS[(p - dealer + 4) % 4];
 const fmt = v => { const a = Math.abs(v); const s = Number.isInteger(a) ? a.toString() : a.toFixed(1); return (v>0?"+":v<0?"−":"") + "$" + s; };
 const cls = v => v>0?"pos":v<0?"neg":"zero";
 
-function computeWin(winner, discarder, fan){
+function computeWin(winner, discarder, fan, bao){
   const deltas = [0,0,0,0], rows = [];
   if(isPM()){
     // 跑馬仔：每份 = 每底 × 2^番（封頂）；自摸三家各俾一份，出銃包一份；莊家有份就另加 (1 + 連莊數) 底
@@ -953,12 +957,12 @@ function computeWin(winner, discarder, fan){
   if(isHK()){
     const pts = hkPoints(fan), X = pts * state.hk.unit;
     const shares = discarder===null
-      ? [0,1,2,3].filter(p=>p!==winner).map(p=>[p,0.5])
+      ? (bao!=null && bao!==winner ? [[bao,1.5]] : [0,1,2,3].filter(p=>p!==winner).map(p=>[p,0.5]))
       : (state.hk.shoot==="half" ? [0,1,2,3].filter(p=>p!==winner).map(p=>[p, p===discarder?0.5:0.25]) : [[discarder,1]]);
     for(const [p,share] of shares){
       const amt = Math.round(X*share*100)/100;
       deltas[p] -= amt; deltas[winner] += amt;
-      rows.push({p, bonus:0, total:fan, amt, label:`${Math.min(fan,state.hk.cap)}番 = ${pts}點${share<1?` × ${share===0.5?"½":"¼"}`:""}`});
+      rows.push({p, bonus:0, total:fan, amt, label:share===1.5 ? `包自摸：${Math.min(fan,state.hk.cap)}番 = ${pts}點 × ½ × 3 家` : `${Math.min(fan,state.hk.cap)}番 = ${pts}點${share<1?` × ${share===0.5?"½":"¼"}`:""}`});
     }
     return {deltas, rows};
   }
@@ -999,7 +1003,8 @@ function advanceDealer(){
 }
 // list = [{winner, fan, items}] ; more than one entry = 一炮雙響／三響 (discarder pays each winner)
 const MULTI = {2:{name:"雙響", fan:5, revenge:10}, 3:{name:"三響", fan:10, revenge:20}};
-function recordWins(list, discarder){
+function recordWins(list, discarder, bao){
+  if(!(isHK() && discarder===null && bao!=null)) bao = null;
   const prev = snap();
   const n = list.length, M = isCant() ? null : (MULTI[n] || null);
   const group = n>1 ? Date.now() : null;
@@ -1008,7 +1013,7 @@ function recordWins(list, discarder){
   list.forEach((w,i)=>{
     const items = (w.items||[]).slice(); let fan = w.fan;
     if(M){ items.push({name:M.name, fan:M.fan}); fan += M.fan; }
-    const {deltas} = computeWin(w.winner, discarder, fan);
+    const {deltas} = computeWin(w.winner, discarder, fan, bao);
     let rev = null;
     if(R && R.from===w.winner){
       const amt = Math.round(R.fan*state.rate*100)/100;
@@ -1016,7 +1021,7 @@ function recordWins(list, discarder){
       rev = {targets:R.targets.slice(), fan:R.fan}; usedRevenge = true;
     }
     state.hands.push({kind:"win", t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak,
-      winner:w.winner, discarder, fan, items, deltas, revenge:rev, group, groupFirst: i===0, multi: n>1 ? n : 0, prev: i===0 ? prev : null});
+      winner:w.winner, discarder, bao, fan, items, deltas, revenge:rev, group, groupFirst: i===0, multi: n>1 ? n : 0, prev: i===0 ? prev : null});
   });
   if(usedRevenge) state.revenge = null;
   if(M) state.revenge = {from:discarder, targets:list.map(w=>w.winner), fan:M.revenge};
@@ -1193,7 +1198,7 @@ function render(){
     }
     const dealerTxt = `${esc(state.players[h.dealer])}莊${h.streak?" 連"+h.streak:""}`;
     if(h.kind==="draw") return `<div class="hand"><span class="tag">${tag}</span><span class="what">流局</span><span class="sub">${dealerTxt} · ${h.pass ? "過莊" : "莊家連莊"}</span></div>`;
-    const how = (h.discarder===null ? "自摸" : `食 ${esc(state.players[h.discarder])} 出銃`) + (h.multi ? `（一炮${MULTI[h.multi].name}）` : "");
+    const how = (h.discarder===null ? (h.bao!=null ? `自摸（${esc(state.players[h.bao])} 包自摸）` : "自摸") : `食 ${esc(state.players[h.discarder])} 出銃`) + (h.multi ? `（一炮${MULTI[h.multi].name}）` : "");
     const revTxt = h.revenge ? ` · 反雪收 ${h.revenge.targets.map(t=>esc(state.players[t])).join("、")} 各 ${h.revenge.fan} 番` : "";
     const d = h.deltas.map((v,p)=>v?`<span class="num ${cls(v)}">${esc(state.players[p])} ${fmt(v)}</span>`:"").join("");
     const items = h.items && h.items.length ? " · " + h.items.map(x=>esc(x.name)).join("、") : "";
@@ -1259,6 +1264,7 @@ function swapSeats(a, b){
     const o = Object.assign({}, h, {deltas:sw(h.deltas), dealer:m(h.dealer)});
     if("winner" in h) o.winner = m(h.winner);
     if(h.discarder!=null) o.discarder = m(h.discarder);
+    if(h.bao!=null) o.bao = m(h.bao);
     if("player" in h) o.player = m(h.player);
     if(h.revenge) o.revenge = fixRev(h.revenge);
     if(h.prev) o.prev = fixSnap(h.prev);
@@ -1873,7 +1879,7 @@ $("undoBtn").onclick = ()=>{ if(canWrite && !saving) undo(); };
 let ws = null;
 function openWin(winner){
   if(!canWrite || saving || state.ended) return;
-  ws = {winner, discarder:(winner+3)%4, items:[], adj:0, photo:null, extra:{}};   // 預設食上家出銃
+  ws = {winner, discarder:(winner+3)%4, bao:null, items:[], adj:0, photo:null, extra:{}};   // 預設食上家出銃
   $("winErr").hidden = true;
   buildCatalog();
   renderWin();
@@ -1889,6 +1895,18 @@ function renderWin(){
   $("modeSeg").innerHTML = `<button class="opt${self?" on":""}" data-m="self">自摸（三家找）</button><button class="opt${!self?" on":""}" data-m="d">食出銃</button>`;
   $("modeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.discarder = b.dataset.m==="self" ? null : (ws.discarder ?? [0,1,2,3].find(p=>p!==ws.winner)); if(b.dataset.m!=="self" && ws.discarder===null) ws.discarder=[0,1,2,3].find(p=>p!==ws.winner); renderWin(); });
   $("discarderField").hidden = self;
+  // 廣東牌包自摸：揀咗就由嗰家一個人俾晒三家嘅數
+  const baoOk = self && isHK();
+  if(!baoOk || ws.bao===w) ws.bao = baoOk && ws.bao!==w ? ws.bao : null;
+  $("baoField").hidden = !baoOk;
+  if(baoOk){
+    const on = ws.bao!==null && ws.bao!==undefined;
+    $("baoToggle").innerHTML = `<button class="opt${on?" on":""}" data-bao="t">${on?"✓ ":""}包自摸</button>`;
+    $("baoToggle").querySelector("button").onclick = ()=>{ ws.bao = on ? null : [0,1,2,3].find(p=>p!==w); renderWin(); };
+    $("baoSeg").hidden = !on;
+    $("baoSeg").innerHTML = on ? [0,1,2,3].filter(p=>p!==w).map(p=>`<button class="opt${p===ws.bao?" redon":""}" data-i="${p}">${esc(state.players[p])} 包</button>`).join("") : "";
+    $("baoSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ ws.bao=+b.dataset.i; renderWin(); });
+  }
   $("multiField").hidden = self;
   if(self) ws.extra = {};
   else {
@@ -1925,7 +1943,7 @@ function renderPay(){
   const R = state.revenge;
   list.forEach(x=>{
     const fan = x.fan + (M ? M.fan : 0);
-    const {rows} = computeWin(x.winner, ws.discarder, fan);
+    const {rows} = computeWin(x.winner, ws.discarder, fan, isHK() && ws.discarder===null ? ws.bao : null);
     let sum = rows.reduce((a,r)=>a+r.amt,0);
     html += rows.map(r=>`<div class="r"><span>${esc(state.players[r.p])} 俾 ${list.length>1?esc(state.players[x.winner])+" ":""}<small>${r.label || `底${state.base} + ${fan}番${r.bonus?` + 莊${state.dealerFan}${r.bonus>state.dealerFan?`＋連拉${r.bonus-state.dealerFan}`:""}`:""} = ${r.total}番`}</small></span><span class="neg">−$${r.amt}</span></div>`).join("");
     if(R && R.from===x.winner){
@@ -1977,7 +1995,7 @@ $("confirmWin").onclick = ()=>{
   }
   const items = ws.items.slice(); if(ws.adj) items.push({name:"手動調整", fan:ws.adj});
   const list = [{winner:ws.winner, fan:fanTotal(), items}].concat(Object.keys(ws.extra).map(k=>({winner:+k, fan:ws.extra[k], items:[]})));
-  recordWins(list, ws.discarder);
+  recordWins(list, ws.discarder, ws.bao);
   hideSheet();
 };
 
@@ -2891,7 +2909,7 @@ function liveHandToast(before){
   let t = "";
   if(h.kind==="win"){
     const wins = state.hands.slice(before.n).filter(x=>x.kind==="win");
-    t = wins.map(w=>`${P[w.winner]} ${w.discarder==null ? "自摸" : "食 " + P[w.discarder]} ${w.fan} ${PT_UNIT()}，${fmt(w.deltas[w.winner])}`).join("；");
+    t = wins.map(w=>`${P[w.winner]} ${w.discarder==null ? (w.bao!=null ? `自摸（${P[w.bao]} 包）` : "自摸") : "食 " + P[w.discarder]} ${w.fan} ${PT_UNIT()}，${fmt(w.deltas[w.winner])}`).join("；");
   } else if(h.kind==="draw") t = h.pass ? "流局，過莊。" : "流局，莊家連莊。";
   else if(h.kind==="side") t = `${P[h.player] || ""}：${h.desc || ""}`;
   if(t) toast("🀄 " + t);
