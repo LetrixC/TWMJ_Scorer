@@ -3023,6 +3023,9 @@ function onRoomSnap(d){
   ONLINE.lastEndKey = endKey;
   // 結算時重新攞一次各人資料（收款資料可能啱啱先填）
   if(endKey && ONLINE.payKey!==endKey){ ONLINE.payKey = endKey; (state.uids || []).forEach(u=>{ if(u && u!==ONLINE.user.uid) delete ONLINE.profiles[u]; }); }
+  // 有人改咗外框／VIP（或者返嚟房）：所有人即時重新讀佢嘅資料
+  ONLINE.profSeen = ONLINE.profSeen || {};
+  Object.entries(d.req || {}).forEach(([u,r])=>{ if(r && (r.type==="prof" || r.type==="here") && r.t && r.t!==ONLINE.profSeen[u]){ ONLINE.profSeen[u] = r.t; if(u!==ONLINE.user.uid) delete ONLINE.profiles[u]; } });
   if(state.profV && state.profV!==ONLINE.profV){ ONLINE.profV = state.profV; const me = ONLINE.user && ONLINE.profiles[ONLINE.user.uid]; ONLINE.profiles = {}; if(me) ONLINE.profiles[ONLINE.user.uid] = me; }
   if(ONLINE.isHost) hostProcess(d);
   ensureProfiles(Object.keys(d.members || {}).concat(state.uids || []));
@@ -3108,11 +3111,16 @@ function hostProcess(d){
   }
   if(changed){ render(); save(); }
 }
-document.addEventListener("visibilitychange", ()=>{
-  if(document.visibilityState!=="visible" || !ONLINE.room) return;
-  ONLINE.backend.getRoom(ONLINE.room).then(d=>{ if(d && ONLINE.room) onRoomSnap(d); }).catch(()=>{});
-  subscribeRoom(ONLINE.room);
-});
+// 返到前台／網絡恢復：即刻讀一次房間、重新連線；房主順手將最新記錄再推一次
+function resyncRoom(){
+  if(!ONLINE.room) return;
+  const code = ONLINE.room;
+  ONLINE.backend.getRoom(code).then(d=>{ if(d && ONLINE.room===code){ onRoomSnap(d); if(ONLINE.isHost && d.state!==JSON.stringify(state)) onlinePush(); } }).catch(()=>{});
+  subscribeRoom(code);
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") resyncRoom(); });
+window.addEventListener("online", resyncRoom);
+window.addEventListener("pageshow", e=>{ if(e.persisted) resyncRoom(); });
 window.__canSurr = p => !ONLINE.room ? canWrite : (ONLINE.isHost ? !(state.uids && state.uids[p] && state.uids[p]!==ONLINE.user.uid) : !!(state.uids && state.uids[p]===ONLINE.user.uid));
 window.__surrender = async p => {
   if(!ONLINE.room || ONLINE.isHost){ if(canWrite) recordSurrender(p); return; }
@@ -3141,9 +3149,14 @@ function onlinePush(){
     if(!ONLINE.room || !ONLINE.isHost) return;
     const json = JSON.stringify(state);
     ONLINE.lastSent = json;
-    try{ await ONLINE.backend.pushState(ONLINE.room, json); }
-    catch(e){ toast("同步唔到房間，請檢查網絡。"); }
-  }, 250);
+    try{ await ONLINE.backend.pushState(ONLINE.room, json); ONLINE.pushFails = 0; }
+    catch(e){
+      // 網絡唔穩：自動再試（最多 5 次），唔使房主再撳
+      ONLINE.pushFails = (ONLINE.pushFails || 0) + 1;
+      if(ONLINE.pushFails <= 5) setTimeout(()=>{ if(ONLINE.lastSent===json) onlinePush(); }, 1500 * ONLINE.pushFails);
+      else toast("同步唔到房間，請檢查網絡。");
+    }
+  }, 80);
 }
 function onlinePushNow(){ clearTimeout(ONLINE.pushTimer); if(!ONLINE.room || !ONLINE.isHost) return; const json = JSON.stringify(state); ONLINE.lastSent = json; ONLINE.backend.pushState(ONLINE.room, json).catch(()=>{}); }
 window.__onlineSave = () => { if(!ONLINE.room) return false; if(ONLINE.isHost) onlinePush(); return true; };
@@ -3903,9 +3916,12 @@ function renderInbox(){
 }
 // 喺房間改咗外框：通知其他人重新讀取（房主直接改，其他人經房主）
 function notifyProfile(){
-  if(!ONLINE.room) return;
-  if(ONLINE.isHost){ state.profV = Date.now(); ONLINE.profV = state.profV; save(); }
-  else ONLINE.backend.request(ONLINE.room, ONLINE.user.uid, {type:"prof", t:Date.now()}).catch(()=>{});
+  // 喺大廳改都通知上次嗰間房（返去嗰陣其他人已經見到新外框）
+  let code = ONLINE.room; if(!code){ try{ code = localStorage.getItem("fansyu-lastroom"); }catch(e){} }
+  if(!code || !ONLINE.user) return;
+  // 每個人都會收到房間更新入面嘅 req，直接重新讀我嘅資料，唔使等房主轉達
+  ONLINE.backend.request(code, ONLINE.user.uid, {type:"prof", t:Date.now()}).catch(()=>{});
+  if(ONLINE.room && ONLINE.isHost){ state.profV = Date.now(); ONLINE.profV = state.profV; save(); }
 }
 // 設定入面嘅「外框」：只顯示自己擁有嘅（隱藏選項）
 function frameFieldHTML(){

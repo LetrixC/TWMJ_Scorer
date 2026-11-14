@@ -545,7 +545,7 @@ $("bulkBtn").onclick = async () => {
   if(!await confirmBox(`移除 ${stale.length} 位一年內冇上線嘅玩家？`, "以下玩家超過一年冇登入。確認之後會刪走佢哋嘅資料同小氣簿，並封鎖登入，冇得還原。", stale.map(u=>u.name), `確認移除 ${stale.length} 位`)) return;
   await removeUsers(stale);
 };
-$("outBtn").onclick = async () => { await B.logout(); toApp(); };
+$("outBtn").onclick = async () => { try{ localStorage.removeItem("fansyu-auto"); }catch(e){} await B.logout(); toApp(); };
 
 (async function start(){
   const cfg = (typeof firebaseConfig !== "undefined" && firebaseConfig) || null;
