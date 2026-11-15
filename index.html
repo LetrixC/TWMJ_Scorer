@@ -228,6 +228,13 @@ input[type=text],input[type=number]{font:inherit;font-size:16px;padding:10px 12p
 .prefix{position:relative}
 .prefix span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
 .prefix input{padding-left:44px}
+.suffix{position:relative}
+.suffix span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.suffix input{padding-right:76px}
+.opt small{display:block;font-size:11px;font-weight:500;opacity:.8;margin-top:2px}
+.side.hk1 > :not(#zhaBtn){display:none!important}
+#zhaBtn{width:100%}
+#zhaBtn small{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:2px}
 .hint{font-size:12px;color:var(--muted)}
 
 .fanbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
@@ -346,7 +353,26 @@ body:not(.ro) .view-only{display:none!important}
 .st-foot{font-size:11px;color:var(--felt-muted);text-align:center}
 .settle-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .settle-actions .full{grid-column:1/-1}
-#shareImg{display:block;width:auto;max-width:100%;max-height:56vh;margin:0 auto;border-radius:14px;border:1px solid var(--line)}
+#shareImg{display:block;width:auto;max-width:min(100%,300px);max-height:44vh;margin:0 auto 12px;border-radius:14px;border:1px solid var(--line)}
+#shareSheet #shareHint{text-align:center;margin:0 0 10px}
+.sty-frame,.sty-cn{display:none}
+/* 正方形戰績圖（WhatsApp／Telegram／Signal 用，1080×1080） */
+.story.sq{height:360px;padding:18px 20px 14px;gap:8px}
+.sq .sty-head{gap:10px}
+.sq .sty-logo{width:46px;height:46px}
+.sq .sty-logo.tint{padding:5px}
+.sq .sty-title{font-size:25px;letter-spacing:.1em}
+.sq .sty-meta{margin-top:4px}
+.sq-quote{background:rgba(255,255,255,.14);border-radius:12px;padding:7px 12px;font-size:14px;line-height:1.4;font-weight:700;text-align:center}
+.sq-quote small{display:block;font-size:11px;font-weight:500;opacity:.8;margin-top:1px}
+.sq .sty-list{gap:6px;justify-content:center}
+.sq .sty-row{padding:5px 12px;border-radius:11px;grid-template-columns:22px 1fr auto}
+.sq .sty-row.me{box-shadow:0 0 0 2px var(--felt-ink)}
+.sq .sty-row.first{box-shadow:0 0 0 2px #E2B53E}
+.sq .sty-rk{font-size:17px}
+.sq .sty-name{font-size:15px}
+.sq .sty-score b{font-size:16px}
+.sq .sty-foot{font-size:11px;letter-spacing:.04em}
 /* 9:16 story card for sharing (IG 限時動態 1080×1920) */
 .story{width:360px;height:640px;box-sizing:border-box;padding:76px 20px 60px;background:var(--felt);color:var(--felt-ink);font-family:var(--f-body);
   display:flex;flex-direction:column;gap:16px;background-image:radial-gradient(circle at 50% 0%,rgba(255,255,255,.14),transparent 55%)}
@@ -436,6 +462,17 @@ button.modechip::after{content:" ⇄";font-size:11px}
 @keyframes tapblink{0%,100%{opacity:.35}50%{opacity:1}}
 .splash-note{margin:4px 0 0;font-size:13px;color:var(--red);font-weight:700}
 .modechip{font-family:var(--f-body);font-size:12px;font-weight:700;color:var(--navy);border:1.5px solid var(--navy);border-radius:999px;padding:1px 8px;letter-spacing:.04em}
+.seatrow2{display:grid;grid-template-columns:40px 1fr 44px;gap:8px;align-items:center;margin-bottom:6px}
+.seatrow2 .w{font-family:var(--f-display);font-weight:900;font-size:18px;text-align:center}
+.seatchip{font:inherit;font-size:16px;font-weight:700;text-align:left;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;display:flex;align-items:center;gap:8px}
+.seatchip small{font-size:11px;font-weight:500;color:var(--muted);margin-left:auto;flex:none}
+.seatchip.empty{border-style:dashed;color:var(--muted);font-weight:500;cursor:default;background:transparent}
+.seatrow2 input{font:inherit;font-size:16px;padding:10px 12px;border-radius:12px;border:2px solid var(--head);background:var(--surface);color:var(--fg);min-width:0;width:100%;box-sizing:border-box}
+.seatrow2 .iconbtn{width:44px;height:44px;padding:0}
+.seatpool{margin-top:10px;padding:10px 12px;border-radius:14px;border:1px dashed var(--line);background:rgba(127,127,127,.06)}
+.seatpool .lbl{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
+#seatPool{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;align-items:center}
+#seatPool .seatchip{border-color:var(--head);padding:9px 14px}
 .swaprow{display:grid;grid-template-columns:40px 1fr auto;gap:8px;align-items:center;margin-bottom:6px}
 .swaprow .w{font-weight:900;text-align:center}.swaprow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .swaprow select{font:inherit;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);max-width:170px}
@@ -550,6 +587,7 @@ const SHELL = `<div class="splash" id="splash" hidden>
       <button class="btn" data-side="zhading" disabled>詐叮<small>比三家各 20 番</small></button>
     </div>
     <div class="dingrow" hidden><span class="lbl">詐糊／詐叮另計叮</span><span id="dingSeg" class="dingrow"></span></div>
+    <button class="btn" id="zhaBtn" hidden>詐糊<small></small></button>
     <span class="hint" id="sideHint">先揀玩家，再按項目。</span>
   </div>
 
@@ -584,21 +622,17 @@ const SHELL = `<div class="splash" id="splash" hidden>
 <div class="sheet" id="shareSheet" hidden role="dialog" aria-label="分享戰績">
   <div class="grab"></div>
   <h3>分享戰績</h3>
-  <div class="field" id="shWhoWrap"><label>以邊個身份分享</label><div class="grid4" id="shWho"></div></div>
+  <div class="field" id="shWhoWrap" hidden><label>你係邊個</label><div class="grid4" id="shWho"></div></div>
   <div class="sh-quote" id="shQuote"></div>
+  <img id="shareImg" alt="正方形戰績圖" hidden>
+  <p class="hint" id="shareHint" role="status">製作圖片中…</p>
   <div class="share-grid">
-    <button class="btn sh-wa" data-ssh="wa">WhatsApp</button><button class="btn sh-tg" data-ssh="tg">Telegram</button>
-    <button class="btn sh-sg" data-ssh="sys">Signal／其他</button><button class="btn" data-ssh="copy">複製文字</button>
+    <button class="btn sh-wa" data-ssh="wa" disabled>WhatsApp</button><button class="btn sh-tg" data-ssh="tg" disabled>Telegram</button>
+    <button class="btn sh-sg" data-ssh="sys" disabled>Signal／其他</button><button class="btn" id="saveImgBtn" disabled>儲存圖片</button>
   </div>
-  <button class="btn sh-ig" id="nativeShareBtn" style="width:100%;margin-top:8px" disabled>IG 限時動態（圖片）</button>
-  <p class="hint" id="shareHint">製作圖片中…</p>
-  <img id="shareImg" alt="結算戰績圖（IG 限時動態 9:16）" hidden>
-  <div class="settle-actions" style="margin-top:12px">
-    <button class="btn" id="saveImgBtn" hidden>儲存圖片</button>
-    <button class="btn" id="closeShare">關閉</button>
-  </div>
+  <button class="btn sh-ig" id="nativeShareBtn" style="width:100%;margin-top:8px" disabled>IG 限時動態</button>
+  <button class="btn" id="closeShare" style="width:100%;margin-top:8px">關閉</button>
 </div>
-
 <div class="sheet" id="helpSheet" hidden role="dialog" aria-label="牌型說明">
   <div class="grab"></div>
   <div id="helpListView">
@@ -618,23 +652,22 @@ const SHELL = `<div class="splash" id="splash" hidden>
   </div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeHelp">關閉</button>
 </div>
-
+<div class="sheet" id="zhaSheet" hidden role="dialog" aria-label="詐糊">
+  <div class="grab"></div>
+  <h3>詐糊</h3>
+  <div class="field"><label>邊個詐糊</label><div class="grid4" id="zhaWho"></div></div>
+  <div class="field"><label for="zhaAmt">賠三家各</label><div class="prefix"><span>HK$</span><input type="number" id="zhaAmt" inputmode="decimal" min="0" step="1"></div>
+    <span class="hint" id="zhaHint"></span></div>
+  <div class="grid2"><button class="btn" id="zhaCancel">取消</button><button class="btn primary" id="zhaOk" disabled>記錄詐糊</button></div>
+</div>
 <div class="sheet" id="setupSheet" hidden role="dialog" aria-label="設定">
   <div class="grab"></div>
   <h3>牌局設定</h3>
-  <div class="field">
-    <label>玩家名稱（按座位逆時針：自己 → 下家 → 對家 → 上家）</label>
-    <div class="grid2">
-      <input type="text" id="p0" maxlength="8">
-      <input type="text" id="p1" maxlength="8">
-      <input type="text" id="p2" maxlength="8">
-      <input type="text" id="p3" maxlength="8">
-    </div>
-  </div>
-  <div class="field" id="swapField">
-    <label>換位（輸贏跟人走）</label>
-    <div id="swapRows"></div>
-    <span class="hint">揀「同邊個換位」，兩個人即刻對調位置，之前嘅輸贏同記錄都跟返自己。</span>
+  <div class="field" id="seatField">
+    <label>座位（按座位逆時針：自己 → 下家 → 對家 → 上家）</label>
+    <div id="seatRows"></div>
+    <div class="seatpool"><span class="lbl">被選區</span><div id="seatPool"></div></div>
+    <span class="hint">撳名：放落被選區。再撳被選區嘅名：由上而下填入空位。✎ 改名。</span>
   </div>
   <div class="field">
     <label>牌種</label>
@@ -672,17 +705,18 @@ const SHELL = `<div class="splash" id="splash" hidden>
   <div id="hkFields">
     <div class="grid2">
       <div class="field"><label for="hkUnit">每點</label><div class="prefix"><span>HK$</span><input type="number" id="hkUnit" inputmode="decimal" min="0" step="0.25"></div></div>
-      <div class="field"><label for="hkMin">起糊（番）</label><input type="number" id="hkMin" inputmode="numeric" min="0" max="13" step="1"></div>
+      <div class="field"><label for="hkMin">起糊</label><div class="suffix"><input type="text" id="hkMin" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off"><span>番起糊</span></div></div>
     </div>
     <div class="field"><label>爆棚（最高番數）</label><div class="grid4" id="hkCapSeg" style="grid-template-columns:repeat(3,1fr)"></div></div>
     <div class="field"><label>計法</label><div class="grid2" id="hkScaleSeg"></div></div>
     <div class="field"><label>出銃</label><div class="grid2" id="hkShootSeg"></div></div>
     <p class="hint" id="hkTable"></p>
+    <div class="field"><label for="hkZha">詐糊（賠三家各）</label><div class="prefix"><span>HK$</span><input type="number" id="hkZha" inputmode="decimal" min="0" step="1"></div><span class="hint" id="hkZhaHint"></span></div>
     <div class="field jp-set"><label>🎰 Jackpot</label><div class="grid2" id="jpOnSeg"></div>
       <div id="jpMore">
         <div class="grid2" style="margin-top:8px">
           <div class="field"><label for="jpAmt">每次供款（每人）</label><div class="prefix"><span>HK$</span><input type="number" id="jpAmt" inputmode="decimal" min="0" step="1"></div></div>
-          <div class="field"><label for="jpMin">中獎番數（或以上）</label><input type="number" id="jpMin" inputmode="numeric" min="1" max="13" step="1"></div>
+          <div class="field"><label for="jpMin">中獎番數（或以上）</label><input type="text" id="jpMin" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off"></div>
         </div>
         <div class="field"><label>幾時供款</label><div class="grid2" id="jpWhenSeg"></div></div>
         <div class="field"><label>中獎條件</label><div class="grid2" id="jpSelfSeg"></div></div>
@@ -883,8 +917,9 @@ const RATE_TXT = () => isHK() ? `每點 HK$${state.hk.unit}` : isVN() ? `每分 
 function cantZhahuEach(){
   if(isPM()) return Math.round(Math.pow(2, state.pm.cap) * state.pm.unit * 100)/100;
   if(isVN()) return Math.round(32 * state.vn.unit * 100)/100;      // 賠每家 1 滿（單）
-  return Math.round(hkPoints(state.hk.cap) * state.hk.unit / 2 * 100)/100;
+  return state.hk.zha!=null && state.hk.zha>=0 ? state.hk.zha : hkZhaDefault();
 }
+const hkZhaDefault = () => Math.round(hkPoints(state.hk.cap) * state.hk.unit / 2 * 100)/100;
 // 越南牌：6 番 = 1 滿；回傳 {single, double} 分
 function vnPts(fan){
   const V = state.vn || {extra:6, bonus:0};
@@ -1070,10 +1105,23 @@ const jpPool = () => Math.round(((state.jpCarry || 0) + state.hands.reduce((a,h)
 const JP_WHEN = [["hand","每鋪"],["draw","流局"],["shoot","出銃（出銃者供）"],["round","每個圈"]];
 function jpHit(fan, self){ const c = jpCfg(); return jpOn() && fan >= c.min && (!c.self || self); }
 function jpPush(deltas, jp, desc, prev){ state.hands.push({kind:"jp", auto:true, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, jp, desc, prev}); }
-// 每記完一鋪之後：先派彩（如有），再按設定供款
+// 每記完一鋪：「每鋪」當係開打前供（計入今鋪個池），之後派彩；其餘（流局／出銃／過圈）係派彩之後先供
 function jpAfter(ev){
   if(!jpOn()) return;
   const c = jpCfg(), amt = Math.round(c.amt*100)/100, prev = ev.prev;
+  const give = () => {
+    if(!(amt > 0)) return;
+    let who = [];
+    if(c.when==="hand") who = [0,1,2,3];
+    else if(c.when==="draw" && ev.draw) who = [0,1,2,3];
+    else if(c.when==="shoot" && ev.discarder!=null) who = [ev.discarder];
+    else if(c.when==="round" && state.round > ev.prev.round) who = [0,1,2,3];
+    if(!who.length) return;
+    const d = [0,0,0,0]; who.forEach(p=>d[p] = -amt);
+    const why = c.when==="hand" ? "每鋪" : c.when==="draw" ? "流局" : c.when==="shoot" ? `${state.players[ev.discarder]} 出銃` : "過圈";
+    jpPush(d, amt*who.length, `${why}供款：${who.length===4 ? "每人" : state.players[who[0]]} $${amt}`, prev);
+  };
+  if(c.when==="hand") give();
   if(ev.winner!=null && jpHit(ev.fan, ev.self)){
     const pool = jpPool();
     if(pool > 0){
@@ -1082,16 +1130,7 @@ function jpAfter(ev){
       ONLINE_JP_TOAST(`🎰 ${state.players[ev.winner]} 中 Jackpot！攞晒 $${pool}`);
     }
   }
-  if(!(amt > 0)) return;
-  let who = [];
-  if(c.when==="hand") who = [0,1,2,3];
-  else if(c.when==="draw" && ev.draw) who = [0,1,2,3];
-  else if(c.when==="shoot" && ev.discarder!=null) who = [ev.discarder];
-  else if(c.when==="round" && state.round > ev.prev.round) who = [0,1,2,3];
-  if(!who.length) return;
-  const d = [0,0,0,0]; who.forEach(p=>d[p] = -amt);
-  const why = c.when==="hand" ? "每鋪" : c.when==="draw" ? "流局" : c.when==="shoot" ? `${state.players[ev.discarder]} 出銃` : "過圈";
-  jpPush(d, amt*who.length, `${why}供款：${who.length===4 ? "每人" : state.players[who[0]]} $${amt}`, prev);
+  if(c.when!=="hand") give();
 }
 function ONLINE_JP_TOAST(t){ try{ toast(t); }catch(e){} }
 function recordWin(winner, discarder, fan, items){ recordWins([{winner, fan, items}], discarder); }
@@ -1141,11 +1180,12 @@ function recordSide(type, p){
     deltas[q] -= sign*a; deltas[p] += sign*a;
   }
   const dTxt = extra ? (isPM() ? `；同莊家之間加 ${1+state.streak} 底` : `；同莊家之間加莊 ${state.dealerFan} 番${state.streak?`＋連${state.streak}拉${state.streak}`:""}`) : "";
-  const desc = cz ? `賠三家各 $${amt}（按封頂自摸計）${dTxt}` : S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}${dTxt}` : S.mult ? `收三家各 ${fanEach} 番（${S.mult===1?"1":"半"}底）` : S.pm ? `收三家各 ${state.pm[S.pm]} 底（$${amt}）` : S.desc;
+  const desc = cz ? `賠三家各 $${amt}（${isHK() && state.hk.zha!=null ? "自訂" : "按封頂自摸計"}）${dTxt}` : S.fan ? `比三家各 ${fanEach} 番${S.ding && DING[dingIdx][1] ? `（含${DING[dingIdx][0]} ${DING[dingIdx][1]} 番）` : ""}${dTxt}` : S.mult ? `收三家各 ${fanEach} 番（${S.mult===1?"1":"半"}底）` : S.pm ? `收三家各 ${state.pm[S.pm]} 底（$${amt}）` : S.desc;
   const prev = snap();
   const isHand = type==="zhahu";   // 詐糊當完一鋪：閒家詐糊莊家連莊；莊家詐糊過莊
   state.hands.push({kind:"side", type, player:p, desc, t:Date.now(), round:state.round, dealer:state.dealer, streak:state.streak, deltas, prev, hand:isHand||undefined});
   if(isHand){ if(p===state.dealer) advanceDealer(); else state.streak++; }
+  if(isHand) jpAfter({prev});     // 詐糊都當一鋪：Jackpot「每鋪」「每個圈」照供
   if(S.ding) dingIdx = 0;
   render(); save();
 }
@@ -1195,6 +1235,7 @@ function applySkin(){
   if(state.skin==="beige") state.skin = "ice";
   let k = null; try{ k = localStorage.getItem("fansyu-skin"); }catch(e){}
   k = k || state.skin || "maji"; if(k==="beige") k = "ice"; if(window.__setAppIcon) window.__setAppIcon(k);
+  if(window.__a2hsSync) window.__a2hsSync();
   if(k==="default") delete document.documentElement.dataset.skin; else document.documentElement.dataset.skin = k;
 }
 const isHandStart = h => h.kind!=="jp" && (h.kind!=="side" || !!h.hand) && !(h.group && !h.groupFirst);
@@ -1287,6 +1328,10 @@ function renderSide(){
   $("dingSeg").innerHTML = DING.map((d,i)=>`<button class="opt${i===dingIdx?" on":""}" data-d="${i}">${d[0]}${d[1]?" "+d[1]:""}</button>`).join("");
   $("dingSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ dingIdx=+b.dataset.d; renderSide(); });
   $("sideLbl").textContent = isPM() ? "明槓／暗槓／詐糊" : isCant() ? "詐糊" : "暗槓／圍骰／順骰／花／詐糊／詐叮";
+  // 廣東牌：淨係一個「詐糊」掣，撳落去先揀玩家同價錢
+  document.querySelector(".side").classList.toggle("hk1", isHK());
+  $("zhaBtn").hidden = !isHK();
+  if(isHK()) $("zhaBtn").querySelector("small").textContent = `賠三家各 $${cantZhahuEach()}`;
   if(isPM()){
     const pa = state.pm;
     document.querySelector('[data-side="pmming"] small').textContent = `收三家各 ${pa.ming||0} 底`;
@@ -1314,6 +1359,27 @@ function renderSide(){
     : `${state.players[sidePlayer]}：暗槓／圍骰／一台花收三家各 $${amt}，一台草各 $${Math.round(amt*50)/100}，順骰比三家各 $${amt}；詐糊／詐叮按掣上番數比三家，詐糊同莊家之間另加莊番同連拉番。`;
 }
 
+/* 廣東牌詐糊：撳掣 → 揀玩家 → 價錢有預設，可以改 */
+let zhaP = null;
+function renderZha(){
+  $("zhaWho").innerHTML = state.players.map((n,i)=>`<button class="opt${i===zhaP?" redon":""}" data-i="${i}">${esc(n)}</button>`).join("");
+  $("zhaWho").querySelectorAll("button").forEach(b=>b.onclick = ()=>{ zhaP = +b.dataset.i; renderZha(); });
+  $("zhaOk").disabled = zhaP===null;
+  $("zhaHint").textContent = `預設 $${hkZhaDefault()}（${state.hk.cap} 番爆棚自摸嗰份），可以改；改咗之後呢個牌局會記住。${zhaP===null ? "" : zhaP===state.dealer ? `${state.players[zhaP]} 係莊家：詐糊之後過莊。` : `${state.players[zhaP]} 係閒家：詐糊之後莊家連莊。`}`;
+}
+$("zhaBtn").onclick = ()=>{ if(!canWrite || saving || state.ended) return; zhaP = null; $("zhaAmt").value = cantZhahuEach(); renderZha(); showSheet($("zhaSheet")); };
+$("zhaCancel").onclick = ()=>hideSheet();
+$("zhaOk").onclick = ()=>{
+  if(zhaP===null || !canWrite) return;
+  const v = parseFloat($("zhaAmt").value);
+  if(isNaN(v) || v<0){ $("zhaAmt").value = cantZhahuEach(); return; }
+  const r = Math.round(v*100)/100;
+  if(r===hkZhaDefault()) delete state.hk.zha; else state.hk.zha = r;
+  const p = zhaP; hideSheet();
+  recordSide("zhahu", p);
+  if(typeof toast==="function") toast(`已記錄：${state.players[p]} 詐糊，賠三家各 $${r}。`);
+};
+
 function resetGame(){
   const keep = {mode:state.mode, hk:state.hk, pm:state.pm, vn:state.vn, skin:state.skin, players:state.players, rate:state.rate, base:state.base, dealerFan:state.dealerFan, streakFan:state.streakFan, startDealer:state.startDealer};
   const carry = isHK() && jpCfg().on ? jpPool() : 0;
@@ -1322,10 +1388,11 @@ function resetGame(){
 }
 
 // 換位：兩個座位對調，所有記錄（食糊、出銃、雜項、莊家、投降、反雪）都跟人走
-function swapSeats(a, b){
-  if(a===b || !canWrite) return;
-  const m = i => i===a ? b : i===b ? a : i;
-  const sw = arr => { if(!Array.isArray(arr)) return arr; const o = arr.slice(); o[a] = arr[b]; o[b] = arr[a]; return o; };
+// 座位重排：P[新位] = 舊位。記錄入面所有同座位有關嘅嘢（輸贏、莊、食糊／出銃者…）都跟人走
+function permuteSeats(P){
+  const inv = []; P.forEach((o,n)=>{ inv[o] = n; });
+  const m = i => (i==null || inv[i]===undefined) ? i : inv[i];
+  const sw = arr => (Array.isArray(arr) && arr.length===4) ? P.map(o=>arr[o]) : arr;
   const fixRev = r => r ? Object.assign({}, r, {from:m(r.from), targets:(r.targets||[]).map(m)}) : r;
   const fixSnap = x => { if(!x) return x; const o = Object.assign({}, x); if("dealer" in o) o.dealer = m(o.dealer); if(o.surr) o.surr = sw(o.surr); if(o.revenge) o.revenge = fixRev(o.revenge); return o; };
   state.players = sw(state.players);
@@ -1343,8 +1410,95 @@ function swapSeats(a, b){
     if(h.prev) o.prev = fixSnap(h.prev);
     return o;
   });
+}
+function swapSeats(a, b){
+  if(a===b || !canWrite) return;
+  permuteSeats([0,1,2,3].map(i=>i===a ? b : i===b ? a : i));
   render(); save();
   if(typeof toast==="function") toast(`${state.players[b]} 同 ${state.players[a]} 已經換位。`);
+}
+
+/* ---------- 座位：撳名落被選區，撳被選區嘅名由上而下填入空位 ---------- */
+const PH_RE = /^玩家[1-4]$/;
+// 補位用嘅虛擬玩家：由 玩家4 → 3 → 2 → 1，揀未有人用緊嘅名
+function phName(taken){ const used = new Set(taken || state.players); for(const n of [4,3,2,1]) if(!used.has("玩家"+n)) return "玩家"+n; return "玩家"; }
+let seatDraft = null, seatRen = null;
+function seatBuild(){
+  const uids = state.uids || [null,null,null,null];
+  const D = seatDraft && seatDraft.dirty ? seatDraft
+    : {seats:[0,1,2,3].map(i=>({uid:uids[i] || null, name:state.players[i], from:i})), pool:[], dirty:false};
+  // 喺房間：未坐低嘅成員放入被選區，走咗嘅攞走，名跟最新
+  const mem = window.__seatMembers ? window.__seatMembers() : null;
+  if(mem){
+    const mm = new Map(mem);
+    D.seats.concat(D.pool).forEach(t=>{ if(t && t.uid && mm.get(t.uid)) t.name = mm.get(t.uid); });
+    D.pool = D.pool.filter(t=>!t.uid || mm.has(t.uid));
+    mem.forEach(([u,n])=>{ if(n && !D.seats.concat(D.pool).some(t=>t && t.uid===u)) D.pool.push({uid:u, name:n, from:null}); });
+  }
+  return seatDraft = D;
+}
+function renderSeats(){
+  const box = $("seatRows"); if(!box) return;
+  const D = seatBuild(), tag = window.__seatTag || (()=>"");
+  box.innerHTML = D.seats.map((t,i)=>{
+    const w = `<span class="w">${seatWind(i)}</span>`;
+    if(!t) return `<div class="seatrow2">${w}<span class="seatchip empty">空位</span><span></span></div>`;
+    if(seatRen===i && !D.dirty) return `<div class="seatrow2">${w}<input type="text" id="seatRenIn" maxlength="8" value="${esc(t.name)}" aria-label="${seatWind(i)}位玩家名稱"><button type="button" class="iconbtn" data-renok="${i}" aria-label="確認改名">✓</button></div>`;
+    return `<div class="seatrow2">${w}<button type="button" class="seatchip" data-seat="${i}">${esc(t.name)}<small>${t.uid ? tag(t.uid) : "訪客"}</small></button>${D.dirty ? "<span></span>" : `<button type="button" class="iconbtn" data-ren="${i}" aria-label="改 ${esc(t.name)} 嘅名">✎</button>`}</div>`;
+  }).join("");
+  $("seatPool").innerHTML = D.pool.length
+    ? D.pool.map((t,j)=>`<button type="button" class="seatchip" data-pool="${j}">${esc(t.name)}</button>`).join("")
+    : `<span class="hint">未有人</span>`;
+  box.querySelectorAll("[data-seat]").forEach(b=>b.onclick = ()=>{
+    if(!canWrite) return;
+    const i = +b.dataset.seat; seatRen = null;
+    D.pool.push(D.seats[i]); D.seats[i] = null; D.dirty = true; renderSeats();
+  });
+  $("seatPool").querySelectorAll("[data-pool]").forEach(b=>b.onclick = ()=>{
+    if(!canWrite) return;
+    const i = D.seats.findIndex(t=>!t);
+    if(i<0){ if(typeof toast==="function") toast("未有空位。先撳上面一個名，放佢落被選區。"); return; }
+    D.seats[i] = D.pool.splice(+b.dataset.pool, 1)[0]; D.dirty = true;
+    if(D.seats.every(Boolean)){ seatCommit(); fillSetup(); } else renderSeats();
+  });
+  box.querySelectorAll("[data-ren]").forEach(b=>b.onclick = ()=>{ seatRen = +b.dataset.ren; renderSeats(); const el = $("seatRenIn"); if(el){ el.focus(); el.select(); } });
+  const done = ()=>{
+    const el = $("seatRenIn"); if(!el || seatRen===null) return;
+    const i = seatRen, v = el.value.trim().slice(0,8); seatRen = null;
+    if(v && v!==state.players[i] && canWrite){
+      state.players[i] = v;
+      const u = (state.uids || [])[i];
+      if(u && window.__renameSeat) window.__renameSeat(u, v);
+      seatDraft = null; render(); save();
+    }
+    fillSetup();
+  };
+  const ri = $("seatRenIn");
+  if(ri){ ri.addEventListener("change", done); ri.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); done(); } }); }
+  box.querySelectorAll("[data-renok]").forEach(b=>b.onclick = done);
+}
+// 確認新座位：空位補返虛擬玩家（玩家4 → 3 → 2），已經開打就連輸贏記錄一齊跟人走
+function seatCommit(){
+  const D = seatDraft; seatDraft = null; seatRen = null;
+  if(!D || !D.dirty || !canWrite) return;
+  const names = D.seats.filter(Boolean).map(t=>t.name);
+  const seats = D.seats.map(t=>{ if(t) return t; const n = phName(names); names.push(n); return {uid:null, name:n, from:null}; });
+  const claimed = new Set(seats.map(t=>t.from).filter(f=>f!=null));
+  const free = [0,1,2,3].filter(o=>!claimed.has(o));
+  const P = seats.map(t=>t.from);
+  seats.forEach((t,i)=>{ if(t.from==null && free.includes(i)){ P[i] = i; free.splice(free.indexOf(i), 1); } });   // 新嚟嘅人：優先接手同一個位嘅記錄
+  seats.forEach((t,i)=>{ if(P[i]==null) P[i] = free.shift(); });
+  const moved = P.some((o,i)=>o!==i), fresh = seats.some(t=>t.from==null);
+  if(!moved && !fresh) return;
+  if(moved && state.hands.length) permuteSeats(P);
+  const hasU = !!state.uids || seats.some(t=>t.uid);
+  state.players = seats.map(t=>t.name);
+  if(hasU) state.uids = seats.map(t=>t.uid || null);
+  // 房主親手放落被選區嘅成員：唔好自動塞返入虛擬玩家個位，等房主自己安排
+  const bench = {}; D.pool.forEach(t=>{ if(t.uid) bench[t.uid] = 1; });
+  if(Object.keys(bench).length) state.bench = bench; else delete state.bench;
+  render(); save();
+  if(typeof toast==="function") toast("已更新座位。");
 }
 window.__swapSeats = swapSeats;
 
@@ -1553,8 +1707,26 @@ function storyHTML(logo){
       <div class="sty-score num"><b class="${cls(s.money)}">${fmt(s.money)}</b><small>${s.pts>0?"+":""}${s.pts} ${PT_UNIT()}</small></div>${tags}</div>`;
   }).join("");
   const L = logo ? `<img src="${logo}" alt="">` : LOGO_D;
-  return `<div class="story"><div class="sty-head"><span class="sty-logo${logo?" tint":""}">${L}</span><div><div class="sty-title">結算<span class="st-mode">${MODE_NAME(state.mode)}</span></div><div class="sty-meta num">${date} · ${pu} 鋪 · ${RATE_TXT()}</div></div></div>
+  return `<div class="story">${STY_FRAME}<div class="sty-head"><span class="sty-logo${logo?" tint":""}">${L}</span><div><div class="sty-title">結算<span class="st-mode">${MODE_NAME(state.mode)}</span></div><div class="sty-meta num">${date} · ${pu} 鋪 · ${RATE_TXT()}</div></div></div>
     <div class="sty-list">${rows}</div><div class="sty-foot"><span>${L}</span>番鼠 FanSyu · 一站式麻雀計番工具</div></div>`;
+}
+// 尊爵不凡用嘅金線框同四角（其他主題唔顯示）
+const STY_FRAME = `<i class="sty-frame"></i><i class="sty-frame f2"></i><b class="sty-cn c1"></b><b class="sty-cn c2"></b><b class="sty-cn c3"></b><b class="sty-cn c4"></b>`;
+const shareDate = () => { const d = new Date(state.endedAt || Date.now()); return `${d.getDate()}/${d.getMonth()+1}`; };
+// 正方形戰績圖：標題、一句說話、四個人嘅輸贏、網址
+function squareHTML(logo, who, line){
+  const {order} = computeStats();
+  const topPts = order[0].pts;
+  const rows = order.map(s=>{
+    const first = s.rank===1 && topPts>0;
+    return `<div class="sty-row${first?" first":""}${s.p===who && !first?" me":""}"><div class="sty-rk">${s.rank}</div>
+      <div class="sty-name">${first?"👑 ":""}${esc(state.players[s.p])}</div>
+      <div class="sty-score num"><b class="${cls(s.money)}">${fmt(s.money)}</b></div></div>`;
+  }).join("");
+  const L = logo ? `<img src="${logo}" alt="">` : LOGO_D;
+  return `<div class="story sq">${STY_FRAME}<div class="sty-head"><span class="sty-logo${logo?" tint":""}">${L}</span><div><div class="sty-title">番鼠戰績</div><div class="sty-meta num">${MODE_NAME(state.mode)} · ${shareDate()}</div></div></div>
+    <div class="sq-quote">「${esc(line)}」<small>—— ${esc(state.players[who])}</small></div>
+    <div class="sty-list">${rows}</div><div class="sty-foot">www.fansyu.com · 一站式麻雀計番工具</div></div>`;
 }
 function renderSettle(){
   const ended = !!state.ended;
@@ -1580,17 +1752,21 @@ function payUpList(){
       out.push({from:d.p, to:c.p, amt:a}); d.v -= a; c.v -= a;
     }
   }
+  // Jackpot：供咗入池未開出嘅錢交入池；中咗上局帶落嚟嘅池就由池俾
+  debt.forEach(d=>{ if(d.v>=0.005) out.push({from:d.p, to:"jp", amt:Math.round(d.v*100)/100}); });
+  cred.forEach(c=>{ if(c.v>=0.005) out.push({from:"jp", to:c.p, amt:Math.round(c.v*100)/100}); });
   return out;
 }
+const puName = p => p==="jp" ? "🎰 Jackpot 池" : state.players[p];
 function renderPayUp(){
   const box = $("payupBox"); if(!box) return;
   const L = payUpList();
   if(!L.length){ box.innerHTML = ""; return; }
   const money = a => "$" + (Number.isInteger(a) ? a : a.toFixed(2).replace(/0$/,""));
-  box.innerHTML = `<div class="payup"><div class="pu-head"><b>找數</b><span>${L.length} 次轉賬就清</span></div>
-    ${L.map((x,i)=>{ const pi = window.__payInfo ? window.__payInfo(x.to) : null, mine = window.__mySeat && window.__mySeat()===x.from;
+  box.innerHTML = `<div class="payup"><div class="pu-head"><b>找數</b><span>${L.filter(x=>x.to!=="jp" && x.from!=="jp").length} 次轉賬就清</span></div>
+    ${L.map((x,i)=>{ const pi = window.__payInfo && x.to!=="jp" && x.from!=="jp" ? window.__payInfo(x.to) : null, mine = window.__mySeat && window.__mySeat()===x.from;
       const acts = pi ? `<div class="payrow-acts">${pi.payme ? `<a class="pm" href="${esc(pi.payme)}" target="_blank" rel="noopener">${mine?"PayMe 俾佢":"PayMe"}</a>` : ""}${pi.fps ? `<button type="button" class="fps" data-fps="${i}">複製轉數快</button>` : ""}</div>` : "";
-      return `<div class="pu-row"><span>${esc(state.players[x.from])}</span><i aria-hidden="true">→</i><span>${esc(state.players[x.to])}</span><b class="num">${money(x.amt)}</b>${acts}</div>`; }).join("")}
+      return `<div class="pu-row"><span>${esc(puName(x.from))}</span><i aria-hidden="true">→</i><span>${esc(puName(x.to))}</span><b class="num">${money(x.amt)}</b>${acts}</div>`; }).join("")}
     <button class="btn" id="payCopy">複製找數</button></div>`;
   box.querySelectorAll("[data-fps]").forEach(b=>b.onclick = async ()=>{
     const x = L[+b.dataset.fps], pi = window.__payInfo(x.to);
@@ -1598,7 +1774,7 @@ function renderPayUp(){
     try{ await navigator.clipboard.writeText(txt); b.textContent = "已複製"; setTimeout(()=>{ b.textContent = "複製轉數快"; }, 1800); }catch(e){ prompt(`${state.players[x.to]} 嘅轉數快：`, txt); }
   });
   $("payCopy").onclick = async ()=>{
-    const txt = "🀄 番鼠找數\n" + L.map(x=>`${state.players[x.from]} → ${state.players[x.to]} ${money(x.amt)}`).join("\n");
+    const txt = "🀄 番鼠找數\n" + L.map(x=>`${puName(x.from)} → ${puName(x.to)} ${money(x.amt)}`).join("\n");
     try{ await navigator.clipboard.writeText(txt); $("payCopy").textContent = "已複製"; setTimeout(()=>{ if($("payCopy")) $("payCopy").textContent = "複製找數"; }, 1800); }
     catch(e){ prompt("複製呢段：", txt); }
   };
@@ -1645,54 +1821,39 @@ function resultTier(money, order){
   return {pct, tier: pct >= 0.5 ? "big" : pct > 0.001 ? "win" : pct > -0.001 ? "even" : pct > -0.5 ? "lose" : "big_l"};
 }
 let shWho = null, shLine = {};
+const SHARE_SITE = "https://www.fansyu.com/";
+// 我係邊個：房間入面跟帳戶；單機就搵同我暱稱一樣嘅位
+function shareMe(){
+  const U = typeof ONLINE!=="undefined" && ONLINE.user ? ONLINE.user : null;
+  if(!U) return -1;
+  const byUid = (state.uids || []).indexOf(U.uid);
+  return byUid>=0 ? byUid : state.players.indexOf(U.name);
+}
 function settleShareText(){
   const {order} = computeStats();
   const s = order.find(x=>x.p===shWho) || order[0];
-  const {pct, tier} = resultTier(s.money, order);
-  const key = shWho + ":" + tier;
+  const {tier} = resultTier(s.money, order);
+  const key = s.p + ":" + tier;
   if(!shLine[key]) shLine[key] = BRAG[tier][Math.floor(Math.random()*BRAG[tier].length)];
-  const pu = state.hands.filter(isHandStart).length, d = new Date(state.endedAt || Date.now());
-  const site = /fansyu\.com$/.test(location.hostname) ? location.origin + "/" : "https://www.fansyu.com/";
-  const pctTxt = tier==="even" ? "打和" : `${s.money>0?"贏咗":"輸咗"}成枱 ${Math.round(Math.abs(pct)*100)}%`;
-  const lines = [
-    `*🀄 番鼠戰績 · ${MODE_NAME(state.mode)}*`,
-    `${d.getMonth()+1}/${d.getDate()} · ${pu} 鋪 · ${RATE_TXT()}`, "",
-    `「${shLine[key]}」`,
-    `—— ${state.players[s.p]}：*${fmt(s.money)}*（${pctTxt}）`, "",
-    ...order.map(x=>`${x.rank===1 && x.money>0 ? "👑" : x.rank + "."} ${state.players[x.p]}　${fmt(x.money)}`),
-  ];
-  if(isHK() && jpCfg().on) lines.push("", `🎰 Jackpot 池：$${jpPool()}`);
-  lines.push("", "👉 一齊用番鼠計番：", site);
-  return {text: lines.join("\n"), line: shLine[key], tier, site};
+  const text = [`番鼠戰績 · ${MODE_NAME(state.mode)} ${shareDate()}`, shLine[key], "", "👉 一齊用番鼠計番：" + SHARE_SITE].join("\n");
+  return {text, line: shLine[key], tier, who: s.p};
 }
 function renderShareWho(){
-  const uids = state.uids || [];
-  const meSeat = typeof ONLINE!=="undefined" && ONLINE.user ? uids.indexOf(ONLINE.user.uid) : -1;
-  if(shWho===null) shWho = meSeat>=0 ? meSeat : computeStats().order[0].p;
-  $("shWho").innerHTML = state.players.map((n,i)=>`<button class="opt${i===shWho?" on":""}" data-i="${i}">${esc(n)}${i===meSeat?"（你）":""}</button>`).join("");
-  $("shWho").querySelectorAll("button").forEach(b=>b.onclick = ()=>{ shWho = +b.dataset.i; renderShareWho(); });
+  const me = shareMe();
+  if(shWho===null) shWho = me>=0 ? me : computeStats().order[0].p;
+  $("shWhoWrap").hidden = me>=0;      // 認到你係邊個就唔使揀
+  if(me<0){
+    $("shWho").innerHTML = state.players.map((n,i)=>`<button class="opt${i===shWho?" on":""}" data-i="${i}">${esc(n)}</button>`).join("");
+    $("shWho").querySelectorAll("button").forEach(b=>b.onclick = ()=>{ if(shWho===+b.dataset.i) return; shWho = +b.dataset.i; renderShareWho(); buildShare("sq"); });
+  }
   const t = settleShareText();
   $("shQuote").className = "sh-quote t-" + t.tier;
-  $("shQuote").innerHTML = `<b>${esc(state.players[shWho])}</b>「${esc(t.line)}」<button class="iconbtn" id="shReroll" title="換一句">🎲</button>`;
-  $("shReroll").onclick = ()=>{ Object.keys(shLine).filter(k=>k.startsWith(shWho+":")).forEach(k=>delete shLine[k]); renderShareWho(); };
+  $("shQuote").innerHTML = `「${esc(t.line)}」<button class="iconbtn" id="shReroll" title="換一句" aria-label="換一句">🎲</button>`;
+  $("shReroll").onclick = ()=>{ Object.keys(shLine).filter(k=>k.startsWith(shWho+":")).forEach(k=>delete shLine[k]); renderShareWho(); buildShare("sq"); };
 }
-document.querySelectorAll("[data-ssh]").forEach(b=>b.onclick = async ()=>{
-  const {text, site} = settleShareText(), k = b.dataset.ssh, plain = text.replace(/\*/g, "");
-  if(k==="wa"){
-    const t = encodeURIComponent(text), mobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
-    if(!mobile){ window.open("https://wa.me/?text=" + t, "_blank"); return; }
-    const t0 = Date.now(); location.href = "whatsapp://send?text=" + t;
-    setTimeout(()=>{ if(document.visibilityState==="visible" && Date.now()-t0 < 2500) location.href = "https://wa.me/?text=" + t; }, 1500);
-    return;
-  }
-  if(k==="tg") return window.open("https://t.me/share/url?url=" + encodeURIComponent(site) + "&text=" + encodeURIComponent(plain.replace(site, "").trim()), "_blank");
-  if(k==="copy"){ try{ await navigator.clipboard.writeText(plain); toast("已複製戰績文字。"); }catch(e){ prompt("複製呢段：", plain); } return; }
-  try{ await navigator.share({title:"番鼠戰績", text:plain}); }
-  catch(e){ if(!(e && e.name==="AbortError")){ try{ await navigator.clipboard.writeText(plain); toast("已複製戰績文字，貼去 Signal 就得。"); }catch(_){ prompt("複製呢段：", plain); } } }
-});
 
 /* share image */
-let h2cPromise = null, downloadsNs = null, shareFile = null, shareURL = null;
+let h2cPromise = null, downloadsNs = null;
 function loadH2C(){
   if(window.html2canvas) return Promise.resolve();
   if(!h2cPromise) h2cPromise = new Promise((ok,bad)=>{
@@ -1703,59 +1864,97 @@ function loadH2C(){
   });
   return h2cPromise;
 }
-$("shareBtn").onclick = async ()=>{
-  showSheet($("shareSheet"));
-  shWho = null; shLine = {}; renderShareWho();
-  $("shareImg").hidden = true; $("saveImgBtn").hidden = true; $("nativeShareBtn").disabled = true; shareFile = null;
-  $("shareHint").textContent = "製作圖片中…";
+let shFiles = {sq:null, story:null}, shURLs = {sq:null, story:null}, shJob = 0;
+window.__shareReady = () => !!(shFiles.sq && shFiles.story);
+window.__shareURLs = () => shURLs;
+async function shareCard(kind, logo){
+  const H = kind==="sq" ? 360 : 640;
   const holder = document.createElement("div");
-  holder.style.cssText = "position:fixed;left:-10000px;top:0;width:360px;height:640px";
-  let logo = null;
-  try{ const cs = getComputedStyle(document.documentElement); logo = await tintedMouse((cs.getPropertyValue("--head") || "#5B2E12").trim(), (cs.getPropertyValue("--red") || "#C0282D").trim()); }catch(e){}
-  holder.innerHTML = storyHTML(logo);
+  holder.style.cssText = `position:fixed;left:-10000px;top:0;width:360px;height:${H}px`;
+  const t = settleShareText();
+  holder.innerHTML = kind==="sq" ? squareHTML(logo, t.who, t.line) : storyHTML(logo);
   document.body.appendChild(holder);
   try{
+    await Promise.all([...holder.querySelectorAll("img")].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
+    const canvas = await window.html2canvas(holder.firstElementChild, {scale:3, width:360, height:H, backgroundColor:null, logging:false, useCORS:true});
+    const blob = await new Promise(r=>canvas.toBlob(r, "image/png"));
+    return new File([blob], `番鼠戰績-${shareDate().replace("/","-")}${kind==="sq"?"":"-story"}.png`, {type:"image/png"});
+  } finally { holder.remove(); }
+}
+// only==="sq"：換咗句說話／身份，淨係重新整正方形嗰張
+async function buildShare(only){
+  const job = ++shJob;
+  const sqBtns = [...document.querySelectorAll("[data-ssh]"), $("saveImgBtn")];
+  sqBtns.forEach(b=>b.disabled = true); shFiles.sq = null;
+  if(!only){ $("nativeShareBtn").disabled = true; shFiles.story = null; $("shareImg").hidden = true; }
+  $("shareHint").hidden = false; $("shareHint").textContent = "製作圖片中…";
+  try{
+    let logo = null;
+    try{ const cs = getComputedStyle(document.documentElement); logo = await tintedMouse((cs.getPropertyValue("--head") || "#5B2E12").trim(), (cs.getPropertyValue("--red") || "#C0282D").trim()); }catch(e){}
     await loadH2C();
     if(document.fonts && document.fonts.ready) await document.fonts.ready;
-    await Promise.all([...holder.querySelectorAll("img")].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
-    const canvas = await window.html2canvas(holder.firstElementChild, {scale:3, width:360, height:640, backgroundColor:null, logging:false, useCORS:true});
-    const blob = await new Promise(r=>canvas.toBlob(r, "image/png"));
-    const d = new Date();
-    shareFile = new File([blob], `番鼠戰績-${d.getMonth()+1}-${d.getDate()}.png`, {type:"image/png"});
-    if(shareURL) URL.revokeObjectURL(shareURL);
-    shareURL = URL.createObjectURL(blob);
-    $("shareImg").src = shareURL; $("shareImg").hidden = false;
-    let canShare = false;
-    try{ canShare = !!(navigator.canShare && navigator.canShare({files:[shareFile]})); }catch(e){}
-    $("nativeShareBtn").disabled = !canShare;
-    $("saveImgBtn").hidden = false;
-    $("shareHint").textContent = canShare
-      ? "WhatsApp／Telegram／Signal 會發送戰績文字同連結；IG 會分享下面呢張 9:16 戰績圖。"
-      : "WhatsApp／Telegram／Signal 會發送戰績文字。IG：長按圖片或者撳「儲存圖片」，再喺 IG 限時動態揀呢張相。";
+    const sq = await shareCard("sq", logo);
+    if(job!==shJob) return;
+    shFiles.sq = sq;
+    if(shURLs.sq) URL.revokeObjectURL(shURLs.sq);
+    shURLs.sq = URL.createObjectURL(sq);
+    $("shareImg").src = shURLs.sq; $("shareImg").hidden = false;
+    sqBtns.forEach(b=>b.disabled = false);
+    $("shareHint").hidden = true;
+    if(!only){
+      const st = await shareCard("story", logo);
+      if(job!==shJob) return;
+      shFiles.story = st;
+      if(shURLs.story) URL.revokeObjectURL(shURLs.story);
+      shURLs.story = URL.createObjectURL(st);
+      $("nativeShareBtn").disabled = false;
+    }
   }catch(e){
-    $("shareHint").textContent = "暫時整唔到圖片，可以直接用手機截圖分享。";
-  }finally{ holder.remove(); }
-};
-$("nativeShareBtn").onclick = async ()=>{
-  if(!shareFile) return;
-  try{ await navigator.share({files:[shareFile], title:"番鼠戰績"}); toast("揀 Instagram → 限時動態。"); }
-  catch(e){
-    if(e && e.name==="AbortError") return;
-    $("nativeShareBtn").disabled = true;
-    $("shareHint").textContent = "呢度唔可以直接分享。請長按圖片或者撳「儲存圖片」，再喺 IG、WhatsApp 或 Telegram 分享。";
+    if(job!==shJob) return;
+    $("shareHint").hidden = false; $("shareHint").textContent = "暫時整唔到圖片，可以直接用手機截圖分享。";
   }
+}
+$("shareBtn").onclick = ()=>{
+  showSheet($("shareSheet"));
+  shWho = null; shLine = {}; renderShareWho();
+  buildShare();
 };
-$("saveImgBtn").onclick = async ()=>{
-  if(!shareFile) return;
-  if(downloadsNs){
-    try{ await downloadsNs.save({filename:shareFile.name, data:shareFile}); $("shareHint").textContent = "已儲存。"; }
-    catch(e){ if(e && e.code!=="declined") $("shareHint").textContent = "儲存唔到，請長按圖片儲存。"; }
-    return;
-  }
-  const a = document.createElement("a"); a.href = shareURL; a.download = shareFile.name;
+function saveShareFile(file, url){
+  if(!file) return;
+  if(downloadsNs){ downloadsNs.save({filename:file.name, data:file}).catch(()=>{}); return; }
+  const a = document.createElement("a"); a.href = url; a.download = file.name;
   document.body.appendChild(a); a.click(); a.remove();
-  $("shareHint").textContent = "已下載。iPhone 如果冇反應，請長按圖片再揀「加入照片」。";
+}
+// WhatsApp／Telegram／Signal：發正方形戰績圖，文字跟住（同時複製咗，可以貼做說明）
+document.querySelectorAll("[data-ssh]").forEach(b=>b.onclick = async ()=>{
+  const file = shFiles.sq; if(!file) return;
+  const {text} = settleShareText(), k = b.dataset.ssh;
+  try{ navigator.clipboard.writeText(text).catch(()=>{}); }catch(e){}
+  let can = false;
+  try{ can = !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){}
+  if(can){
+    try{ await navigator.share({files:[file], text}); return; }
+    catch(e){ if(e && e.name==="AbortError") return; }
+  }
+  // 呢部機唔可以直接分享圖片（例如電腦）：儲存張圖，再開返個 app 發文字
+  saveShareFile(file, shURLs.sq);
+  const t = encodeURIComponent(text);
+  if(k==="wa") window.open("https://wa.me/?text=" + t, "_blank");
+  else if(k==="tg") window.open("https://t.me/share/url?url=" + encodeURIComponent(SHARE_SITE) + "&text=" + encodeURIComponent(text.replace("👉 一齊用番鼠計番：" + SHARE_SITE, "").trim()), "_blank");
+  toast("已儲存戰績圖，文字已複製。");
+});
+$("nativeShareBtn").onclick = async ()=>{
+  const file = shFiles.story; if(!file) return;
+  let can = false;
+  try{ can = !!(navigator.canShare && navigator.canShare({files:[file]})); }catch(e){}
+  if(can){
+    try{ await navigator.share({files:[file], title:"番鼠戰績"}); return; }
+    catch(e){ if(e && e.name==="AbortError") return; }
+  }
+  saveShareFile(file, shURLs.story);
+  toast("已儲存 9:16 戰績圖。");
 };
+$("saveImgBtn").onclick = ()=>{ if(!shFiles.sq) return; saveShareFile(shFiles.sq, shURLs.sq); toast("已儲存戰績圖。"); };
 $("closeShare").onclick = hideSheet;
 
 /* 牌型說明：d = 解釋，ex = 例子（m 萬、p 筒、s 索；E S W N 東南西北；C 中、F 發、P 白；f1–f8 花：梅蘭菊竹春夏秋冬） */
@@ -1946,16 +2145,17 @@ $("modeChip").onclick = ()=>{
 /* ---------- sheets ---------- */
 let openSheet = null;
 function showSheet(el){ openSheet = el; $("scrim").hidden = false; el.hidden = false; el.scrollTop = 0; }
-function hideSheet(){ const was = openSheet; if(openSheet) openSheet.hidden = true; openSheet = null; $("scrim").hidden = true; }
+function hideSheet(){
+  const was = openSheet; if(openSheet) openSheet.hidden = true; openSheet = null; $("scrim").hidden = true;
+  if(was && was.id==="setupSheet" && seatDraft && seatDraft.dirty) seatCommit();   // 閂設定時仲有空位：自動補返虛擬玩家
+  if(was && was.id==="setupSheet"){ seatDraft = null; seatRen = null; }
+}
 $("scrim").onclick = hideSheet;
 
 /* setup */
 let resetArmed = false;
 function fillSetup(){
-  for(let i=0;i<4;i++) $("p"+i).value = state.players[i];
-  $("swapRows").innerHTML = state.players.map((n,i)=>`<div class="swaprow"><span class="w">${seatWind(i)}</span><b>${esc(n)}</b>
-    <select data-sw="${i}" aria-label="${esc(n)} 同邊個換位"><option value="">同…換位</option>${state.players.map((m,j)=>j===i?"":`<option value="${j}">同 ${esc(m)}（${seatWind(j)}）換位</option>`).join("")}</select></div>`).join("");
-  $("swapRows").querySelectorAll("select").forEach(sel=>sel.onchange=()=>{ const j = sel.value; if(j==="") return; swapSeats(+sel.dataset.sw, +j); fillSetup(); });
+  renderSeats();
   $("rate").value = state.rate; $("base").value = state.base; $("dealerFan").value = state.dealerFan; $("streakFan").value = state.streakFan;
   const locked = state.hands.length>0;
   $("startDealerSeg").innerHTML = state.players.map((n,i)=>`<button class="opt${i===state.startDealer?" redon":""}" data-i="${i}" ${locked?"disabled":""}>${esc(n)}</button>`).join("");
@@ -1978,8 +2178,14 @@ function fillSetup(){
   $("vnUnit").value = state.vn.unit; $("vnExtra").value = state.vn.extra; $("vnBonus").value = state.vn.bonus;
   $("vnTable").textContent = "例子（雙／單）：" + [1,3,6,9,12].map(f=>{ const v = vnPts(f); return `${vnTxt(f)} ${v.double}／${v.single}分`; }).join("、") + "。";
   const seg = (id, opts, key) => { $(id).innerHTML = opts.map(([v,n])=>`<button class="opt${state.hk[key]===v?" on":""}" data-v="${v}">${n}</button>`).join("");
-    $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.hk[key] = isNaN(+v) ? v : +v; render(); save(); fillSetup(); }); };
-  seg("hkCapSeg", [[8,"8 番"],[10,"10 番"],[13,"13 番"]], "cap");
+    $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ const v=b.dataset.v; state.hk[key] = isNaN(+v) ? v : +v;
+      if(key==="cap" && state.hk.min > state.hk.cap) state.hk.min = state.hk.cap;      // 起糊唔可以高過爆棚
+      render(); save(); fillSetup(); }); };
+  // 爆棚：每個選項旁邊寫埋嗰個番數值幾多錢（出銃全數；自摸三家各俾一半）
+  const ptsAt = f => (state.hk.scale==="full" || f<=4) ? Math.pow(2,f) : 16 * Math.pow(2, Math.floor((f-4)/2)) * ((f-4)%2 ? 1.5 : 1);
+  seg("hkCapSeg", [8,10,13].map(f=>[f, `${f} 番<small>$${Math.round(ptsAt(f)*state.hk.unit*100)/100}</small>`]), "cap");
+  $("hkZha").value = cantZhahuEach();
+  $("hkZhaHint").textContent = `預設 $${hkZhaDefault()}（${state.hk.cap} 番爆棚自摸嗰份）。${state.hk.zha!=null ? "而家用緊自訂價錢，清空就用返預設。" : "可以自己改。"}`;
   seg("hkScaleSeg", [["half","半辣上"],["full","全辣上"]], "scale");
   seg("hkShootSeg", [["full","全銃（出銃包晒）"],["half","半銃（三家分）"]], "shoot");
   const ex = [state.hk.min, Math.min(state.hk.min+2,state.hk.cap), state.hk.cap].map(f=>`${f}番 ${hkPoints(f)}點（$${Math.round(hkPoints(f)*state.hk.unit*100)/100}）`).join("、");
@@ -1997,13 +2203,22 @@ function fillSetup(){
   $("skinSeg").innerHTML = skinButtonsHTML();
   $("skinSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>chooseSkin(b.dataset.k, fillSetup));
 }
-$("openSetup").onclick = ()=>{ fillSetup(); showSheet($("setupSheet")); };
+$("openSetup").onclick = ()=>{ seatDraft = null; seatRen = null; fillSetup(); showSheet($("setupSheet")); };
 $("closeSetup").onclick = hideSheet;
-for(let i=0;i<4;i++) $("p"+i).addEventListener("change", e=>{ state.players[i] = e.target.value.trim() || `玩家${i+1}`; render(); save(); fillSetup(); });
 [["vnUnit","unit"],["vnExtra","extra"],["vnBonus","bonus"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.vn[k] = k==="unit" ? v : Math.round(v); render(); save(); fillSetup(); } else e.target.value = state.vn[k]; }));
-[["jpAmt","amt"],["jpMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v);
-  if(!isNaN(v) && v>=(k==="min"?1:0)){ state.hk.jp = Object.assign(jpCfg(), {[k]:v}); render(); save(); fillSetup(); } else e.target.value = jpCfg()[k]; }));
-[["hkUnit","unit"],["hkMin","min"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ let v = parseFloat(e.target.value); if(k==="min") v = Math.round(v); if(!isNaN(v) && v>=0 && (k!=="min" || v<=state.hk.cap)){ state.hk[k]=v; render(); save(); fillSetup(); } else e.target.value = state.hk[k]; }));
+// 淨係俾打整數：其他字（小數點、負號、字母）一打就即刻刪走
+["hkMin","jpMin"].forEach(id=>$(id).addEventListener("input", e=>{ const v = e.target.value.replace(/[^0-9]/g, "").slice(0,2); if(v!==e.target.value) e.target.value = v; }));
+$("jpAmt").addEventListener("change", e=>{ const v = parseFloat(e.target.value);
+  if(!isNaN(v) && v>=0){ state.hk.jp = Object.assign(jpCfg(), {amt:Math.round(v*100)/100}); render(); save(); fillSetup(); } else e.target.value = jpCfg().amt; });
+$("jpMin").addEventListener("change", e=>{ const v = parseInt(e.target.value, 10);
+  if(!isNaN(v)){ state.hk.jp = Object.assign(jpCfg(), {min:Math.max(1, Math.min(13, v))}); render(); save(); fillSetup(); } else e.target.value = jpCfg().min; });
+$("hkUnit").addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.hk.unit = v; render(); save(); fillSetup(); } else e.target.value = state.hk.unit; });
+// 起糊：最少 1 番，最多同爆棚一樣；超出就自動拉返入範圍
+$("hkMin").addEventListener("change", e=>{ const v = parseInt(e.target.value, 10);
+  if(!isNaN(v)){ state.hk.min = Math.max(1, Math.min(state.hk.cap, v)); render(); save(); fillSetup(); } else e.target.value = state.hk.min; });
+$("hkZha").addEventListener("change", e=>{ const t = e.target.value.trim(), v = parseFloat(t);
+  if(t===""){ delete state.hk.zha; } else if(!isNaN(v) && v>=0){ const r = Math.round(v*100)/100; if(r===hkZhaDefault()) delete state.hk.zha; else state.hk.zha = r; }
+  render(); save(); fillSetup(); });
 [["rate",0.1],["base",0],["dealerFan",0],["streakFan",0]].forEach(([k])=>$(k).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state[k]=v; render(); save(); } else e.target.value = state[k]; }));
 [["pmMing","ming"],["pmAn","an"]].forEach(([id,k])=>$(id).addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.pm[k] = v; render(); save(); fillSetup(); } else e.target.value = state.pm[k]; }));
 $("pmUnit").addEventListener("change", e=>{ const v = parseFloat(e.target.value); if(!isNaN(v) && v>=0){ state.pm.unit = v; render(); save(); fillSetup(); } else e.target.value = state.pm.unit; });
@@ -2099,7 +2314,7 @@ function renderPay(){
     }
     html += `<div class="r" style="border-top:1px solid var(--line);padding-top:6px;margin:2px 0 6px"><b>${esc(state.players[x.winner])} 收</b><b class="pos">+$${Math.round(sum*100)/100}</b></div>`;
   });
-  if(jpOn() && jpPool()>0 && jpHit(Math.max(...list.map(x=>x.fan)), ws.discarder===null)) html += `<div class="jp-note">🎰 中 Jackpot！記錄後再攞晒成個池 <b>$${jpPool()}</b></div>`;
+  if(jpOn() && (jpPool()>0 || jpCfg().when==="hand") && jpHit(Math.max(...list.map(x=>x.fan)), ws.discarder===null)) html += `<div class="jp-note">🎰 中 Jackpot！記錄後再攞晒成個池 <b>$${Math.round((jpPool() + (jpCfg().when==="hand" ? jpCfg().amt*4 : 0))*100)/100}</b></div>`;
   if(M) html += `<div class="hint">記錄後：${esc(state.players[ws.discarder])} 下次食糊會反雪，收 ${list.map(x=>esc(state.players[x.winner])).join("、")} 各 ${M.revenge} 番。</div>`;
   $("payBox").innerHTML = html;
 }
@@ -2629,14 +2844,38 @@ button.yue-row{font:inherit;color:var(--fg);border:0;text-align:left;cursor:poin
 :root[data-skin="royal"]{--ivm:#8A6516;--ivb:#A3122E}
 .iv-spark{position:absolute;color:#E9C766;font-size:18px;line-height:1;text-shadow:0 0 6px rgba(255,236,170,.9)}
 /* 尊爵不凡：分享圖金框＋閃光 */
-:root[data-skin="royal"] .invite,:root[data-skin="royal"] .story{background-image:radial-gradient(circle at 50% 0%,rgba(255,236,170,.55),transparent 55%),linear-gradient(135deg,#F7E7B4,#D9B45A 45%,#F7E7B4 60%,#B8862C)}
+:root[data-skin="royal"] .invite{background-image:radial-gradient(circle at 50% 0%,rgba(255,236,170,.55),transparent 55%),linear-gradient(135deg,#F7E7B4,#D9B45A 45%,#F7E7B4 60%,#B8862C)}
 :root[data-skin="royal"] .invite{background-color:#E2C677;background-image:radial-gradient(circle at 18% 12%,rgba(255,244,205,0.95) 0,rgba(255,236,170,0.47) 50px,transparent 110px),radial-gradient(circle at 82% 26%,rgba(255,244,205,0.9) 0,rgba(255,236,170,0.45) 43px,transparent 95px),radial-gradient(circle at 28% 52%,rgba(255,244,205,0.85) 0,rgba(255,236,170,0.42) 40px,transparent 90px),radial-gradient(circle at 78% 72%,rgba(255,244,205,0.9) 0,rgba(255,236,170,0.45) 47px,transparent 105px),radial-gradient(circle at 22% 90%,rgba(255,244,205,0.9) 0,rgba(255,236,170,0.45) 45px,transparent 100px),linear-gradient(135deg,#F7E7B4,#D9B45A 45%,#F7E7B4 60%,#B8862C)}
 :root[data-skin="royal"] .iv-in{background-color:#FFFDF7;background-image:radial-gradient(circle at 18% 12%,rgba(255,226,150,0.95) 0,rgba(255,232,170,0.47) 50px,transparent 110px),radial-gradient(circle at 82% 26%,rgba(255,226,150,0.9) 0,rgba(255,232,170,0.45) 43px,transparent 95px),radial-gradient(circle at 28% 52%,rgba(255,226,150,0.85) 0,rgba(255,232,170,0.42) 40px,transparent 90px),radial-gradient(circle at 78% 72%,rgba(255,226,150,0.9) 0,rgba(255,232,170,0.45) 47px,transparent 105px),radial-gradient(circle at 22% 90%,rgba(255,226,150,0.9) 0,rgba(255,232,170,0.45) 45px,transparent 100px)}
 :root[data-skin="royal"] .iv-in{border:3px solid #B8862C;box-shadow:0 0 0 3px #FFF6D6,0 0 0 5px #C9A34A,0 0 22px rgba(201,163,74,.55)}
-:root[data-skin="royal"] .story{color:#FFFDF7;box-shadow:inset 0 0 0 4px #FFF6D6,inset 0 0 0 7px #B8862C}
-:root[data-skin="royal"] .story .sty-title,:root[data-skin="royal"] .story .sty-meta,:root[data-skin="royal"] .story .sty-foot{color:#3B2A06}
-:root[data-skin="royal"] .story .sty-row{border:1px solid #E2C877}
-:root[data-skin="royal"] .story .sty-logo.tint{box-shadow:0 0 0 2px #FFF6D6,0 0 0 4px #B8862C,0 0 14px rgba(255,236,170,.9)}
+/* 尊爵不凡戰績圖：象牙白底、金色暗花、幾個淡淡嘅光暈、雙金線框 */
+:root[data-skin="royal"] .story{position:relative;color:#3B2A06;background-color:#FBF5E4;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23B8862C' stroke-width='1'%3E%3Cpath d='M30 5 L37 30 L30 55 L23 30 Z' stroke-opacity='.22'/%3E%3Cpath d='M5 30 L30 24 L55 30 L30 36 Z' stroke-opacity='.11'/%3E%3Ccircle cx='30' cy='30' r='3.5' stroke-opacity='.26'/%3E%3Ccircle cx='0' cy='0' r='4.5' stroke-opacity='.18'/%3E%3Ccircle cx='60' cy='0' r='4.5' stroke-opacity='.18'/%3E%3Ccircle cx='0' cy='60' r='4.5' stroke-opacity='.18'/%3E%3Ccircle cx='60' cy='60' r='4.5' stroke-opacity='.18'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(circle at 50% 9%,rgba(255,255,255,.95) 0,rgba(255,248,222,.6) 80px,rgba(255,248,222,0) 210px),
+    radial-gradient(circle at 8% 52%,rgba(240,205,120,.42) 0,rgba(240,205,120,0) 150px),
+    radial-gradient(circle at 94% 80%,rgba(233,186,150,.4) 0,rgba(233,186,150,0) 170px),
+    linear-gradient(180deg,#FDFAF0 0%,#F7EED2 52%,#EAD7A2 100%)}
+:root[data-skin="royal"] .story .sty-frame{display:block;position:absolute;left:9px;top:9px;right:9px;bottom:9px;border:1.5px solid #B8862C;border-radius:3px}
+:root[data-skin="royal"] .story .sty-frame.f2{left:13px;top:13px;right:13px;bottom:13px;border:1px solid rgba(184,134,44,.45);border-radius:2px}
+:root[data-skin="royal"] .story .sty-cn{display:block;position:absolute;width:9px;height:9px;background:#B8862C;transform:rotate(45deg)}
+:root[data-skin="royal"] .story .sty-cn.c1{left:5px;top:5px}:root[data-skin="royal"] .story .sty-cn.c2{right:5px;top:5px}
+:root[data-skin="royal"] .story .sty-cn.c3{left:5px;bottom:5px}:root[data-skin="royal"] .story .sty-cn.c4{right:5px;bottom:5px}
+:root[data-skin="royal"] .story .sty-head,:root[data-skin="royal"] .story .sty-list,:root[data-skin="royal"] .story .sty-foot,:root[data-skin="royal"] .story .sq-quote{position:relative}
+:root[data-skin="royal"] .story .sty-head{padding-bottom:12px;border-bottom:1px solid rgba(184,134,44,.5)}
+:root[data-skin="royal"] .story .sty-title{color:#3B2A06}
+:root[data-skin="royal"] .story .sty-meta{color:#8A6516}
+:root[data-skin="royal"] .story .sty-foot{color:#8A6516;letter-spacing:.08em}
+:root[data-skin="royal"] .story .sty-row{background:rgba(255,254,249,.9);border:1px solid #DFC583}
+:root[data-skin="royal"] .story .sty-row.first{border:1.5px solid #B8862C;background:#FFFBEA;box-shadow:0 4px 14px rgba(184,134,44,.28)}
+:root[data-skin="royal"] .story .sty-row.me{box-shadow:none;border:1.5px solid #8A6516}
+:root[data-skin="royal"] .story .sty-logo.tint{background:#FFFDF7;box-shadow:0 0 0 1.5px #B8862C,0 0 16px rgba(255,236,170,.9)}
+:root[data-skin="royal"] .story .sq-quote{background:rgba(255,254,249,.72);border:1px solid rgba(184,134,44,.45);color:#3B2A06}
+:root[data-skin="royal"] .story.sq{padding:24px 26px 23px;gap:7px}
+:root[data-skin="royal"] .story.sq .sty-head{padding-bottom:7px}
+:root[data-skin="royal"] .story.sq .sty-logo{width:40px;height:40px}
+:root[data-skin="royal"] .story.sq .sty-title{font-size:23px}
+:root[data-skin="royal"] .story.sq .sty-row{padding:4px 12px}
+:root[data-skin="royal"] .story.sq .sq-quote{padding:5px 12px}
 .me-card{gap:8px}
 .me-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .me-name{font-size:16px;min-width:0}.me-name b{font-size:18px}
@@ -2650,6 +2889,20 @@ button.yue-row{font:inherit;color:var(--fg);border:0;text-align:left;cursor:poin
 .bell-n{position:absolute;top:-4px;right:-4px;min-width:18px;padding:0 5px;border-radius:999px;background:var(--red);color:#fff;font-size:11px;font-style:normal;line-height:18px;font-weight:700}
 .btn.big{padding:15px 10px;font-size:16px;border-radius:14px}
 .lobby-acts{gap:10px}
+.card.a2hs-card{flex-direction:row;align-items:center;gap:12px}
+.a2hs-icon{width:56px;height:56px;border-radius:13px;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.a2hs-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.a2hs-txt b{font-size:15px}
+.a2hs-card .btn{flex:none;padding-left:16px;padding-right:16px}
+.a2hs-prev{display:flex;align-items:center;gap:14px;margin:4px 0 12px}
+.a2hs-prev img{width:84px;height:84px;border-radius:19px;box-shadow:0 4px 14px rgba(0,0,0,.22);flex:none}
+.a2hs-prev div{display:flex;flex-direction:column;gap:2px}.a2hs-prev b{font-size:18px}
+.a2hs-steps{margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.5}
+.a2hs-all{border-top:1px solid var(--line);padding-top:10px}
+.a2hs-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.a2hs-strip figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted)}
+.a2hs-strip img{width:44px;height:44px;border-radius:10px;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+.a2hs-strip figure.on img{outline:2px solid var(--head);outline-offset:2px}
 .mode-pick{display:grid;grid-template-columns:1fr;gap:8px}
 .lobby-top{display:flex;justify-content:flex-end;gap:6px;margin:-12px 0 -6px}
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--jade);margin-right:6px;vertical-align:middle;box-shadow:0 0 0 3px var(--jade-soft)}
@@ -2718,7 +2971,7 @@ function buildOnlineUI(){
   <div id="noticeBox"></div>
   <div id="lobbyBody"></div>
 </div></div>
-<div class="sheet" id="roomSheet" hidden role="dialog" aria-label="房間"><div class="grab"></div><div id="roomBody"></div>
+<div class="sheet" id="roomSheet" hidden role="dialog" aria-label="邀請"><div class="grab"></div><div id="roomBody"></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeRoom">完成</button></div>
 <div class="sheet" id="liteSheet" hidden role="dialog" aria-label="設定"><div class="grab"></div>
   <h3>設定</h3>
@@ -2750,6 +3003,12 @@ function buildOnlineUI(){
 <div class="yinbox" id="yinBox" hidden role="dialog" aria-label="約局邀請"><div class="yin-card" id="yinCard"></div></div>
 <div class="sheet" id="yueDaySheet" hidden role="dialog" aria-label="約局"><div class="grab"></div><div id="yueDayBody"></div>
   <button class="btn" style="width:100%;margin-top:14px" id="closeYueDay">關閉</button></div>
+<div class="sheet" id="a2hsSheet" hidden role="dialog" aria-label="新增到主畫面"><div class="grab"></div>
+  <h3>新增到主畫面</h3>
+  <div class="a2hs-prev"><img id="a2hsBig" alt="而家主題嘅番鼠 logo" width="84" height="84" onerror="this.style.visibility='hidden'"><div><b>番鼠</b><span class="hint" id="a2hsSkinName"></span></div></div>
+  <ol class="a2hs-steps" id="a2hsSteps"></ol>
+  <div class="a2hs-all"><span class="hint">唔同主題會有唔同 logo 㗎！主畫面個 logo 會跟你新增嗰陣揀緊嘅主題；想換 logo，就轉咗主題之後喺主畫面刪走舊嗰個，再新增一次。</span><div class="a2hs-strip" id="a2hsStrip"></div></div>
+  <button class="btn primary" style="width:100%;margin-top:14px" id="closeA2hs">知道</button></div>
 <div class="sheet" id="createSheet" hidden role="dialog" aria-label="創建房間"><div class="grab"></div>
   <h3>創建房間</h3><p class="hint" style="margin:0 0 12px" id="createHint">揀牌種。你會做房主，只有房主可以記錄同改資料。</p>
   <div class="mode-pick"><button class="btn primary big" data-new="hk">廣東牌</button><button class="btn primary big" data-new="tw">台灣牌</button><button class="btn primary big" data-new="pm">跑馬仔</button></div>
@@ -2768,6 +3027,7 @@ function buildOnlineUI(){
   $("closeLedger").onclick = () => { hideSheet(); liftReset(); };
   $("closeLite").onclick = () => { hideSheet(); liftReset(); };
   $("closeInbox").onclick = () => { hideSheet(); liftReset(); };
+  $("closeA2hs").onclick = () => { hideSheet(); liftReset(); };
   $("closeCreate").onclick = $("closeJoin").onclick = $("closeYue").onclick = $("closeYueShare").onclick = $("closeYueDay").onclick = () => { hideSheet(); liftReset(); };
   $("yueOk").onclick = confirmYue;
   document.querySelectorAll("[data-sh]").forEach(b=>b.onclick = () => shareYue(b.dataset.sh));
@@ -2802,7 +3062,7 @@ function buildOnlineUI(){
   $("liteName").addEventListener("change", async e=>{
     const v = e.target.value.trim().slice(0,8);
     if(!v || !ONLINE.room){ return; }
-    try{ await ONLINE.backend.joinRoom(ONLINE.room, ONLINE.user.uid, v); toast("已改名，等房主手機同步。"); }catch(err){ toast("改唔到名：" + errText(err)); }
+    try{ await ONLINE.backend.joinRoom(ONLINE.room, ONLINE.user.uid, v); toast("已改名，房入面所有人都會見到。"); }catch(err){ toast("改唔到名：" + errText(err)); }
   });
 }
 
@@ -2906,7 +3166,13 @@ function renderLobby(){
     </div>
     <div class="grid2 lobby-acts"><button class="btn primary big" id="lgCreate">創建房間</button><button class="btn pop big" id="lgJoin">加入房間</button></div>
     ${last ? `<button class="btn pop" id="rejoinBtn">返回上次房間 ${esc(last)}</button>` : ""}
-    <button class="btn" id="lgOffline">單機模式（唔會記入小氣簿）</button>`;
+    <button class="btn" id="lgOffline">單機模式（唔會記入小氣簿）</button>
+    ${isStandalone() ? "" : `<div class="card a2hs-card">
+      <img class="a2hs-icon" id="a2hsIcon" src="${a2hsIconSrc()}" alt="番鼠主畫面 logo 預覽" width="56" height="56" onerror="this.style.visibility='hidden'">
+      <div class="a2hs-txt"><b>新增到 iPhone 主畫面</b><span class="hint">好似 App 咁一撳即開。唔同主題會有唔同 logo 㗎！</span></div>
+      <button class="btn primary" id="lgA2hs">新增</button>
+    </div>`}`;
+  if($("lgA2hs")) $("lgA2hs").onclick = addToHome;
   bindCalendarCard();
   $("lgLedger").onclick = openLedger;
   $("lgInbox").onclick = openInbox;
@@ -2950,6 +3216,7 @@ async function createRoom(mode, btn){
       if(ok) code = c;
     }
     if(!code) throw new Error("開唔到房間，請再試。");
+    await leaveOldRoom(code);
     if(yy) ONLINE.backend.yueSetRoom(yy.id, yf.d, {code, at:Date.now()}).catch(()=>{});
     await withTimeout(enterRoom(code), 15000, "房間開咗但連唔到，請喺大廳撳「返回上次房間」。");
     ONLINE.showQr = true;
@@ -2957,7 +3224,26 @@ async function createRoom(mode, btn){
   }catch(e){ console.error("createRoom", e); toast(e.message && !e.code ? e.message : errText(e)); }
   finally{ ONLINE.creating = 0; document.querySelectorAll("#createSheet [data-new]").forEach(b=>b.disabled = false); }
 }
+// 去第二間房：自動退出上一間（房主就先交俾其他人），嗰邊個位會由虛擬玩家頂上
+async function leaveOldRoom(newCode){
+  let old = ONLINE.room || ONLINE.lastCode || null;
+  if(!old){ try{ old = localStorage.getItem("fansyu-lastroom"); }catch(e){} }
+  if(!old || old===newCode || !ONLINE.user) return;
+  const uid = ONLINE.user.uid;
+  try{
+    const d = await withTimeout(ONLINE.backend.getRoom(old), 6000, "timeout");
+    if(!d || !d.members || !(uid in d.members)) return;
+    if(d.host===uid){
+      const others = Object.entries(d.members).filter(([u])=>u!==uid);
+      let seatedU = []; try{ seatedU = (JSON.parse(d.state || "{}").uids || []); }catch(e){}
+      const next = others.find(([u])=>seatedU.includes(u)) || others[0];
+      if(next) await ONLINE.backend.setHost(old, next[0], next[1]);
+    }
+    await ONLINE.backend.leaveRoom(old, uid);
+  }catch(e){}
+}
 async function joinRoom(code){
+  await leaveOldRoom(code);
   const d = await withTimeout(ONLINE.backend.getRoom(code), 15000, "網絡太慢，入唔到房間。請檢查網絡再試。");
   if(!d) throw new Error("搵唔到呢個房間，請檢查號碼。");
   if(d.kicked && d.kicked[ONLINE.user.uid]) throw new Error("房主已經將你移出呢個房間。");
@@ -2970,6 +3256,7 @@ function enterRoom(code){
   leaveRoom(true);
   ONLINE.room = code; ONLINE.firstSnap = true; ONLINE.lastSent = ""; ONLINE.lastEndKey = undefined; ONLINE.rmImg = null;
   ONLINE.profiles = {}; ONLINE.handledReq = {};
+  ONLINE.lastCode = code;
   try{ sessionStorage.setItem("fansyu-room", code); localStorage.setItem("fansyu-lastroom", code); }catch(e){}
   canWrite = false; applyMode();
   return new Promise(resolve=>{
@@ -3012,6 +3299,8 @@ function onRoomSnap(d){
     try{ state = Object.assign(DEFAULT_STATE(), JSON.parse(d.state)); }catch(e){}
     if(before && !ONLINE.isHost) liveHandToast(before);
   }
+  // 有人改名：唔使等房主手機轉達，每部手機即刻跟房間成員名單顯示
+  if(!ONLINE.isHost) (state.uids || []).forEach((u,i)=>{ const n = u && d.members && d.members[u]; if(n && state.players[i]!==n){ state.players = state.players.slice(); state.players[i] = n; } });
   ONLINE.firstSnap = false;
   // 房主結算咗：其他玩家即時讀返自己嘅小氣簿同經驗值
   const endKey = state.ended ? (state.gameId || "") + ":" + (state.endedAt || "") : "";
@@ -3081,28 +3370,54 @@ function liveHandToast(before){
   if(t) toast("🀄 " + t);
 }
 // 房主：同步成員改名；處理閒家喺自己手機送嚟嘅投降
+// 坐緊位但已經唔喺房（離開咗／去咗第二間房）：個位變返虛擬玩家，由 玩家4 → 3 → 2 頂上
+function seatSweep(mem){
+  let changed = false;
+  if(state.bench && Object.keys(state.bench).some(u=>!(u in mem))){ state.bench = Object.fromEntries(Object.keys(state.bench).filter(u=>u in mem).map(u=>[u,1])); changed = true; }
+  const uids = state.uids || [];
+  uids.forEach(u=>{ if(u && (u in mem) && !(state.seen && state.seen[u])){ state.seen = Object.assign({}, state.seen, {[u]:1}); changed = true; } });
+  uids.forEach((u,i)=>{
+    if(!u || (u in mem) || !(state.seen && state.seen[u])) return;
+    const was = state.players[i];
+    state.uids = state.uids.slice(); state.uids[i] = null;
+    state.players = state.players.slice(); state.players[i] = phName();
+    state.seen = Object.assign({}, state.seen); delete state.seen[u];
+    toast(`${was} 走咗，${seatWind(i)}位由 ${state.players[i]} 頂上。`);
+    changed = true;
+  });
+  return changed;
+}
 function hostProcess(d){
   let changed = false;
   const nowM = Object.keys(d.members || {});
-  if(ONLINE.prevMembers) ONLINE.prevMembers.filter(u=>!nowM.includes(u) && u!==ONLINE.user.uid).forEach(u=>toast(`${ONLINE.memberNames[u] || "有人"} 離開咗房間。`));
+  if(ONLINE.prevMembers) ONLINE.prevMembers.filter(u=>!nowM.includes(u) && u!==ONLINE.user.uid && !(state.uids || []).includes(u)).forEach(u=>toast(`${ONLINE.memberNames[u] || "有人"} 離開咗房間。`));
   if(ONLINE.prevMembers) nowM.filter(u=>!ONLINE.prevMembers.includes(u) && u!==ONLINE.user.uid && d.members[u]).forEach(u=>{ if(!(state.uids||[]).includes(u)) return; toast(`${d.members[u]} 入咗房。`); });
   ONLINE.prevMembers = nowM; ONLINE.memberNames = Object.assign({}, ONLINE.memberNames, d.members);
   const uids = state.uids || [];
-  uids.forEach((u,i)=>{ if(u && d.members && d.members[u] && state.players[i]!==d.members[u]){ state.players[i] = d.members[u]; changed = true; } });
-  // 新入房嘅朋友：自動坐入第一個空位（未改名嘅「玩家n」位）
+  const rn = ONLINE.renaming || {};
+  uids.forEach((u,i)=>{
+    if(!u || !d.members || !d.members[u] || state.players[i]===d.members[u]) return;
+    if(rn[u] && rn[u].name===state.players[i] && Date.now() - rn[u].t < 6000) return;   // 房主啱啱改完名，舊快照未跟上：唔好改返轉頭
+    state.players[i] = d.members[u]; changed = true;
+  });
+  if(!state.ended && seatSweep(d.members || {})) changed = true;
+  // 新入房嘅朋友：由上而下取代虛擬玩家（玩家2／3／4）；冇虛擬玩家就留喺被選區等房主安排
+  ONLINE.poolSeen = ONLINE.poolSeen || {};
   if(!state.ended) for(const [u,n] of Object.entries(d.members || {})){
-    if((state.uids || []).includes(u) || !n) continue;
-    const i = [0,1,2,3].find(k=>!(state.uids || [])[k]);    // 按次序換走虛擬玩家；坐滿真人就唔換
-    if(i===undefined) break;
+    if((state.uids || []).includes(u) || !n || (state.bench && state.bench[u])) continue;
+    const i = [0,1,2,3].find(k=>!(state.uids || [])[k] && PH_RE.test(state.players[k]));
+    if(i===undefined){ if(!ONLINE.poolSeen[u]){ ONLINE.poolSeen[u] = 1; toast(`${n} 入咗房，喺「設定 → 座位」嘅被選區等緊。`); } continue; }
     state.uids = (state.uids || [null,null,null,null]).slice(); state.uids[i] = u; state.players[i] = n; changed = true;
+    state.seen = Object.assign({}, state.seen, {[u]:1});
     toast(`${n} 已經坐入${seatWind(i)}位。`);
   }
+  if(changed && openSheet && openSheet.id==="setupSheet" && !(seatDraft && seatDraft.dirty)){ seatDraft = null; setTimeout(()=>{ if(openSheet && openSheet.id==="setupSheet") renderSeats(); }, 0); }
+  else if(openSheet && openSheet.id==="setupSheet") setTimeout(()=>{ if(openSheet && openSheet.id==="setupSheet" && seatRen===null) renderSeats(); }, 0);
   for(const [u,r] of Object.entries(d.req || {})){
     if(!r || ONLINE.handledReq[u]===r.t) continue;
     ONLINE.handledReq[u] = r.t;
     if(r.type==="prof"){ state.profV = Date.now(); changed = true; }
-    else if(r.type==="leave"){ state.left = Object.assign({}, state.left, {[u]:1}); changed = true; toast(`${(d.members||{})[u] || "有人"} 離開咗房間。`); }
-    else if(r.type==="here" && state.left && state.left[u]){ state.left = Object.assign({}, state.left); delete state.left[u]; changed = true; toast(`${(d.members||{})[u] || "有人"} 返咗嚟。`); }
+    else if(r.type==="leave" || r.type==="here"){ if(state.left){ delete state.left; changed = true; } }   // 舊版「已離開」標記：唔再用
     else if(r.type==="surr" && uids[r.p]===u && state.dealer===r.dealer && state.streak===r.streak && canSurrNow(r.p)){
       recordSurrender(r.p); changed = false;
       toast(`${state.players[r.p]} 投降咗。`);
@@ -3128,6 +3443,19 @@ window.__surrender = async p => {
   catch(e){ toast("送唔到投降：" + errText(e)); }
 };
 window.__helpLocked = () => !!ONLINE.room;
+// 座位編輯（設定入面）用：房間成員、名牌、改名
+window.__seatMembers = () => ONLINE.room && ONLINE.roomDoc ? Object.entries(ONLINE.roomDoc.members || {}) : null;
+window.__seatTag = u => !ONLINE.room ? "" : u===ONLINE.user.uid ? "你" : (ONLINE.roomDoc && u===ONLINE.roomDoc.host) ? "房主" : (ONLINE.roomDoc && ONLINE.roomDoc.members && (u in ONLINE.roomDoc.members)) ? "" : "未入房";
+window.__renameSeat = (u, name) => {
+  if(!ONLINE.room || !ONLINE.isHost || !ONLINE.roomDoc) return;
+  const code = ONLINE.room;
+  if(ONLINE.roomDoc.members && (u in ONLINE.roomDoc.members)){
+    ONLINE.roomDoc.members[u] = name;    // 即刻用新名，唔好俾舊快照改返轉頭
+    ONLINE.renaming = Object.assign({}, ONLINE.renaming, {[u]:{name, t:Date.now()}});
+    ONLINE.backend.joinRoom(code, u, name).catch(e=>toast("改唔到名：" + errText(e)));
+    if(u===ONLINE.roomDoc.host){ ONLINE.roomDoc.hostName = name; ONLINE.backend.setHost(code, u, name).catch(()=>{}); renderRoomBar(); }
+  }
+};
 
 function leaveRoom(quiet){
   if(ONLINE.unsub){ try{ ONLINE.unsub(); }catch(e){} ONLINE.unsub = null; }
@@ -3168,7 +3496,7 @@ function renderRoomBar(){
   if(ONLINE.room && ONLINE.roomDoc){
     const d = ONLINE.roomDoc;
     bar.innerHTML = `<span class="rb-txt"><i class="live-dot${ONLINE.live?"":" off"}" title="${ONLINE.live?"即時同步中":"重新連接中"}"></i>房間 <b>${esc(ONLINE.room)}</b> · ${ONLINE.isHost ? "你係房主" : `房主 ${esc(d.hostName||"")} · 只可查看`}</span>
-      <button class="iconbtn" id="rbSet">設定</button><button class="iconbtn" id="rbRoom">房間</button><button class="iconbtn" id="rbLobby">大廳</button>`;
+      <button class="iconbtn" id="rbSet">設定</button><button class="iconbtn" id="rbRoom">邀請</button><button class="iconbtn" id="rbLobby">大廳</button>`;
     if(hostAway()) $("rbRoom").classList.add("alert"); 
     $("rbRoom").onclick = () => { renderRoomSheet(); showSheet($("roomSheet")); };
     $("rbSet").onclick = () => $("openSetup").click();
@@ -3183,21 +3511,6 @@ function renderRoomSheet(){
   ensureProfiles(members.map(([u])=>u));
   const link = SITE + "?room=" + ONLINE.room;
   const uids = state.uids || [null,null,null,null];
-  let seats = "";
-  if(ONLINE.isHost){
-    const mem = d.members || {};
-    const unseated = members.filter(([u])=>!uids.includes(u));
-    seats = `<div class="field"><label>座位（揀同邊個換位，或者換入房間成員）</label>
-      ${[0,1,2,3].map(i=>`<div class="seatrow"><span class="w">${seatWind(i)}</span><select data-seat="${i}" aria-label="${seatWind(i)}位">
-        <option value="" selected>${esc(state.players[i])}${uids[i] ? (uids[i] in mem ? (uids[i]===d.host?"（房主）":"") : "（未入房）") : "（訪客）"}</option>
-        ${[0,1,2,3].filter(j=>j!==i).map(j=>`<option value="sw:${j}">⇄ 同 ${esc(state.players[j])}（${seatWind(j)}）換位</option>`).join("")}
-        ${unseated.map(([u,n])=>`<option value="${esc(u)}">＋ 換入 ${esc(n)}</option>`).join("")}
-        ${uids[i] && uids[i]!==d.host ? `<option value="guest">改返做訪客位</option>` : ""}
-      </select></div>`).join("")}
-      <span class="hint">換位：兩個人對調，之前嘅輸贏跟返自己。朋友登入入房會自動坐入空位。有帳戶嘅座位結算時會記入佢嘅小氣簿同經驗值。</span></div>`;
-  } else {
-    seats = `<div class="field"><label>座位</label><div class="mlist">${[0,1,2,3].map(i=>`<div class="mrow"><span>${seatWind(i)} · ${esc(state.players[i])}</span><span class="uid">${uids[i] ? (uids[i]===ONLINE.user.uid ? "你" : "有帳戶") : "訪客"}</span></div>`).join("")}</div></div>`;
-  }
   const away = hostAway();
   const takeCard = away && (ONLINE.user.uid in (d.members||{})) ? `<div class="takeover"><b>房主 ${esc(d.hostName||"")} 已經 ${Math.floor(away/60000)} 分鐘冇回應</b><span class="hint">可能手機熄咗或者斷咗線。你可以接手做房主繼續記錄。</span><button class="btn primary" id="rmTake">接手做房主</button></div>` : "";
   box.innerHTML = `<h3>房間 ${esc(ONLINE.room)}</h3>${takeCard}
@@ -3209,13 +3522,12 @@ function renderRoomSheet(){
       <button class="btn sh-ig" id="rmIg" style="width:100%;margin-top:8px">IG 限時動態</button>
       <div id="rmImgWrap"${ONLINE.rmImg ? "" : " hidden"}><p class="hint" id="rmImgHint">${ONLINE.rmImg ? ONLINE.rmImg.hint : ""}</p>${ONLINE.rmImg && ONLINE.rmImg.url ? `<img id="rmImg" src="${ONLINE.rmImg.url}" alt="番鼠房間邀請圖" style="display:block;max-width:100%;max-height:56vh;margin:0 auto;border-radius:14px;border:1px solid var(--line)">` : ""}${ONLINE.rmImg && ONLINE.rmImg.can ? `<button class="btn primary" id="rmImgShare" style="width:100%;margin-top:8px">分享到 IG</button>` : ""}${ONLINE.rmImg && ONLINE.rmImg.url ? `<button class="btn" id="rmImgLink" style="width:100%;margin-top:8px">複製連結（IG 連結貼紙用）</button>` : ""}</div>
       <button class="btn accent${ONLINE.showQr?" on":""}" id="rmQrBtn" style="width:100%;margin-top:8px">${ONLINE.showQr?"收埋 QR code":"顯示 QR code"}</button>
-      ${ONLINE.showQr ? qrBoxHTML(link, `朋友用相機掃呢個 QR code，登入之後就會自動入房 ${esc(ONLINE.room)}，順序換走虛擬玩家。`) : ""}
+      ${ONLINE.showQr ? qrBoxHTML(link, `朋友用相機掃呢個 QR code，登入之後就會自動入房 ${esc(ONLINE.room)}，由上而下取代虛擬玩家。`) : ""}
       <span class="hint">朋友打開連結登入就會入房；或者喺大廳輸入房間號碼 <b>${esc(ONLINE.room)}</b>。</span></div>
     <div class="field"><label>房間成員（${members.length}）</label><div class="mlist">
-      ${members.map(([u,n])=>`<div class="mrow"${state.left && state.left[u] ? ` style="opacity:.55"` : ""}><span>${esc(n || "（未有名）")}${state.left && state.left[u] ? `<span class="hint">（已離開）</span>` : ""}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span>${ONLINE.isHost && u!==d.host ? `<span class="rm-acts"><button class="iconbtn" data-give="${esc(u)}">交房主</button><button class="iconbtn rm-kick" data-kick="${esc(u)}">移除</button></span>` : `<span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span>`}</div>`).join("")}
+      ${members.map(([u,n])=>`<div class="mrow"><span>${esc(n || "（未有名）")}${(state.uids || []).includes(u) ? "" : `<span class="hint">（被選區）</span>`}${isVip(u)?` <span class="vipb">VIP</span>`:""}${u===d.host?`<span class="pill-host">房主</span>`:""}${ONLINE.profiles[u] ? " "+lvBadge(ONLINE.profiles[u].xp, true) : ""}</span>${ONLINE.isHost && u!==d.host ? `<span class="rm-acts"><button class="iconbtn" data-give="${esc(u)}">交房主</button><button class="iconbtn rm-kick" data-kick="${esc(u)}">移除</button></span>` : `<span class="uid">${u===ONLINE.user.uid?"你":"#"+esc(u.slice(0,6))}</span>`}</div>`).join("")}
     </div></div>
     ${ONLINE.isHost ? (()=>{ const others = members.filter(([u])=>u!==d.host); return `<div class="field"><label>轉讓房主</label>${others.length ? `<div style="display:flex;gap:8px"><select id="rmGiveSel" style="flex:1">${others.map(([u,n])=>`<option value="${esc(u)}">${esc(n)}</option>`).join("")}</select><button class="btn primary" id="rmGive" style="flex:0 0 auto">交房主</button></div>` : `<span class="hint">房間入面暫時得你一個。朋友入咗房之後，就可以喺度將房主交俾佢。</span>`}</div>`; })() : ""}
-    ${seats}
     <button class="btn danger" style="width:100%" id="rmLeave">離開房間</button>`;
   const inviteTxt = [
     "*🐭 番鼠麻吉 FanSyu & Maji 🐦*", "",
@@ -3236,15 +3548,22 @@ function renderRoomSheet(){
   if($("rmTake")) $("rmTake").onclick = takeOver;
   box.querySelectorAll("[data-give]").forEach(b=>b.onclick = () => giveHost(b.dataset.give));
   if($("rmGive")) $("rmGive").onclick = () => giveHost($("rmGiveSel").value);
-  // 離開：未有份打緊嘅局就退出成員名單；坐咗位打緊（要結算記小氣簿）就保留成員身份，只通知房主「已離開」
+  // 離開：退出成員名單；房主手機會將你個位變返虛擬玩家
   const quit = async () => {
     const code = ONLINE.room, me = ONLINE.user.uid;
-    const inGame = (state.uids || []).includes(me) && !state.ended && state.hands.length;
-    try{ if(inGame) await ONLINE.backend.request(code, me, {type:"leave", t:Date.now()}); else await ONLINE.backend.leaveRoom(code, me); }catch(e){}
+    ONLINE.lastCode = null;
+    try{ localStorage.removeItem("fansyu-lastroom"); }catch(e){}
+    try{ await ONLINE.backend.leaveRoom(code, me); }catch(e){}
   };
   $("rmLeave").onclick = () => {
     const others = members.filter(([u])=>u!==ONLINE.user.uid);
-    if(!ONLINE.isHost || !others.length){ hideSheet(); if(!ONLINE.isHost) quit(); leaveRoom(); return; }
+    if(!ONLINE.isHost || !others.length){
+      const mid = !ONLINE.isHost && (state.uids || []).includes(ONLINE.user.uid) && !state.ended && state.hands.length;
+      const go = () => { hideSheet(); if(!ONLINE.isHost) quit(); leaveRoom(); };
+      if(mid) askConfirm("未結算就離開？", "你個位會由虛擬玩家頂上，呢局到目前為止嘅輸贏會留喺個位度，唔會記入你嘅小氣簿。想記低就等房主結算咗先離開。", "照樣離開", go);
+      else go();
+      return;
+    }
     const seated = others.find(([u])=>uids.includes(u)) || others[0];
     askConfirm("離開房間？", `你係房主。離開之後房主會自動交俾 ${seated[1]}，佢可以繼續記錄。`, "交俾佢並離開", async ()=>{
       try{ onlinePushNow(); await ONLINE.backend.setHost(ONLINE.room, seated[0], seated[1]); await quit(); }catch(e){}
@@ -3258,26 +3577,12 @@ function renderRoomSheet(){
   if($("rmImgShare")) $("rmImgShare").onclick = () => shareStory(ONLINE.rmImg.file, link, "番鼠麻吉房間");
   box.querySelectorAll("[data-kick]").forEach(b=>b.onclick = () => {
     const u = b.dataset.kick, n = (d.members || {})[u] || "呢位玩家";
-    askConfirm(`移除 ${n}？`, `${n} 會即刻被移出房間，之後唔可以再用房號入返嚟。佢坐緊嘅位會變返訪客位，之前嘅輸贏會留喺個位度，但唔會記入佢嘅小氣簿。`, "移除", async ()=>{
+    askConfirm(`移除 ${n}？`, `${n} 會即刻被移出房間，之後唔可以再用房號入返嚟。佢坐緊嘅位會由虛擬玩家頂上，之前嘅輸贏會留喺個位度，但唔會記入佢嘅小氣簿。`, "移除", async ()=>{
       const i = (state.uids || []).indexOf(u);
-      if(i>=0){ state.uids = state.uids.slice(); state.uids[i] = null; render(); save(); }
+      if(i>=0){ state.uids = state.uids.slice(); state.uids[i] = null; if(!state.ended){ state.players = state.players.slice(); state.players[i] = phName(); } if(state.seen){ state.seen = Object.assign({}, state.seen); delete state.seen[u]; } render(); save(); }
       try{ await ONLINE.backend.kick(ONLINE.room, u); toast(`已移除 ${n}。`); }
       catch(e){ toast("移除唔到：" + errText(e)); }
     });
-  });
-  box.querySelectorAll("select[data-seat]").forEach(sel=>sel.onchange = () => {
-    const i = +sel.dataset.seat, v = sel.value;
-    if(!v) return;
-    if(v.startsWith("sw:")){ swapSeats(i, +v.slice(3)); renderRoomSheet(); return; }
-    const go = () => {
-      state.uids = (state.uids || [null,null,null,null]).slice();
-      if(v==="guest"){ state.uids[i] = null; state.players[i] = `玩家${i+1}`; }
-      else { state.uids[i] = v; state.players[i] = d.members[v]; }
-      render(); save(); renderRoomSheet();
-    };
-    if(state.hands.length && !state.ended) askConfirm("未結算就換人？", `${state.players[i]} 呢個位之前嘅輸贏會計落新嚟嘅人度。想分開計，可以先「結束遊戲 · 睇結算」再重新開局。`, "照樣換人", go);
-    else go();
-    renderRoomSheet();
   });
 }
 
@@ -4055,9 +4360,13 @@ async function sendRecords(){
   };
   const origReset = resetGame;
   resetGame = function(){
-    const keepU = state.uids;
+    const keepU = state.uids, keepS = state.seen, keepB = state.bench;
     origReset();
-    if(ONLINE.room){ state.uids = keepU; state.gameId = newGameId(); render(); save(); }
+    if(ONLINE.room){
+      state.uids = keepU; if(keepS) state.seen = keepS; if(keepB) state.bench = keepB; state.gameId = newGameId();
+      if(ONLINE.isHost && ONLINE.roomDoc) seatSweep(ONLINE.roomDoc.members || {});   // 上一局完咗先走嘅人：新一局先變返虛擬玩家
+      render(); save();
+    }
   };
 }
 
@@ -4159,12 +4468,20 @@ let installEvt = null;
 window.addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); installEvt = e; });
 window.addEventListener("appinstalled", ()=>{ installEvt = null; toast("已加到主畫面。"); });
 if("serviceWorker" in navigator && /^https:$/.test(location.protocol)) window.addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+// 主畫面 logo 跟主題：head 入面 apple-touch-icon 已經指住而家主題嗰個
+const a2hsIconSrc = () => { const e = document.getElementById("apIcon"); return (e && e.getAttribute("href")) || "icon-maji-180.png"; };
+const a2hsSkin = () => (a2hsIconSrc().match(/icon-([a-z]+)-/) || [,"maji"])[1];
+window.__a2hsSync = () => { const i = $("a2hsIcon"); if(i){ i.style.visibility = ""; if(i.getAttribute("src")!==a2hsIconSrc()) i.src = a2hsIconSrc(); } };
 async function addToHome(){
   if(installEvt){ installEvt.prompt(); try{ await installEvt.userChoice; }catch(e){} installEvt = null; return; }
-  const ios = isIOS();
-  askConfirm("加到主畫面", ios
-    ? "用 Safari 打開番鼠 → 撳底部「分享」掣（方格加向上箭咀）→ 揀「加入主畫面」→「新增」。之後喺主畫面撳番鼠 icon 就會全螢幕打開，好似 App 咁用。"
-    : "喺 Chrome 撳右上角「⋮」→ 揀「加到主畫面」或者「安裝應用程式」。之後喺主畫面撳番鼠 icon 就會全螢幕打開，好似 App 咁用。", "知道", ()=>{});
+  const cur = a2hsSkin(), names = Object.fromEntries(SKINS.concat([ROYAL]));
+  $("a2hsBig").style.visibility = ""; $("a2hsBig").src = a2hsIconSrc();
+  $("a2hsSkinName").textContent = `而家主題：${names[cur] || "麻吉"}`;
+  $("a2hsSteps").innerHTML = (isIOS()
+    ? ["用 <b>Safari</b> 打開 www.fansyu.com（喺 WhatsApp／IG 入面打開嘅話，先揀「用 Safari 開啟」）", "撳底部中間嘅<b>「分享」</b>掣（方格加向上箭咀）", "向下碌，揀<b>「加入主畫面」</b>", "撳右上角<b>「新增」</b>"]
+    : ["用 <b>Chrome</b> 打開 www.fansyu.com", "撳右上角<b>「⋮」</b>", "揀<b>「加到主畫面」</b>或者<b>「安裝應用程式」</b>", "撳<b>「新增」／「安裝」</b>"]).map(t=>`<li>${t}</li>`).join("");
+  $("a2hsStrip").innerHTML = SKINS.map(([k,n])=>`<figure${k===cur?' class="on"':""}><img src="icon-${k}-180.png" alt="" width="44" height="44" onerror="this.parentNode.remove()"><figcaption>${esc(n)}</figcaption></figure>`).join("");
+  showSheet($("a2hsSheet"));
 }
 
 /* ---------- start ---------- */
